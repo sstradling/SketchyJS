@@ -33,7 +33,7 @@ Run on Linux x86_64, Node 22.23, pnpm 10.33.
 | `pnpm format:check`               | pass                                                                 |
 | `pnpm lint` (eslint + boundaries) | pass, 13 packages                                                    |
 | `pnpm typecheck`                  | pass, 17 turbo tasks                                                 |
-| `pnpm test`                       | 9 files, 189 tests pass (core 102, plugin 37, types 29, eslint 12, fixtures 9) |
+| `pnpm test`                       | 9 files, 192 tests pass (including plugin validation/conformance and fit-scale coverage) |
 | `pnpm schemas:check`              | up to date, 6 files                                                  |
 | `pnpm fixtures:verify`            | manifest matches disk                                                |
 | `pnpm fixtures:regen -- --check`  | reproducible, matches 9 committed fixtures                           |
@@ -42,12 +42,10 @@ Run on Linux x86_64, Node 22.23, pnpm 10.33.
 
 ## Decisions needed from maintainers
 
-1. **License and notices.** No `LICENSE` file exists. Clipper2 builds are BSL-1.0; upstream Sketchy's license is copied into the corpus as `UPSTREAM-LICENSE`. Pick the project license and a third-party notices format before any publish.
-2. **macOS fixtures.** Someone with a Mac must run the pending exporters (see `docs/fixtures.md`). Phase 2 and Phase 3 depend on them. Decide whether those phases wait for them.
-3. **Clipper decision.** Confirm `clipper2-ts` as the default and `clipper2-wasm` as optional only, or ask for a browser benchmark first.
-4. **Float tolerance.** The Darwin-versus-Linux comparison sets the tolerance for libm-dependent fixtures. Until then Phase 1 tests need a provisional tolerance; propose `1e-4` CSS pixels.
-5. **Node floor.** Node 22 is the minimum supported runtime (`.nvmrc` and all package manifests); CI covers Node 22 and 24.
-6. **Publishing scope.** `@sketchy-js/*` scope ownership has not been verified on npm.
+1. **macOS fixtures.** Someone with a Mac must run the pending exporters (see `docs/fixtures.md`). Phase 2 and Phase 3 depend on them. Decide whether those phases wait for them.
+2. **Clipper decision.** `clipper2-ts` is the provisional default and `clipper2-wasm` is optional. Revisit after real Swift contours and browser timings.
+3. **Float tolerance.** The Darwin-versus-Linux comparison sets the tolerance for libm-dependent fixtures. Until then Phase 1 tests need a provisional tolerance; propose `1e-4` CSS pixels.
+4. **Publishing.** The project is MIT under the same copyright notices as Sketchy; Clipper notices are in `THIRD_PARTY_NOTICES`. Confirm `@sketchy-js` scope ownership on npm before publishing.
 
 ## Known limits
 
