@@ -1,0 +1,179 @@
+{
+  "sketchyTag": "v1.5.0",
+  "sketchyCommit": "fb17a6e7344f46da994ece07da1505be7d431b16",
+  "patch": "removed lines matching ^import os.signpost$",
+  "files": [
+    {
+      "file": "AnimationOptions.swift",
+      "sha256": "331b609c47d9601162172aa5167d7b02d3ddf8f963391939fd4b40c257bfb9b6"
+    },
+    {
+      "file": "BrushProfile.swift",
+      "sha256": "3f3fdefe0e6eb525b30c6e13c5a95196a21bfdb88bf1591942fd4340a5e2438c"
+    },
+    {
+      "file": "CGPathToSVG.swift",
+      "sha256": "f6f3fa87f2ea576fc669f7960f2c9caad0b871e10f15e081e438bf3e60aa28eb"
+    },
+    {
+      "file": "CrayonStyle.swift",
+      "sha256": "8ba4252afe450f2e3bbfd2459b4401f968a98ba878d9ec27d275e3d673364486"
+    },
+    {
+      "file": "CrossHatchFiller.swift",
+      "sha256": "c49ef8990f2b53219aae8f86ab51b5cf45254302513392578ec72c3fcb9d86e7"
+    },
+    {
+      "file": "DashedFiller.swift",
+      "sha256": "212b77b5cff94510f975ae7869ac8ebf3f320a9e81f681e509da7481631d82a4"
+    },
+    {
+      "file": "DotsFiller.swift",
+      "sha256": "153ed774c480642b2fb985da7d8c04429dcddab062634cc6e2ffcb4637039741"
+    },
+    {
+      "file": "Drawable.swift",
+      "sha256": "18e4d815237f5bd2dab5e73b944be6a08dbf085670a0ba06da923ec63faf38e8"
+    },
+    {
+      "file": "Drawing.swift",
+      "sha256": "ee171a1c15542edd7201a9f96778d38d850f4cf4ef77da0f277ac646e5f7d7eb"
+    },
+    {
+      "file": "DrawingCache.swift",
+      "sha256": "3081480c5a3f4564642378882602301a43d87d6fc2920fa6bc12aa57a429724f"
+    },
+    {
+      "file": "Engine.swift",
+      "sha256": "2345e71ae0ba4a6388ee5af9eed52a4904558ba4a29cc8d912010d9908f701f3"
+    },
+    {
+      "file": "FillGenerator.swift",
+      "sha256": "4a781b2e222ddcb28d85702c1fcf9cc279c543b9f1a425faadef892e4f688e89"
+    },
+    {
+      "file": "FillGeometry.swift",
+      "sha256": "87e07cdbb3a08ac721b142a66517cae2e67f3e22b83076d4872efab4cd8304a5"
+    },
+    {
+      "file": "FillStyle.swift",
+      "sha256": "684caade0bd706f0c2d21fa10bac9e4c017fb37484871b4f94b7ee414a43dbd9"
+    },
+    {
+      "file": "Generator.swift",
+      "sha256": "078b445f3fad3bdfe862c4b7e33ce2e322a5f17fd3f16538ceecef98d4f5167f"
+    },
+    {
+      "file": "GeneratorCache.swift",
+      "sha256": "90f813b7fec3ce9db11f7bf16738b7511170dc53ada0f50cbe7606e1bf407294"
+    },
+    {
+      "file": "HachureFiller.swift",
+      "sha256": "d053554058e89f4325a2ad9bff98bdeff39d5927a9a6ab8b358242004225f477"
+    },
+    {
+      "file": "NativeGenerator.swift",
+      "sha256": "2c48bd8fa133fa751fb61db00ba4e06c5552639b1a1c168c7138f8dccdd5671e"
+    },
+    {
+      "file": "OpacityProfile.swift",
+      "sha256": "4cce1c6a6ede19985728c5eb54f66aa63390be1887d832cfbd39d565c804d42e"
+    },
+    {
+      "file": "Operation.swift",
+      "sha256": "3efdb12df965f7ab031bded1ed87202a983fca91ca8457ec25cce492de567fa9"
+    },
+    {
+      "file": "OperationSet.swift",
+      "sha256": "85b672a10bd3a21a428083182e7fe0fa1273b2e711f73aca73406c80c028027c"
+    },
+    {
+      "file": "OperationSetType.swift",
+      "sha256": "b1bd44a717b47925389c92693463da7c1b601e8c2c56dae261f43ff4b24cddea"
+    },
+    {
+      "file": "OperationType.swift",
+      "sha256": "388c2b8b296f2ff56474bfb09d62099e88e80e6c5c515b399cffa2de67e6512c"
+    },
+    {
+      "file": "Operator.swift",
+      "sha256": "0e016100685862d3d762ded3ebbf6e60153bcb1c1f3c5fa6850cef6a0c1a7690"
+    },
+    {
+      "file": "Options.swift",
+      "sha256": "0dcdb1d80ec0bc4df582ff6f7daf7144ccc37c9430fbac81a0ce8dbd8b807f8c"
+    },
+    {
+      "file": "Point.swift",
+      "sha256": "8e3c193d537e686550aaf7ab0aeb81f0bf5d15ba89dc46ea3c33dda54fda59a5"
+    },
+    {
+      "file": "RoughCurves.swift",
+      "sha256": "cd4f3a569b6034e618009995b38ed67183b49626dad75f1822085eb68dee6674"
+    },
+    {
+      "file": "RoughMath.swift",
+      "sha256": "f9e969179b0e6fc030df6383a870c2b66a1a0bc9cb0d7a5bc29e9cda9cef01db"
+    },
+    {
+      "file": "SVGArcConverter.swift",
+      "sha256": "2c9c6a3cb730e50d4d1bd1b30bfd7e02601e35d27d57f538869033c2aa535d0a"
+    },
+    {
+      "file": "SVGPath.swift",
+      "sha256": "f0274933af9c7e77d29e66375ea2b4830deedd5600ad6c0aab6e2452d8ad1fc9"
+    },
+    {
+      "file": "ScribbleFillGenerator.swift",
+      "sha256": "bee608461e165bc72c862a59086c13a45affdcabc4533b56a5e355b7668391f5"
+    },
+    {
+      "file": "SeededNoise.swift",
+      "sha256": "3b740f6987d70b50ae7a32a04d034cc38e25dd84b9176160a9285747509ce55a"
+    },
+    {
+      "file": "SeededRandom.swift",
+      "sha256": "994879f1219bf23f958b7f7ae3e5d0502ad08e25dde0db1f5593dd62c3c5771d"
+    },
+    {
+      "file": "Size.swift",
+      "sha256": "608ac64ea094b6f95ed0882410ba6ac2908aab0647b5ecb2e8f87fd5131862b3"
+    },
+    {
+      "file": "SolidFiller.swift",
+      "sha256": "fa3b7cf06c6a08071ada3f1a925cb4c5d6c8a6bbe7068bb3b424d19ae0a0cfdf"
+    },
+    {
+      "file": "StarburstFiller.swift",
+      "sha256": "8d95bffcdad0d35b6516b7fe507efb7374c7fef3fc3859d3765a36787ccb595c"
+    },
+    {
+      "file": "StickerBacking.swift",
+      "sha256": "7c6c80b1d10832f07123cd3cb98b76fd8ecda949eabd28533a6398d42733640d"
+    },
+    {
+      "file": "StickerGuide.swift",
+      "sha256": "207b5f5b82515f1cb40504d59fa997b305f2729c89913d650efb8e16841c7906"
+    },
+    {
+      "file": "StrokeContinuity.swift",
+      "sha256": "407114fb5de56a531ddb48e1cd87a5d63a19a4e441b01ac8799ebbb97ddbe01f"
+    },
+    {
+      "file": "VariableStrokeWidth.swift",
+      "sha256": "dd44a4a66fb287f4f1d55c790a336cb42c66acaa478e477dff69f46788af068f"
+    },
+    {
+      "file": "WatercolorStyle.swift",
+      "sha256": "da53734cd986cd3962c4c5a3b97a8cb8089a06176f454bde1110781b8726527e"
+    },
+    {
+      "file": "ZigzagFiller.swift",
+      "sha256": "fb438be665d7d865c84593f8a9dc9badf8518e7b5f1e37a164a51b7d14e7a8ba"
+    },
+    {
+      "file": "ZigzagLineFiller.swift",
+      "sha256": "1f1895b01f311746e6e875eca2b8222b99e0fac0292d88bd134524d060445ba4"
+    }
+  ]
+}
