@@ -11,6 +11,42 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./solid": {
+      "types": "./dist/solid.d.ts",
+      "import": "./dist/solid.js"
+    },
+    "./hachure": {
+      "types": "./dist/hachure.d.ts",
+      "import": "./dist/hachure.js"
+    },
+    "./zigzag": {
+      "types": "./dist/zigzag.d.ts",
+      "import": "./dist/zigzag.js"
+    },
+    "./crossHatch": {
+      "types": "./dist/crossHatch.d.ts",
+      "import": "./dist/crossHatch.js"
+    },
+    "./dots": {
+      "types": "./dist/dots.d.ts",
+      "import": "./dist/dots.js"
+    },
+    "./dashed": {
+      "types": "./dist/dashed.d.ts",
+      "import": "./dist/dashed.js"
+    },
+    "./zigzagLine": {
+      "types": "./dist/zigzagLine.d.ts",
+      "import": "./dist/zigzagLine.js"
+    },
+    "./sunBurst": {
+      "types": "./dist/sunBurst.d.ts",
+      "import": "./dist/sunBurst.js"
+    },
+    "./starBurst": {
+      "types": "./dist/starBurst.d.ts",
+      "import": "./dist/starBurst.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

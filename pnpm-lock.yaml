@@ -128,6 +128,9 @@ importers:
       '@sketchy-js/core':
         specifier: workspace:*
         version: link:../core
+      '@sketchy-js/fills':
+        specifier: workspace:*
+        version: link:../fills
       '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
