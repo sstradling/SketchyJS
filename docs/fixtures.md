@@ -40,12 +40,14 @@ Each file in the manifest carries a `fidelity` tag. Tests should use tolerances 
 
 | Fidelity          | Meaning                                                                                      | Files                                                  |
 | ----------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| `verbatim-engine` | Produced only by upstream engine code and the Swift standard library. Exact on any platform. | `rng/*`, `options/*`                                   |
+| `verbatim-engine` | Produced only by upstream engine code and the Swift standard library. Exact on any platform. | `rng/*`, `options/*`, and their `darwin/` replays      |
 | `shim-dependent`  | Also passes through a Linux CGPath or UIBezierPath shim.                                     | `shapes/shapes.json`, `fills/scribble.json`            |
 | `libm-dependent`  | Uses trigonometry, so the last bits can differ per platform.                                 | `fills/fills.json`, `fills/direct-fillers.json`, `svg/path-parse.json` |
+| `native-framework` | Produced on Darwin with UIKit, CoreGraphics, CoreText, or SwiftUI.                          | `strokes/`, `brushes/`, `stickers/`, `animation/`, `text/`, and the other `darwin/` replays |
+| `comparison`      | Numeric diff of a committed Linux file against its Darwin replay.                            | `comparison/darwin-linux.json`                         |
 | `upstream-copy`   | A file copied unchanged from upstream.                                                       | `images/*`, `assets/*`, `UPSTREAM-LICENSE`             |
 
-All exporter data is tagged `linux-x86_64` unless it is `any`. Until the Darwin comparison below is done, we do not know whether libm differences exceed the test tolerances.
+Linux exporter data is tagged `linux-x86_64` unless it is `any`. Darwin output is tagged `darwin-x86_64` because this corpus was generated on the Intel iOS simulator. `comparison/darwin-linux.json` records the max and mean absolute pixel delta for every replayed group.
 
 The RNG fixtures include the sequence quoted in the Swift test suite (`SeedDeterminismTests.testSplitMix64MatchesReferenceSequence`, seed 42) next to the sequence the compiled engine actually emits, so a mismatch between documentation and code would be visible in the data.
 
@@ -63,19 +65,14 @@ These are recorded in `manifest.json` under `pending` so the gap is visible in e
 
 | Id                             | Why Linux cannot produce it                                                        |
 | ------------------------------ | ---------------------------------------------------------------------------------- |
-| `stroke-outlines`              | CoreGraphics stroking (`copy(strokingWithWidth:)`).                                |
-| `crayon-watercolor-layers`     | CoreGraphics path and clip behavior.                                               |
-| `sticker-backing-contours`     | CoreGraphics path union and offset. Also needed to validate ADR 0001.              |
-| `sticker-image-placement`      | `StickerImagePainter` is SwiftUI code; placement is not a pure function upstream.  |
-| `animation-frames`             | `PathVariance` and frame generation sit behind the SwiftUI render layer.           |
-| `text-outlines`                | CoreText glyph outlines and system fonts.                                          |
 | `reference-image-regeneration` | Docs images need the macOS `DocsGalleryRenderer` target; they are copied, not rebuilt. |
-| `darwin-float-comparison`      | Compare a Darwin export of the existing fixtures against the Linux one.            |
+
+The other seven former pending groups are now Darwin fixtures: `strokes/outlines.json`, `brushes/crayon-watercolor.json`, `stickers/contours.json`, `stickers/image-placement.json`, `animation/frames.json`, `text/outlines.json`, and `comparison/darwin-linux.json`. `darwin/` repeats the original nine exporter files against real frameworks. `pnpm fixtures:export:darwin` builds that simulator exporter. It does not replace the Linux files, so `pnpm fixtures:regen -- --check` on Linux still checks those nine.
 
 ### macOS regeneration plan
 
 1. On a Mac with Xcode, check out this repository and the pinned Sketchy tag.
-2. Add exporters for the pending items in a macOS-only target that links the real `Sketchy` module (so no shims). Write to `fixtures/swift-reference/v1.5.0/<group>/` with `platform: "darwin-arm64"` in the classification.
+2. Add exporters for the pending items in a Darwin-only target that links real UIKit, CoreGraphics, CoreText, and SwiftUI. Write to `fixtures/swift-reference/v1.5.0/<group>/` with `platform: "darwin-x86_64"` when the simulator is Intel, or `darwin-arm64` on Apple silicon.
 3. Run the existing exporter against real Foundation too, and diff its output against the committed Linux files. Record the largest per-field delta; that sets the tolerance used by Phase 1 and 2 tests.
 4. `pnpm fixtures:manifest`, commit, and remove the corresponding `pending` entries.
 

@@ -12,49 +12,22 @@
     "upstreamFilesSha256": "afacd9de0c523c3a0966af7ac1197e8a3a91821ae767fca74380263b9d51128e",
     "note": "Engine files are verbatim upstream; UIKit, CoreGraphics, SwiftUI and CoreText are Linux shims. See docs/fixtures.md."
   },
+  "darwin": {
+    "name": "darwin-fixture-exporter",
+    "swift": "6.2",
+    "platform": "darwin-x86_64",
+    "sdk": "iphonesimulator",
+    "minimumOS": "17.0",
+    "note": "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline."
+  },
   "pending": [
-    {
-      "id": "stroke-outlines",
-      "needs": "macOS",
-      "reason": "StrokeToFill, NativeStrokeOutline, StrokeRibbon and StrokeJoinGeometry use CoreGraphics stroking (copy(strokingWithWidth:)) that the Linux shims do not implement."
-    },
-    {
-      "id": "crayon-watercolor-layers",
-      "needs": "macOS",
-      "reason": "CrayonStroke, WatercolorStroke and WatercolorFill depend on CoreGraphics path and clipping behavior."
-    },
-    {
-      "id": "sticker-backing-contours",
-      "needs": "macOS",
-      "reason": "StickerBackingBuilder and SilhouetteUnion use CoreGraphics path unions and offsets; also needed for torn and fully smooth edge contours."
-    },
-    {
-      "id": "sticker-image-placement",
-      "needs": "macOS",
-      "reason": "StickerImagePainter is SwiftUI and CoreGraphics code; placement rectangles are not exposed as a pure function."
-    },
-    {
-      "id": "animation-frames",
-      "needs": "macOS",
-      "reason": "PathVariance and animated frame generation sit behind the SwiftUI render layer."
-    },
-    {
-      "id": "text-outlines",
-      "needs": "macOS",
-      "reason": "TextPathConverter uses CoreText glyph outlines and system fonts."
-    },
     {
       "id": "reference-image-regeneration",
       "needs": "macOS",
       "reason": "docs/images are imported as committed upstream files. Regenerating them needs the macOS DocsGalleryRenderer test target."
-    },
-    {
-      "id": "darwin-float-comparison",
-      "needs": "macOS",
-      "reason": "All exporter fixtures are linux-x86_64. Comparing them with a Darwin export would show whether libm trigonometry differences exceed the test tolerances."
     }
   ],
-  "treeSha256": "cd0081a3cf4e6ec4618237104dfc0c71e53bbeda44fcb4c12d9dc38e48d8f210",
+  "treeSha256": "3f024ad923ef68068c59f230899a379a9a159b59152109acdd11efcc41fa6c91",
   "files": [
     {
       "path": "UPSTREAM-LICENSE",
@@ -64,6 +37,15 @@
       "fidelity": "upstream-copy",
       "platform": "any",
       "generator": "import-assets"
+    },
+    {
+      "path": "animation/frames.json",
+      "sha256": "893e289c4feeec434f09333277aa7c8c325cb13c28aa874a61ef0ecacd91fab7",
+      "bytes": 10586,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
     },
     {
       "path": "assets/seth-input-v3.svg",
@@ -91,6 +73,105 @@
       "fidelity": "upstream-copy",
       "platform": "any",
       "generator": "import-assets"
+    },
+    {
+      "path": "brushes/crayon-watercolor.json",
+      "sha256": "ef652d8125bd1d07a5682664252aa6b7c8f12f10bb7a590681f485c352813cd4",
+      "bytes": 3336504,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "comparison/darwin-linux.json",
+      "sha256": "d280103407601917222910c6def9a9a5a7cbb9780b86bcdcba108d591bf0ecc1",
+      "bytes": 3039,
+      "kind": "data",
+      "fidelity": "comparison",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/fills/direct-fillers.json",
+      "sha256": "a098316bda457e776c75cebf16791c79526c04bf71239935c8ea1091ced8bc45",
+      "bytes": 889545,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/fills/fills.json",
+      "sha256": "48be1e2af26f05e8dbbf31924a8ea2054801d165d14207e4c160411e5ab7454e",
+      "bytes": 1288168,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/fills/scribble.json",
+      "sha256": "e8b547fe7a7eebf77b913cda7e6287e590dc97f77fa71d800448819fdfd8d246",
+      "bytes": 7655,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/options/clamps.json",
+      "sha256": "21015d4daa67731cc6c6f7b3000e135b5b1a10501e507a082b1704121335c42e",
+      "bytes": 38796,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/options/defaults.json",
+      "sha256": "b4bf200b8c6456c8ad97f95dba2c7a9cc705914e4e8926be3e22c2cf1359e02d",
+      "bytes": 2997,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/rng/splitmix64.json",
+      "sha256": "658c4c132f95ed5e9fc0ea9b553be73ca51626f867caeb218682dee18ea17ad5",
+      "bytes": 14546,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/rng/unit-float.json",
+      "sha256": "6bf95b1cdcc793116a970bc494d514c5ce99d37f09f20407a9f6c25a907fbd81",
+      "bytes": 81363,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/shapes/shapes.json",
+      "sha256": "fd42543b729acf381400485864b56b1e79ade297920167ee455963a14d9deb5e",
+      "bytes": 61748,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/svg/path-parse.json",
+      "sha256": "4d2081d17d683850c0ad7be760d22c2ca2b36065453f90f5d6f0fcdd6caad2aa",
+      "bytes": 30473,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
     },
     {
       "path": "fills/direct-fillers.json",
@@ -903,6 +984,33 @@
       "platform": "linux-x86_64"
     },
     {
+      "path": "stickers/contours.json",
+      "sha256": "d1dd8eef8732983e05507c274d15583b3c90cb4170b6d155abfac99788668114",
+      "bytes": 327862,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "stickers/image-placement.json",
+      "sha256": "3c25b88f063e21766600d641e5da4ce7af17bef96254a30719b8b9007376f111",
+      "bytes": 348984,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "strokes/outlines.json",
+      "sha256": "8af8fe7ec5881cf14a682c02dce89b212d3c6e43dce8eb103e00131b460d6613",
+      "bytes": 13341,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
       "path": "svg/path-parse.json",
       "sha256": "22d2ac85da5c747ad342ee81aec335a8b653be630747616faff548a4c38b1722",
       "bytes": 30476,
@@ -910,6 +1018,15 @@
       "generator": "swift-fixture-exporter",
       "fidelity": "libm-dependent",
       "platform": "linux-x86_64"
+    },
+    {
+      "path": "text/outlines.json",
+      "sha256": "639837f0dfe6ffce63e7b24570b0638fd6ddb44811bf973dc3cd1e8b87776fbf",
+      "bytes": 14982,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
     }
   ]
 }

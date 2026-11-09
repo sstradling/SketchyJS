@@ -19,6 +19,7 @@
     "fixtures:verify": "node tools/fixtures/verify.mjs",
     "fixtures:manifest": "node tools/fixtures/build-manifest.mjs",
     "fixtures:regen": "node tools/fixtures/regenerate.mjs",
+    "fixtures:export:darwin": "bash tools/swift-fixture-exporter/scripts/export-darwin.sh && node tools/fixtures/compare-darwin.mjs && node tools/fixtures/build-manifest.mjs",
     "fixtures:import-assets": "node tools/fixtures/import-assets.mjs",
     "smoke:exports": "node tools/consumer-smoke/run.mjs",
     "bench:clipper": "pnpm --filter @sketchy-js/clipper-bench run bench",

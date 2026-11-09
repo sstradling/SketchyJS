@@ -48,8 +48,9 @@ describe("committed Swift reference manifest", () => {
 
   it("tags every file with fidelity and platform and lists what still needs macOS", () => {
     expect(manifest.files.every((f) => f.fidelity && f.platform)).toBe(true);
-    expect(manifest.pending.length).toBeGreaterThan(0);
-    expect(manifest.pending.every((p) => p.needs === "macOS")).toBe(true);
+    expect(manifest.pending.map((item) => item.id)).toEqual(["reference-image-regeneration"]);
+    expect(manifest.files.find((file) => file.path === "strokes/outlines.json")?.platform).toBe("darwin-x86_64");
+    expect(manifest.files.find((file) => file.path === "comparison/darwin-linux.json")?.fidelity).toBe("comparison");
   });
 
   it("is reproducible: rebuilding yields the same manifest", () => {

@@ -47,6 +47,13 @@ export function classify(path) {
   if (path.startsWith("images/") || path.startsWith("assets/") || path === "UPSTREAM-LICENSE") {
     return { kind: path.startsWith("images/") ? "image" : "asset", fidelity: "upstream-copy", platform: "any", generator: "import-assets" };
   }
+  if (path === "comparison/darwin-linux.json") {
+    return { kind: "data", fidelity: "comparison", platform: "darwin-x86_64", generator: "darwin-fixture-exporter" };
+  }
+  if (path.startsWith("darwin/") || ["strokes/", "brushes/", "stickers/", "animation/", "text/"].some((prefix) => path.startsWith(prefix))) {
+    const fidelity = path.startsWith("darwin/rng/") || path === "darwin/options/clamps.json" ? "verbatim-engine" : "native-framework";
+    return { kind: "data", fidelity, platform: "darwin-x86_64", generator: "darwin-fixture-exporter" };
+  }
   const base = { kind: "data", generator: "swift-fixture-exporter" };
   if (path.startsWith("rng/") || path.startsWith("options/")) return { ...base, fidelity: "verbatim-engine", platform: "any" };
   if (path === "svg/path-parse.json") return { ...base, fidelity: "libm-dependent", platform: "linux-x86_64" };
@@ -56,14 +63,7 @@ export function classify(path) {
 
 /** Fixtures the exporter cannot produce on Linux. Each needs the macOS/iOS harness. */
 export const pending = [
-  { id: "stroke-outlines", needs: "macOS", reason: "StrokeToFill, NativeStrokeOutline, StrokeRibbon and StrokeJoinGeometry use CoreGraphics stroking (copy(strokingWithWidth:)) that the Linux shims do not implement." },
-  { id: "crayon-watercolor-layers", needs: "macOS", reason: "CrayonStroke, WatercolorStroke and WatercolorFill depend on CoreGraphics path and clipping behavior." },
-  { id: "sticker-backing-contours", needs: "macOS", reason: "StickerBackingBuilder and SilhouetteUnion use CoreGraphics path unions and offsets; also needed for torn and fully smooth edge contours." },
-  { id: "sticker-image-placement", needs: "macOS", reason: "StickerImagePainter is SwiftUI and CoreGraphics code; placement rectangles are not exposed as a pure function." },
-  { id: "animation-frames", needs: "macOS", reason: "PathVariance and animated frame generation sit behind the SwiftUI render layer." },
-  { id: "text-outlines", needs: "macOS", reason: "TextPathConverter uses CoreText glyph outlines and system fonts." },
   { id: "reference-image-regeneration", needs: "macOS", reason: "docs/images are imported as committed upstream files. Regenerating them needs the macOS DocsGalleryRenderer test target." },
-  { id: "darwin-float-comparison", needs: "macOS", reason: "All exporter fixtures are linux-x86_64. Comparing them with a Darwin export would show whether libm trigonometry differences exceed the test tolerances." },
 ];
 
 export { statSync };

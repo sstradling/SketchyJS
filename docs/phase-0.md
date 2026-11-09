@@ -20,9 +20,9 @@ Scope is `docs/plan.md`, "Phase 0". Nothing from Phase 1 is implemented: the 13 
 | Consumer fixture                                  | Done    | `tools/consumer-smoke`. Uses `npm` for the consumer on purpose, since consumers are not on pnpm.                                                                                                                                                                                                  |
 | JSON schemas                                      | Done    | Six schemas in `packages/types/schemas`: options, path operations, scene, geometry snapshot, color, seed. Generated from TypeScript types by `tools/schemas` (`pnpm schemas:check` fails on drift) and exercised with ajv (29 tests). Plugin option schemas also export through `toJsonSchema`. |
 | Clamping and defaults in one source of truth      | Done    | `packages/core/src/options/spec.ts` covers sketch options, crayon, watercolor, sticker tear/texture/shadow/backing/image, and animation. 42 tests compare every default and clamp with the Swift dump, including Swift's NaN-to-lower-bound `min`/`max` behavior. Groups not in Swift's `Options` (for example plugin-defined brushes) are out of scope here. |
-| Swift fixture exporter pinned to v1.5.0           | Partial | Pinned by tag and commit, 43 verbatim upstream files, Linux shims. Produces RNG, option, shape, fill, and SVG path-parse fixtures. Eight groups need macOS and are listed under `pending` in the manifest; see `docs/fixtures.md`.                                                                  |
+| Swift fixture exporter pinned to v1.5.0           | Partial | Pinned by tag and commit. Linux shims produce the original nine groups. The iOS simulator exporter adds stroke, brush, sticker, animation, and text fixtures plus a Darwin replay and float comparison. Regenerating the docs image catalog is still pending; see `docs/fixtures.md`. |
 | Reference images with manifest hashes             | Partial | Upstream docs images and test assets are copied and hashed (`images/catalog.json`, manifest). They are copies, not regenerated, and they are not yet compared with any SketchyJS output.                                                                                                          |
-| Polygon backend benchmark and decision            | Done    | `tools/clipper-bench`, results in `tools/clipper-bench/results/results.json`, decision in `docs/adr/0001-polygon-clipper.md`: `clipper2-ts` default, `clipper2-wasm` optional, `polygon-clipping` rejected. Fixtures are synthetic; Swift sticker contours are pending.                              |
+| Polygon backend benchmark and decision            | Done    | `tools/clipper-bench`, results in `tools/clipper-bench/results/results.json`, decision in `docs/adr/0001-polygon-clipper.md`: `clipper2-ts` default, `clipper2-wasm` optional, `polygon-clipping` rejected. Swift sticker contours are in `fixtures/swift-reference/v1.5.0/stickers/contours.json`. |
 
 ## Test results
 
@@ -42,9 +42,9 @@ Run on Linux x86_64, Node 22.23, pnpm 10.33.
 
 ## Decisions needed from maintainers
 
-1. **macOS fixtures.** Someone with a Mac must run the pending exporters (see `docs/fixtures.md`). Phase 2 and Phase 3 depend on them. Decide whether those phases wait for them.
-2. **Clipper decision.** `clipper2-ts` is the provisional default and `clipper2-wasm` is optional. Revisit after real Swift contours and browser timings.
-3. **Float tolerance.** The Darwin-versus-Linux comparison sets the tolerance for libm-dependent fixtures. Until then Phase 1 tests need a provisional tolerance; propose `1e-4` CSS pixels.
+1. **macOS fixtures.** Stroke, brush, sticker, animation, and text groups are exported. Regenerating the docs image catalog is still pending. See `docs/fixtures.md`.
+2. **Clipper decision.** `clipper2-ts` is the provisional default and `clipper2-wasm` is optional. Swift sticker contours are now in the fixture corpus; browser timings are still open.
+3. **Float tolerance.** Aligned Darwin and Linux values differ by at most `2.84e-14` px, so keep the provisional `1e-4` CSS-pixel tolerance. Sunburst and starburst fills of the concave polygon are a separate shape mismatch. See `comparison/darwin-linux.json`.
 4. **Publishing.** The project is MIT under the same copyright notices as Sketchy; Clipper notices are in `THIRD_PARTY_NOTICES`. Confirm `@sketchy-js` scope ownership on npm before publishing.
 
 ## Known limits
