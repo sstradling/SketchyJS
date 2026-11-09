@@ -16,12 +16,23 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
     budget: [28, 42],
   },
   {
+    name: "core: all shapes, outlines, SVG parser (plan 12-18 KB)",
+    code: `export * from "@sketchy-js/core";`,
+    budget: [12, 18],
+  },
+  {
+    name: "fills: all nine (plan 7-12 KB)",
+    code: `export { builtinFills } from "@sketchy-js/fills";`,
+    budget: [7, 12],
+  },
+  {
     name: "scene/basic only",
     code: `export { sketch } from "@sketchy-js/scene/basic";`,
   },
   {
-    name: "svg-renderer only",
-    code: `export { renderToSvgString } from "@sketchy-js/svg-renderer";`,
+    name: "svg-renderer only (plan 5-9 KB)",
+    code: `export { renderToSvgString, renderToSvgElement } from "@sketchy-js/svg-renderer";`,
+    budget: [5, 9],
   },
   {
     name: "one fill plugin (hachure)",
