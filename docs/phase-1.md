@@ -129,10 +129,14 @@ Sketchy configures a `RoughView` with one modifier per option and sizes shapes t
 9. **Namespaces removed from the core index.** `legacyRough` and `continuousRough` were not used by any package and defeated tree shaking (a `SplitMix64` import pulled 11 KB). They are internal.
 10. **Float emulation.** Every Swift `Float` operation is rounded with `Math.fround`; `sin`, `cos`, `tan` are computed in double and rounded. No fused multiply-add is used (neither reference platform fuses on x86_64).
 
-Housekeeping: `tools/clipper-bench/results/results.json` was reformatted so `pnpm format:check` passes (it failed on the Phase 0 branch).
+Housekeeping:
+
+- `tools/clipper-bench/results/results.json` was reformatted so `pnpm format:check` passes (it failed on the Phase 0 branch, which kept CI red before any later step ran).
+- CI now runs on `ubuntu-24.04` (not `ubuntu-latest`) and installs Swift 6.0.3 with `swift-actions/setup-swift`. Once `format:check` passed, `fixtures:regen --check` failed because `ubuntu-latest` had moved to Ubuntu 26.04 with Swift 6.4.2, which regenerates the four dashed-fill cases (`fill-dashed-*`, `filler-dashed-*`) differently from the committed Swift 6.0.3 / glibc 2.39 baselines. Swift 6.1.2 and 6.2.1 on Ubuntu 24.04 reproduce the committed fixtures byte for byte. `fixtures:regen --check` now prints the Swift version and the ids of differing cases.
 
 ## Open risks
 
+- **Linux oracle drift.** The Linux baselines are tied to Swift 6.0.3 on glibc 2.39. A newer image (Ubuntu 26.04, Swift 6.4.2) changes the dashed fills, and glibc differences change the concave radial fills. CI is pinned for that reason; refreshing the pin means regenerating the Linux baselines and re-checking the Darwin comparison.
 - **Linux libm.** Concave radial fills cannot match a Linux oracle without emulating glibc `sinf`/`cosf`. If CI compares to Linux fixtures later, expect the same 4-operation difference. Any other fill that produces a vertex-grazing ray on some platform has the same exposure.
 - **Float32 fidelity far from the origin.** Operation counts can legitimately change when a shape is translated far from the origin (the `Float` grid is 0.0625 px at 1e6), as in Swift. Region cases at 1e6 are checked for finiteness, not for count stability.
 - **Example sheets are golden files** that depend on V8's `Math.sin`/`cos` agreeing across Node 22 and 24 after rounding to `Float`. It has held locally; CI on both versions is the check.
