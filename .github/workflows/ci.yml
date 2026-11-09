@@ -29,6 +29,9 @@ jobs:
       - run: pnpm test
       - run: pnpm schemas:check
       - run: pnpm fixtures:verify
+      - uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.0.3"
       - run: pnpm fixtures:regen -- --check --allow-missing-swift
       - run: pnpm smoke:exports
       - run: pnpm size
