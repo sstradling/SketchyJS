@@ -87,12 +87,12 @@ Per-package size against the plan estimates (minified, gzip, `pnpm size`): core 
 | Phase 0 baseline (after merging the macOS fixtures) | 196   |
 | `core`                                             | 159   |
 | `fills`                                            | 6     |
-| `plugin`                                           | 39    |
+| `plugin`                                           | 53    |
 | `scene`                                            | 272   |
 | `svg-renderer`                                     | 46    |
 | `types`                                            | 29    |
 | `tools/*`                                          | 25    |
-| **Total**                                          | **576** (22 files) |
+| **Total**                                          | **590** (23 files) |
 
 The 196 Phase 0 tests still pass. New tests: parity (shapes, fills, direct fillers, SVG parse and arcs, sunburst oracle), independent math (`Float.pi`, fill geometry, geometry kit, generator order and determinism, SVG fit, transforms, stroke alignment, option resolution, registry), plugin conformance for all nine fills (edge regions, angles, determinism, `Math.random` guard, huge and tiny gaps, metadata), and integration tests (shapes to scene to SVG, builder and functional parity, SVG import clipping, golden example sheets).
 

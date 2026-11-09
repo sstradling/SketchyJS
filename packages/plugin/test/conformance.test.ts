@@ -10,7 +10,13 @@ import {
 
 describe("withRandomGuard", () => {
   it("throws on each guarded nondeterministic global and restores them afterwards", () => {
-    const before = [Math.random, Date.now, performance.now, crypto.getRandomValues];
+    const snapshot = (): unknown[] => [
+      Reflect.get(Math, "random"),
+      Reflect.get(Date, "now"),
+      Reflect.get(performance, "now"),
+      Reflect.get(crypto, "getRandomValues"),
+    ];
+    const before = snapshot();
     expect(() => withRandomGuard(() => Math.random())).toThrow(/Math\.random/);
     expect(() => withRandomGuard(() => Date.now())).toThrow(/Date\.now/);
     expect(() => withRandomGuard(() => performance.now())).toThrow(/performance\.now/);
@@ -18,7 +24,7 @@ describe("withRandomGuard", () => {
       /crypto\.getRandomValues/,
     );
     expect(() => withRandomGuard(() => crypto.randomUUID())).toThrow(/crypto\.randomUUID/);
-    expect([Math.random, Date.now, performance.now, crypto.getRandomValues]).toEqual(before);
+    expect(snapshot()).toEqual(before);
     expect(typeof Math.random()).toBe("number");
   });
 
