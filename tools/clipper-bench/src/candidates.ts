@@ -191,21 +191,14 @@ export function polygonClippingBackend(): ClipBackend {
       polygon.map((ring) => [...ring.map(([x, y]) => [x, y] as [number, number])]),
     );
   const fromGeom = (geom: polygonClipping.MultiPolygon): MultiPolygon =>
-    geom.map((polygon) =>
-      polygon.map((ring) => ring.slice(0, -1).map(([x, y]) => [x, y] as Pt)),
-    );
+    geom.map((polygon) => polygon.map((ring) => ring.slice(0, -1).map(([x, y]) => [x, y] as Pt)));
   return {
     id: "polygon-clipping",
     joins: ["round"],
     union(polygons) {
       const [first, ...rest] = toGeom(polygons);
       if (!first) return [];
-      return fromGeom(
-        polygonClipping.union(
-          first,
-          ...(rest as polygonClipping.Polygon[]),
-        ),
-      );
+      return fromGeom(polygonClipping.union(first, ...(rest as polygonClipping.Polygon[])));
     },
     offset(polygons, delta, join) {
       if (join !== "round") return null;
