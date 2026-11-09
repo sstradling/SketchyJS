@@ -1,0 +1,973 @@
+{
+  "environment": {
+    "node": "v22.23.4",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "Intel(R) Xeon(R) Processor",
+    "timeoutMs": 60000
+  },
+  "packages": {
+    "clipper2-ts": {
+      "version": "2.0.1-19",
+      "license": "BSL-1.0",
+      "modified": "2026-11-07"
+    },
+    "clipper2-wasm": {
+      "version": "0.4.0",
+      "license": "BSL-1.0",
+      "modified": "2026-05-18"
+    },
+    "polygon-clipping": {
+      "version": "0.15.7",
+      "license": "MIT",
+      "modified": "2023-12-18"
+    }
+  },
+  "fixtures": [
+    {
+      "id": "concave-star-24",
+      "description": "Single deeply concave star with 48 vertices, offset 10 (miter joins would spike at every inner vertex).",
+      "inputVertices": 48,
+      "polygons": 1,
+      "offset": 10
+    },
+    {
+      "id": "concave-star-120",
+      "description": "Single deeply concave star with 240 vertices, offset 10 (miter joins would spike at every inner vertex).",
+      "inputVertices": 240,
+      "polygons": 1,
+      "offset": 10
+    },
+    {
+      "id": "compound-holes",
+      "description": "Outer ring and three holes. Offset 8 shrinks the holes and closes the 12 unit slot, so hole topology must change.",
+      "inputVertices": 196,
+      "polygons": 1,
+      "offset": 8
+    },
+    {
+      "id": "dense-group-20",
+      "description": "20 overlapping rotated rounded rectangles (880 vertices), unioned then offset 8.",
+      "inputVertices": 880,
+      "polygons": 20,
+      "offset": 8
+    },
+    {
+      "id": "dense-group-80",
+      "description": "80 overlapping rotated rounded rectangles (3520 vertices), unioned then offset 8.",
+      "inputVertices": 3520,
+      "polygons": 80,
+      "offset": 8
+    },
+    {
+      "id": "dense-group-200",
+      "description": "200 overlapping rotated rounded rectangles (8800 vertices), unioned then offset 8.",
+      "inputVertices": 8800,
+      "polygons": 200,
+      "offset": 8
+    }
+  ],
+  "sizes": [
+    {
+      "backend": "clipper2-ts",
+      "jsGzip": 17315,
+      "wasmGzip": 0,
+      "note": "named imports of union, inflatePaths and enums; library marked sideEffects: false"
+    },
+    {
+      "backend": "clipper2-wasm",
+      "jsGzip": 10535,
+      "wasmGzip": 81748,
+      "note": "Emscripten glue plus clipper2z.wasm; async init and manual delete() of every native object"
+    },
+    {
+      "backend": "polygon-clipping",
+      "jsGzip": 9787,
+      "wasmGzip": 0,
+      "note": "union only; offset code is extra (the round-dilation helper in this benchmark is about 1 KB)"
+    }
+  ],
+  "cases": [
+    {
+      "fixture": "concave-star-24",
+      "operation": "union",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        0.45435800000001336, 0.28306300000002693, 0.24290100000001758, 0.27040999999996984,
+        0.2372349999999983
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 48,
+      "area": 74341.02777750001,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0.27
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "union",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        0.20542999999997846, 0.15071599999998853, 0.1358380000000352, 0.22489199999995435,
+        0.14611200000001645
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 48,
+      "area": 74341.02397108078,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0.15
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "union",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        0.7806100000000242, 0.7813110000000734, 0.7989790000000312, 0.9423590000000104,
+        0.8576590000000124
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 48,
+      "area": 74341.02135880997,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0.8
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "offset-round",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        1.546991999999932, 1.2134270000000242, 1.7080130000000509, 1.6672660000000405,
+        1.3218580000000202
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 216,
+      "area": 147752.22767850017,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 1.55
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "offset-round",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        0.7507109999999102, 0.8501400000000103, 0.8066360000000259, 1.0876769999999851,
+        0.6373379999999997
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 216,
+      "area": 147752.18403500033,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 0.81
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "offset-round",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        14.79995800000006, 9.023251999999957, 8.491727000000083, 11.121521999999914,
+        6.824442999999974
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 252,
+      "area": 147702.1459106021,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 9.02
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "offset-miter",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        1.1244180000001052, 1.2122669999998834, 1.1657050000001163, 1.4607519999999568,
+        1.2031070000000454
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 72,
+      "area": 148737.72003599993,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 1.2
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "offset-miter",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        0.40704699999992044, 0.31398300000000745, 0.28598799999986113, 0.3344320000001062,
+        0.3528089999999793
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 72,
+      "area": 148737.66049249994,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 0.33
+    },
+    {
+      "fixture": "concave-star-24",
+      "operation": "offset-miter",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "unsupported": true,
+      "timesMs": [],
+      "rings": 0,
+      "holes": 0,
+      "vertices": 0,
+      "area": 0,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "union",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        1.3280139999999392, 1.2932230000001255, 1.2624040000000605, 1.234801999999945,
+        1.2194919999999456
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 240,
+      "area": 73384.97251899993,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 1.26
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "union",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        1.0377440000002025, 1.1026930000000448, 1.1158989999998994, 1.4378779999999551,
+        1.068576000000121
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 240,
+      "area": 73385.09714460373,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 1.1
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "union",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        5.0106530000000475, 1.966551999999865, 1.9770429999998669, 2.0207479999999123,
+        3.210059999999885
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 240,
+      "area": 73385.06568404316,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 2.02
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "offset-round",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        11.816323999999895, 8.76815600000009, 5.252018000000135, 5.695709999999963,
+        5.058842999999797
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 681,
+      "area": 233688.5443309998,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 5.7
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "offset-round",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        4.23698400000012, 4.135721000000103, 3.5419270000002143, 3.552491999999802,
+        2.841968000000179
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 681,
+      "area": 233688.5372504998,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 3.55
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "offset-round",
+      "backend": "polygon-clipping",
+      "status": "error",
+      "error": "Error: Unable to find segment #4192 [33.7021540053431, 309.9682688235869] -> [38.58373164278504, 308.66025403784454] in SweepLine tree."
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "offset-miter",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        6.722157000000152, 7.479541000000154, 7.148428999999851, 5.607977000000119,
+        4.3139170000004015
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 240,
+      "area": 236565.45485850013,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 6.72
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "offset-miter",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        3.009493999999904, 2.3268159999997806, 2.056858999999804, 2.175846999999976,
+        1.8221960000000763
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 240,
+      "area": 236565.4626774999,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 2.18
+    },
+    {
+      "fixture": "concave-star-120",
+      "operation": "offset-miter",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "unsupported": true,
+      "timesMs": [],
+      "rings": 0,
+      "holes": 0,
+      "vertices": 0,
+      "area": 0,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "union",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        0.7011339999999109, 0.7549629999998615, 0.538086999999905, 0.6245320000002721,
+        0.5597560000001067
+      ],
+      "rings": 4,
+      "holes": 3,
+      "vertices": 196,
+      "area": 177362.17548799998,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0.62
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "union",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        0.7592679999997927, 0.9444220000000314, 0.6535709999998289, 0.7956319999998414,
+        1.0487129999996796
+      ],
+      "rings": 4,
+      "holes": 3,
+      "vertices": 196,
+      "area": 177362.33416366577,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0.8
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "union",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        2.449337999999898, 1.4695229999997537, 1.448378000000048, 1.8474989999999707,
+        0.868532999999843
+      ],
+      "rings": 4,
+      "holes": 3,
+      "vertices": 196,
+      "area": 177362.34767905332,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 1.47
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "offset-round",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        3.2194070000000465, 2.7292780000002494, 2.3132630000000063, 3.694336999999905,
+        3.0070660000001226
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 288,
+      "area": 196125.81731399993,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 3.01
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "offset-round",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        1.4084149999998772, 1.1586600000000544, 1.6171469999999317, 1.5553920000002108,
+        1.46640699999989
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 288,
+      "area": 196125.98149399983,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 1.47
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "offset-round",
+      "backend": "polygon-clipping",
+      "status": "error",
+      "error": "Error: Unable to find segment #1069 [62.10191364190279, 208.3291419087276] -> [65.0301168721783, 211.2573451390031] in SweepLine tree."
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "offset-miter",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        2.618069000000105, 2.588101999999708, 2.2043260000000373, 3.139549000000443,
+        1.9122559999996156
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 192,
+      "area": 196126.09910799985,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 2.59
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "offset-miter",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        0.8824269999995522, 1.1435870000004797, 0.8743389999999636, 0.8152980000004391,
+        1.6277270000000499
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 192,
+      "area": 196126.3177280001,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 0.88
+    },
+    {
+      "fixture": "compound-holes",
+      "operation": "offset-miter",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "unsupported": true,
+      "timesMs": [],
+      "rings": 0,
+      "holes": 0,
+      "vertices": 0,
+      "area": 0,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "union",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        2.294076000000132, 2.260554000000411, 2.2688120000002527, 1.4156519999996817,
+        2.006384999999682
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 411,
+      "area": 163068.97540750017,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 2.26
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "union",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        1.7992839999997159, 2.135301999999683, 2.7269820000001346, 1.765613999999914,
+        1.5243280000004233
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 411,
+      "area": 163068.8189549446,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 1.8
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "union",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        10.078335999999581, 5.715402999999242, 4.315553000000364, 3.8785369999995964,
+        3.889902000000802
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 411,
+      "area": 163068.98499059095,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 4.32
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "offset-round",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        8.705506000000241, 5.264234999999644, 3.3962820000006104, 2.544056000000637,
+        2.637593999999808
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 640,
+      "area": 188260.2229175003,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 3.4
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "offset-round",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        2.8058149999997113, 2.2893340000000535, 2.738043999999718, 2.003881999999976,
+        1.5519100000001345
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 640,
+      "area": 188260.10130949982,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 2.29
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "offset-round",
+      "backend": "polygon-clipping",
+      "status": "error",
+      "error": "Error: Unable to find segment #15008 [-7.337526263139304, 486.44383504946677] -> [-7.337526263139143, 486.44383504946677] in SweepLine tree."
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "offset-miter",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        7.726931999999579, 5.383501000000251, 3.1075709999995524, 2.7553089999992153,
+        2.1360059999997247
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 338,
+      "area": 188268.22939649987,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 3.11
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "offset-miter",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        2.3989700000001903, 2.7874140000003536, 2.3485749999999825, 1.8178079999997863,
+        2.4326950000004217
+      ],
+      "rings": 3,
+      "holes": 2,
+      "vertices": 338,
+      "area": 188268.25817249974,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 2.4
+    },
+    {
+      "fixture": "dense-group-20",
+      "operation": "offset-miter",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "unsupported": true,
+      "timesMs": [],
+      "rings": 0,
+      "holes": 0,
+      "vertices": 0,
+      "area": 0,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "union",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        8.003037999999833, 11.34552100000019, 4.831159999999727, 4.581065999999737,
+        4.404074999999466
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 371,
+      "area": 243314.1858710001,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 4.83
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "union",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        5.928726000000097, 5.129447999999684, 5.171308999999383, 4.285539999999855,
+        3.9704680000004373
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 371,
+      "area": 243314.23391008377,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 5.13
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "union",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        36.47903700000006, 26.289536999999655, 19.991457000000082, 18.836954000000333,
+        17.351824999999735
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 371,
+      "area": 243314.24354993226,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 19.99
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "offset-round",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        27.298969999999827, 11.617201999999452, 9.091008999999758, 6.414012999999613,
+        5.669887000000017
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 634,
+      "area": 262609.93389950023,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 9.09
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "offset-round",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        6.978562000000238, 6.024825999999848, 4.7448850000000675, 4.8021749999998065,
+        4.088361000000077
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 634,
+      "area": 262610.0497425003,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 4.8
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "offset-round",
+      "backend": "polygon-clipping",
+      "status": "error",
+      "error": "Error: Unable to find segment #60877 [24.546845345118573, 73.9898705457707] -> [24.546845345118612, 73.9898705457707] in SweepLine tree."
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "offset-miter",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        28.35381200000029, 12.75629299999946, 9.194394999999531, 8.094892000000073,
+        6.466182000000117
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 332,
+      "area": 262617.7696940005,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 9.19
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "offset-miter",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        6.098154999999679, 4.7000759999991715, 6.035867999999937, 4.183173000000352,
+        3.925514999999905
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 332,
+      "area": 262617.8778400002,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 4.7
+    },
+    {
+      "fixture": "dense-group-80",
+      "operation": "offset-miter",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "unsupported": true,
+      "timesMs": [],
+      "rings": 0,
+      "holes": 0,
+      "vertices": 0,
+      "area": 0,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "union",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        37.47100000000046, 28.454327000000376, 26.49500799999987, 26.85773599999993,
+        25.55127999999968
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 449,
+      "area": 287861.21014799987,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 26.86
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "union",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        20.168945999999778, 17.468423000000257, 17.08889099999942, 18.134294999999838,
+        16.39546899999914
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 449,
+      "area": 287861.2666568756,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 17.47
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "union",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "timesMs": [
+        111.56056099999842, 100.44570899999962, 87.89654999999948, 96.47262299999966,
+        89.22061799999938
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 449,
+      "area": 287861.1583226002,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 96.47
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "offset-round",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        56.53867199999877, 47.84652500000084, 42.12892400000055, 40.695197999999436,
+        41.145988000000216
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 711,
+      "area": 307279.8832525005,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 42.13
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "offset-round",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        20.000388000000385, 17.907036000000517, 18.012790999999197, 18.295163000000684,
+        16.7668479999993
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 711,
+      "area": 307279.9317410002,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 18.01
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "offset-round",
+      "backend": "polygon-clipping",
+      "status": "error",
+      "error": "Error: Unable to find segment #150939 [20.2452637795546, 251.7735042168688] -> [20.245263779554627, 251.7735042168688] in SweepLine tree."
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "offset-miter",
+      "backend": "clipper2-ts",
+      "status": "ok",
+      "timesMs": [
+        53.60721299999932, 37.7963120000004, 30.160084000001007, 30.465565000000424,
+        31.571077999999034
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 377,
+      "area": 307288.73692800006,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 31.57
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "offset-miter",
+      "backend": "clipper2-wasm",
+      "status": "ok",
+      "timesMs": [
+        19.705266999999367, 17.601039999999557, 19.79155300000093, 18.170616000001246,
+        17.010839999999007
+      ],
+      "rings": 1,
+      "holes": 0,
+      "vertices": 377,
+      "area": 307288.8345264999,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "containsOriginal": 1,
+      "medianMs": 18.17
+    },
+    {
+      "fixture": "dense-group-200",
+      "operation": "offset-miter",
+      "backend": "polygon-clipping",
+      "status": "ok",
+      "unsupported": true,
+      "timesMs": [],
+      "rings": 0,
+      "holes": 0,
+      "vertices": 0,
+      "area": 0,
+      "selfIntersections": 0,
+      "deterministic": true,
+      "medianMs": 0
+    }
+  ]
+}
