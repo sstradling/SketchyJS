@@ -31,4 +31,5 @@ jobs:
       - run: pnpm fixtures:verify
       - run: pnpm fixtures:regen -- --check --allow-missing-swift
       - run: pnpm smoke:exports
+      - run: pnpm size
       - run: pnpm docs:api

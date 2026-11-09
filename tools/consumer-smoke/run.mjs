@@ -91,15 +91,38 @@ const expectations = {
   "@sketchy-js/plugin/schema": {
     symbols: ["resolveOptions", "validateSchema", "toJsonSchema", "hashOptions", "checkPluginApi"],
   },
-  "@sketchy-js/core": { symbols: ["SplitMix64", "Rng", "swiftUnitFloat"] },
-  "@sketchy-js/core/options": { symbols: ["defaultSketchOptions", "applyRule", "SKETCH_OPTIONS"] },
+  "@sketchy-js/core": {
+    symbols: [
+      "SplitMix64",
+      "Rng",
+      "swiftUnitFloat",
+      "generateDrawing",
+      "rectangle",
+      "circle",
+      "path",
+      "svgPathToOps",
+    ],
+  },
+  "@sketchy-js/core/options": {
+    symbols: ["defaultSketchOptions", "applyRule", "SKETCH_OPTIONS", "resolveSketchOptions"],
+  },
+  "@sketchy-js/fills": { symbols: ["builtinFills"] },
+  "@sketchy-js/fills/solid": { symbols: ["solid"] },
+  "@sketchy-js/fills/hachure": { symbols: ["hachure"] },
+  "@sketchy-js/fills/zigzag": { symbols: ["zigzag"] },
+  "@sketchy-js/fills/crossHatch": { symbols: ["crossHatch"] },
+  "@sketchy-js/fills/dots": { symbols: ["dots"] },
+  "@sketchy-js/fills/dashed": { symbols: ["dashed"] },
+  "@sketchy-js/fills/zigzagLine": { symbols: ["zigzagLine"] },
+  "@sketchy-js/fills/sunBurst": { symbols: ["sunBurst"] },
+  "@sketchy-js/fills/starBurst": { symbols: ["starBurst"] },
+  "@sketchy-js/scene": { symbols: ["createSketchy", "RoughView", "buildScene", "sketchScene"] },
+  "@sketchy-js/scene/basic": { symbols: ["sketch", "RoughView", "basicSketchy"] },
+  "@sketchy-js/svg-renderer": { symbols: ["renderToSvgString", "renderToSvgElement"] },
 };
 const skeletons = [
-  "fills",
   "brushes",
   "stickers",
-  "scene",
-  "svg-renderer",
   "canvas-renderer",
   "animate",
   "react",
@@ -120,6 +143,11 @@ for (const specifier of skeletons) {
   const mod = await import(specifier);
   if (Object.keys(mod).length !== 0) { console.error("skeleton package now has exports; update the smoke test:", specifier); bad++; }
 }
+const { sketch } = await import("@sketchy-js/scene/basic");
+const { renderToSvgString } = await import("@sketchy-js/svg-renderer");
+const { rectangle } = await import("@sketchy-js/core");
+const svg = renderToSvgString(sketch(rectangle(10, 10, 80, 60), { width: 100, height: 80 }, { seed: 42n, fillStyle: "hachure" }));
+if (!svg.startsWith("<svg ") || !svg.includes("<path")) { console.error("end-to-end SVG render failed", svg.slice(0, 80)); bad++; }
 const { SplitMix64 } = await import("@sketchy-js/core");
 const rng = new SplitMix64(42n);
 const first = rng.nextU64();
@@ -143,6 +171,10 @@ import { defineBrush, s, type Resolved } from "@sketchy-js/plugin";
 import { resolveOptions } from "@sketchy-js/plugin/schema";
 import { Rng, SplitMix64 } from "@sketchy-js/core";
 import { defaultSketchOptions } from "@sketchy-js/core/options";
+import { sketch, RoughView } from "@sketchy-js/scene/basic";
+import { hachure } from "@sketchy-js/fills/hachure";
+import { rectangle } from "@sketchy-js/core";
+import { renderToSvgString } from "@sketchy-js/svg-renderer";
 
 const options: SketchOptions = defaultSketchOptions();
 const op: PathOp = { op: "M", x: options.roughness, y: 0 };
@@ -152,7 +184,10 @@ const brush = defineBrush({ id: "x", version: "1.0.0", api: "1.0", title: "X", d
 const resolved: Resolved<typeof schema> = resolveOptions(schema, {}).value;
 const n: number = resolved.passes + new Rng(1).next();
 const big: bigint = new SplitMix64(1n).nextU64();
-export { op, scene, brush, n, big };
+const built: Scene = sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 }, { seed: 1n, fillStyle: "hachure" });
+const viaView: Scene = new RoughView().with({ fillStyle: "dots" }).draw(rectangle(0, 0, 1, 1)).build({ width: 1, height: 1 });
+const markup: string = renderToSvgString(built);
+export { op, scene, brush, n, big, built, viaView, markup, hachure };
 `,
 );
 for (const resolution of [
@@ -276,6 +311,19 @@ await bundle(
   `import { applyRule } from "@sketchy-js/core/options"; console.log(applyRule(1, { type: "float", default: 0, enforcedBy: "none", swift: "x" }));`,
   ["Options.roughness"],
 );
+await bundle(
+  "scene/basic + svg-renderer (plan 28-42 KB)",
+  `import { sketch } from "@sketchy-js/scene/basic"; import { renderToSvgString } from "@sketchy-js/svg-renderer"; import { rectangle } from "@sketchy-js/core"; console.log(renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 })));`,
+  [],
+);
+await bundle(
+  "fills/hachure only",
+  `import { hachure } from "@sketchy-js/fills/hachure"; console.log(hachure);`,
+  ["sunBurst", "starBurst", "zigzagLine"],
+);
+const basicRow = report.find((r) => r.label.startsWith("scene/basic + svg-renderer"));
+if (basicRow && basicRow.gzip > 42 * 1024)
+  fail(`basic SVG scene bundle is ${basicRow.gzip} B gzip, over the 42 KB budget`);
 console.log("bundle sizes (minified, gzip):");
 for (const row of report)
   console.log(
