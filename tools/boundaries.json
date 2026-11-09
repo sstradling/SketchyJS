@@ -1,0 +1,33 @@
+{
+  "$comment": "Allowed workspace dependencies per package. Single source of truth for scripts/check-boundaries.mjs and the ESLint no-restricted-imports overrides.",
+  "packages": {
+    "types": { "dependencies": [] },
+    "plugin": { "dependencies": ["types"] },
+    "core": { "dependencies": ["types", "plugin"] },
+    "fills": { "dependencies": ["plugin"], "peerOnly": [] },
+    "brushes": { "dependencies": ["plugin"], "peerOnly": [] },
+    "stickers": { "dependencies": ["plugin"], "peerOnly": [] },
+    "scene": { "dependencies": ["types", "plugin", "core"], "optionalPeers": ["stickers"] },
+    "svg-renderer": { "dependencies": ["types"] },
+    "canvas-renderer": { "dependencies": ["types"] },
+    "animate": { "dependencies": ["types", "core"] },
+    "react": { "dependencies": ["types", "scene"], "externalPeers": ["react"] },
+    "web-components": { "dependencies": ["types", "scene"] },
+    "contrib": { "dependencies": [], "peers": ["plugin"] }
+  },
+  "pureGeometryPackages": ["types", "plugin", "core", "fills", "brushes", "stickers", "contrib"],
+  "bannedInPureGeometry": {
+    "globals": [
+      "window",
+      "document",
+      "navigator",
+      "Path2D",
+      "OffscreenCanvas",
+      "performance",
+      "crypto",
+      "localStorage"
+    ],
+    "members": ["Math.random", "Date.now", "performance.now", "crypto.getRandomValues"],
+    "newExpressions": ["Date"]
+  }
+}

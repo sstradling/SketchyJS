@@ -1,0 +1,4 @@
+packages:
+  - "packages/*"
+  - "tools/*"
+  - "!tools/swift-fixture-exporter"

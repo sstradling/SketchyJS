@@ -1,0 +1,52 @@
+{
+  "name": "sketchyjs-workspace",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "vitest run",
+    "lint": "eslint . && node scripts/check-boundaries.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "boundaries": "node scripts/check-boundaries.mjs",
+    "schemas": "pnpm --filter @sketchy/schema-tools run generate",
+    "schemas:check": "pnpm --filter @sketchy/schema-tools run check",
+    "fixtures:verify": "node tools/fixtures/verify.mjs",
+    "fixtures:manifest": "node tools/fixtures/build-manifest.mjs",
+    "fixtures:regen": "node tools/fixtures/regenerate.mjs",
+    "fixtures:import-assets": "node tools/fixtures/import-assets.mjs",
+    "smoke:exports": "node tools/consumer-smoke/run.mjs",
+    "bench:clipper": "pnpm --filter @sketchy/clipper-bench run bench",
+    "docs:api": "typedoc",
+    "changeset": "changeset"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@changesets/cli": "^3.0.3",
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.6",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "eslint": "^10.14.0",
+    "prettier": "^3.9.10",
+    "publint": "^0.3.25",
+    "ts-json-schema-generator": "^2.9.0",
+    "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
+    "turbo": "^2.11.10",
+    "typedoc": "^0.28.20",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.2",
+    "vitest": "^5.1.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}
