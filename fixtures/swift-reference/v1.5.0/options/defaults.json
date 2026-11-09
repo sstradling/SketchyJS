@@ -1,0 +1,119 @@
+{
+  "animation": {
+    "speedDurationSeconds": { "fast": 0.1, "medium": 0.3, "slow": 0.6 },
+    "varianceFactor": { "high": 0.1, "low": 0.01, "medium": 0.05, "veryLow": 0.005 }
+  },
+  "animationConfig": { "seed": null, "speed": "medium", "steps": 4, "variance": "medium" },
+  "brushProfileDefault": {
+    "cap": "round",
+    "crayon": null,
+    "join": "round",
+    "opacityProfile": "uniform",
+    "thicknessProfile": "uniform",
+    "tip": { "angle": 0.0, "directionSensitive": false, "roundness": 1.0 },
+    "watercolor": null
+  },
+  "crayonStyle": {
+    "baseOpacity": 0.8,
+    "baseSoftness": 0.5,
+    "edgeRoughness": 0.75,
+    "flakeSize": 1.45,
+    "grain": 0.28,
+    "grit": 0.92,
+    "opacityVariation": 0.35,
+    "passes": 2,
+    "seed": "1",
+    "widthVariation": 0.18
+  },
+  "fillStyleRawValues": {
+    "crossHatch": "cross-hatch",
+    "dashed": "dashed",
+    "dots": "dots",
+    "hachure": "hachure",
+    "scribble": "scribble",
+    "solid": "solid",
+    "starBurst": "starburst",
+    "sunBurst": "sunburst",
+    "watercolor": "watercolor",
+    "zigzag": "zigzag",
+    "zigzagLine": "zigzag-line"
+  },
+  "options": {
+    "bowing": 1.0,
+    "brushProfile": {
+      "cap": "round",
+      "crayon": null,
+      "join": "round",
+      "opacityProfile": "uniform",
+      "thicknessProfile": "uniform",
+      "tip": { "angle": 0.0, "directionSensitive": false, "roundness": 1.0 },
+      "watercolor": null
+    },
+    "curveStepCount": 9.0,
+    "curveTightness": 0.0,
+    "dashGap": -1.0,
+    "dashOffset": -1.0,
+    "fillAngle": 45.0,
+    "fillColor": {
+      "uiColor": { "a": 0.0, "b": 0.0, "g": 0.0, "r": 0.0 }
+    },
+    "fillOffset": { "height": 0.0, "width": 0.0 },
+    "fillOpacity": 1.0,
+    "fillPadding": 0.0,
+    "fillSpacing": 4.0,
+    "fillSpacingPattern": null,
+    "fillStyle": "hachure",
+    "fillWeight": -1.0,
+    "maxRandomnessOffset": 2.0,
+    "roughness": 1.0,
+    "scribbleCurvature": 0.0,
+    "scribbleOrigin": 0.0,
+    "scribbleTightness": 10,
+    "scribbleTightnessPattern": null,
+    "scribbleUseBrushStroke": false,
+    "seed": null,
+    "stickerBacking": null,
+    "strokeColor": {
+      "uiColor": { "a": 1.0, "b": 0.0, "g": 0.0, "r": 0.0 }
+    },
+    "strokeContinuity": "continuous",
+    "strokeMiterLimit": 10.0,
+    "strokeOpacity": 1.0,
+    "strokeWidth": 1.0,
+    "svgFillStrokeAlignment": "center",
+    "svgFillWeight": null,
+    "svgStrokeWidth": null,
+    "zigzagOffset": -1.0
+  },
+  "stickerBacking": {
+    "edge": "smooth",
+    "image": null,
+    "paperColor": {
+      "uiColor": { "a": 1.0, "b": 1.0, "g": 1.0, "r": 1.0 }
+    },
+    "shadow": null,
+    "smoothness": 0.0,
+    "texture": null,
+    "width": 0.0
+  },
+  "stickerShadow": {
+    "inkColor": {
+      "uiColor": { "a": 1.0, "b": 0.0, "g": 0.0, "r": 0.0 }
+    },
+    "opacity": 0.35,
+    "radius": 8.0,
+    "x": 0.0,
+    "y": 8.0
+  },
+  "stickerTear": { "depth": 0.0, "jaggedness": 0.35, "length": 16.0 },
+  "stickerTexturePaper": { "amount": 0.45, "scale": 11.0, "seed": null },
+  "watercolorStyle": {
+    "bleed": 0.5,
+    "edgeDarkening": 0.75,
+    "layers": 3,
+    "pigment": 0.72,
+    "seed": "1",
+    "variation": 0.45,
+    "wetness": 0.6
+  }
+}

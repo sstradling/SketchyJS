@@ -1,0 +1,1358 @@
+{
+  "arcConversion": [
+    {
+      "id": "quarter",
+      "input": {
+        "end": [50.0, 10.0],
+        "largeArc": false,
+        "rotation": 0.0,
+        "rx": 40.0,
+        "ry": 40.0,
+        "start": [10.0, 50.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [9.999999999999996, 27.908610006768274, 27.90861000676826, 10.000000000000004, 50.0, 10.0]
+        ],
+        "cx": 50.0,
+        "cy": 50.0,
+        "deltaAngle": 1.5707963267948966,
+        "kind": "cubic",
+        "rx": 40.0,
+        "ry": 40.0
+      }
+    },
+    {
+      "id": "half-large",
+      "input": {
+        "end": [90.0, 50.0],
+        "largeArc": true,
+        "rotation": 0.0,
+        "rx": 40.0,
+        "ry": 30.0,
+        "start": [10.0, 50.0],
+        "sweep": false
+      },
+      "result": {
+        "curves": [
+          [10.000000000000004, 66.5685424949238, 27.908610006768267, 80.0, 50.0, 80.0],
+          [72.09138999323173, 80.0, 90.0, 66.5685424949238, 90.0, 50.0]
+        ],
+        "cx": 50.0,
+        "cy": 50.0,
+        "deltaAngle": -3.141592653589793,
+        "kind": "cubic",
+        "rx": 40.0,
+        "ry": 30.0
+      }
+    },
+    {
+      "id": "half-sweep",
+      "input": {
+        "end": [90.0, 50.0],
+        "largeArc": false,
+        "rotation": 0.0,
+        "rx": 40.0,
+        "ry": 30.0,
+        "start": [10.0, 50.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [9.999999999999996, 33.43145750507621, 27.90861000676826, 20.000000000000004, 49.99999999999999, 20.0],
+          [72.09138999323173, 19.999999999999996, 90.0, 33.431457505076196, 90.0, 50.0]
+        ],
+        "cx": 50.0,
+        "cy": 50.0,
+        "deltaAngle": 3.141592653589793,
+        "kind": "cubic",
+        "rx": 40.0,
+        "ry": 30.0
+      }
+    },
+    {
+      "id": "rotated-30",
+      "input": {
+        "end": [120.0, 60.0],
+        "largeArc": false,
+        "rotation": 30.0,
+        "rx": 50.0,
+        "ry": 20.0,
+        "start": [20.0, 60.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [-5.110362550290876, 34.45683032032581, -3.0805707259861883, 13.750000136631858, 24.533666931241576, 13.750000305175789],
+          [52.147904588469345, 13.75000047371972, 94.88963804971885, 34.456830930677384, 120.0, 60.0]
+        ],
+        "cx": 70.00000030000484,
+        "cy": 60.00000030517578,
+        "deltaAngle": 3.141592653589793,
+        "kind": "cubic",
+        "rx": 76.03453162872775,
+        "ry": 30.413812651491096
+      }
+    },
+    {
+      "id": "rotated-minus-45-large",
+      "input": {
+        "end": [120.0, 60.0],
+        "largeArc": true,
+        "rotation": -45.0,
+        "rx": 50.0,
+        "ry": 20.0,
+        "start": [20.0, 60.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [48.99494920173245, 19.95935563726748, 94.88576235073909, -12.500000193226597, 122.50000001488218, -12.50000043158371],
+          [150.11423767902525, -12.500000669940821, 148.99494982678473, 19.959354774100028, 120.0, 60.0]
+        ],
+        "cx": 70.00000031252615,
+        "cy": 59.99999956841627,
+        "deltaAngle": 3.141592653589793,
+        "kind": "cubic",
+        "rx": 95.19716382329884,
+        "ry": 38.078865529319536
+      }
+    },
+    {
+      "id": "rotation-360",
+      "input": {
+        "end": [90.0, 50.0],
+        "largeArc": false,
+        "rotation": 360.0,
+        "rx": 40.0,
+        "ry": 30.0,
+        "start": [10.0, 50.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [9.999999999999998, 33.431457505076196, 27.90861000676826, 20.000000000000004, 49.99999999999999, 20.0],
+          [72.09138999323173, 19.999999999999996, 90.0, 33.431457505076196, 90.0, 50.0]
+        ],
+        "cx": 50.0,
+        "cy": 50.0,
+        "deltaAngle": 3.141592653589793,
+        "kind": "cubic",
+        "rx": 40.0,
+        "ry": 30.0
+      }
+    },
+    {
+      "id": "scaled-radii",
+      "input": {
+        "end": [190.0, 50.0],
+        "largeArc": false,
+        "rotation": 0.0,
+        "rx": 5.0,
+        "ry": 5.0,
+        "start": [10.0, 50.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [9.999999999999995, 0.2943725152286163, 50.29437251522859, -39.99999999999999, 99.99999999999999, -40.0],
+          [149.70562748477138, -40.00000000000001, 190.0, 0.29437251522858077, 190.0, 50.0]
+        ],
+        "cx": 100.0,
+        "cy": 50.0,
+        "deltaAngle": 3.141592653589793,
+        "kind": "cubic",
+        "rx": 90.0,
+        "ry": 90.0
+      }
+    },
+    {
+      "id": "zero-rx",
+      "input": {
+        "end": [50.0, 50.0],
+        "largeArc": false,
+        "rotation": 0.0,
+        "rx": 0.0,
+        "ry": 5.0,
+        "start": [10.0, 10.0],
+        "sweep": true
+      },
+      "result": { "kind": "line" }
+    },
+    {
+      "id": "same-point",
+      "input": {
+        "end": [10.0, 10.0],
+        "largeArc": false,
+        "rotation": 0.0,
+        "rx": 5.0,
+        "ry": 5.0,
+        "start": [10.0, 10.0],
+        "sweep": true
+      },
+      "result": { "kind": "omitted" }
+    },
+    {
+      "id": "negative-radii",
+      "input": {
+        "end": [90.0, 50.0],
+        "largeArc": false,
+        "rotation": 0.0,
+        "rx": -40.0,
+        "ry": -30.0,
+        "start": [10.0, 50.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [9.999999999999996, 33.43145750507621, 27.90861000676826, 20.000000000000004, 49.99999999999999, 20.0],
+          [72.09138999323173, 19.999999999999996, 90.0, 33.431457505076196, 90.0, 50.0]
+        ],
+        "cx": 50.0,
+        "cy": 50.0,
+        "deltaAngle": 3.141592653589793,
+        "kind": "cubic",
+        "rx": 40.0,
+        "ry": 30.0
+      }
+    },
+    {
+      "id": "nearly-full-circle",
+      "input": {
+        "end": [49.999, 10.0],
+        "largeArc": true,
+        "rotation": 0.0,
+        "rx": 40.0,
+        "ry": 40.0,
+        "start": [50.0, 10.0],
+        "sweep": true
+      },
+      "result": {
+        "curves": [
+          [72.0912923605094, 10.000276141154526, 89.99963806981484, 27.90895763510526, 89.99949999921876, 50.000249996909076],
+          [89.99936192862268, 72.0915423587129, 72.09079236216715, 89.99999999691263, 49.99949999993187, 89.999999996875],
+          [27.908207637696584, 89.99999999683737, 9.999638071302067, 72.09154235857662, 9.999500000781246, 50.0002499967728],
+          [9.999361930260426, 27.908957634968985, 27.907707639626864, 10.000276141079269, 49.999, 10.0]
+        ],
+        "cx": 49.9995,
+        "cy": 49.999999996875005,
+        "deltaAngle": 6.2831603071829925,
+        "kind": "cubic",
+        "rx": 40.0,
+        "ry": 40.0
+      }
+    }
+  ],
+  "parse": [
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 20.0,
+          "c2x": 10.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 20.0
+        },
+        {
+          "c1x": 30.0,
+          "c1y": 40.0,
+          "c2x": 30.0,
+          "c2y": 40.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 30.0,
+          "y": 40.0
+        },
+        {
+          "c1x": 50.0,
+          "c1y": 20.0,
+          "c2x": 50.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 50.0,
+          "y": 20.0
+        },
+        {
+          "c1x": 10.0,
+          "c1y": 20.0,
+          "c2x": 10.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "close",
+          "x": 10.0,
+          "y": 20.0
+        }
+      ],
+      "d": "M10 20 L30 40 L50 20 Z",
+      "id": "absolute-basic"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 20.0,
+          "c2x": 10.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 20.0
+        },
+        {
+          "c1x": 30.0,
+          "c1y": 40.0,
+          "c2x": 30.0,
+          "c2y": 40.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 30.0,
+          "y": 40.0
+        },
+        {
+          "c1x": 50.0,
+          "c1y": 20.0,
+          "c2x": 50.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 50.0,
+          "y": 20.0
+        },
+        {
+          "c1x": 10.0,
+          "c1y": 20.0,
+          "c2x": 10.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "close",
+          "x": 10.0,
+          "y": 20.0
+        }
+      ],
+      "d": "m10 20 l20 20 l20 -20 z",
+      "id": "relative-basic"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 50.0,
+          "c1y": 10.0,
+          "c2x": 50.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 50.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 50.0,
+          "c1y": 40.0,
+          "c2x": 50.0,
+          "c2y": 40.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 50.0,
+          "y": 40.0
+        },
+        {
+          "c1x": 30.0,
+          "c1y": 40.0,
+          "c2x": 30.0,
+          "c2y": 40.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 30.0,
+          "y": 40.0
+        },
+        {
+          "c1x": 30.0,
+          "c1y": 30.0,
+          "c2x": 30.0,
+          "c2y": 30.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 30.0,
+          "y": 30.0
+        },
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "close",
+          "x": 10.0,
+          "y": 10.0
+        }
+      ],
+      "d": "M10 10 H50 V40 h-20 v-10 Z",
+      "id": "horizontal-vertical"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 20.0,
+          "c1y": 20.0,
+          "c2x": 20.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 20.0,
+          "y": 20.0
+        },
+        {
+          "c1x": 30.0,
+          "c1y": 10.0,
+          "c2x": 30.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 30.0,
+          "y": 10.0
+        }
+      ],
+      "d": "M10 10 20 20 30 10",
+      "id": "implicit-lineto-after-moveto"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 80.0,
+          "c2x": 10.0,
+          "c2y": 80.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 40.0,
+          "c1y": 10.0,
+          "c2x": 65.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "cubic",
+          "x": 95.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 125.0,
+          "c1y": 150.0,
+          "c2x": 150.0,
+          "c2y": 150.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "cubic",
+          "x": 180.0,
+          "y": 80.0
+        }
+      ],
+      "d": "M10 80 C40 10 65 10 95 80 S150 150 180 80",
+      "id": "cubic-and-smooth"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 80.0,
+          "c2x": 10.0,
+          "c2y": 80.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 40.0,
+          "c1y": 10.0,
+          "c2x": 65.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "cubic",
+          "x": 95.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 125.0,
+          "c1y": 150.0,
+          "c2x": 150.0,
+          "c2y": 150.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "cubic",
+          "x": 180.0,
+          "y": 80.0
+        }
+      ],
+      "d": "m10 80 c30 -70 55 -70 85 0 s55 70 85 0",
+      "id": "relative-cubic-smooth"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 80.0,
+          "c2x": 10.0,
+          "c2y": 80.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 52.5,
+          "c1y": 10.0,
+          "c2x": 52.5,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "quad",
+          "x": 95.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 137.5,
+          "c1y": 150.0,
+          "c2x": 137.5,
+          "c2y": 150.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "quad",
+          "x": 180.0,
+          "y": 80.0
+        }
+      ],
+      "d": "M10 80 Q52.5 10 95 80 T180 80",
+      "id": "quad-and-smooth"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 80.0,
+          "c2x": 10.0,
+          "c2y": 80.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 52.5,
+          "c1y": 10.0,
+          "c2x": 52.5,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "quad",
+          "x": 95.0,
+          "y": 80.0
+        },
+        {
+          "c1x": 137.5,
+          "c1y": 150.0,
+          "c2x": 137.5,
+          "c2y": 150.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "quad",
+          "x": 180.0,
+          "y": 80.0
+        }
+      ],
+      "d": "m10 80 q42.5 -70 85 0 t85 0",
+      "id": "relative-quad-smooth"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 40.0,
+          "c1y": 10.0,
+          "c2x": 40.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 40.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 40.0,
+          "c1y": 40.0,
+          "c2x": 40.0,
+          "c2y": 40.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 40.0,
+          "y": 40.0
+        },
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "close",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 15.0,
+          "c1y": 15.0,
+          "c2x": 15.0,
+          "c2y": 15.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 15.0,
+          "y": 15.0
+        },
+        {
+          "c1x": 25.0,
+          "c1y": 15.0,
+          "c2x": 25.0,
+          "c2y": 15.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 25.0,
+          "y": 15.0
+        },
+        {
+          "c1x": 25.0,
+          "c1y": 25.0,
+          "c2x": 25.0,
+          "c2y": 25.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 25.0,
+          "y": 25.0
+        },
+        {
+          "c1x": 15.0,
+          "c1y": 15.0,
+          "c2x": 15.0,
+          "c2y": 15.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "close",
+          "x": 15.0,
+          "y": 15.0
+        }
+      ],
+      "d": "M10 10 L40 10 L40 40 Z m5 5 l10 0 l0 10 z",
+      "id": "close-then-relative-move"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": -20.0,
+          "c2x": 10.0,
+          "c2y": -20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": -20.0
+        },
+        {
+          "c1x": 0.5,
+          "c1y": -0.5,
+          "c2x": 0.5,
+          "c2y": -0.5,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 0.5,
+          "y": -0.5
+        }
+      ],
+      "d": "M1e1 -2E+1 L3.5e-1.5 .5-.5",
+      "id": "exponent-and-signs"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": -20.0,
+          "c2x": 10.0,
+          "c2y": -20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": -20.0
+        },
+        {
+          "c1x": 30.5,
+          "c1y": 0.5,
+          "c2x": 30.5,
+          "c2y": 0.5,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 30.5,
+          "y": 0.5
+        },
+        {
+          "c1x": -40.0,
+          "c1y": -50.0,
+          "c2x": -40.0,
+          "c2y": -50.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": -40.0,
+          "y": -50.0
+        }
+      ],
+      "d": "M10-20L30.5.5-40-50",
+      "id": "compact-numbers"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 20.0,
+          "c2x": 10.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 20.0
+        },
+        {
+          "c1x": 30.0,
+          "c1y": 40.0,
+          "c2x": 30.0,
+          "c2y": 40.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 30.0,
+          "y": 40.0
+        },
+        {
+          "c1x": 50.0,
+          "c1y": 60.0,
+          "c2x": 50.0,
+          "c2y": 60.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 50.0,
+          "y": 60.0
+        }
+      ],
+      "d": "M 10 , 20\n\tL 30,40  50 ,60",
+      "id": "whitespace-and-commas"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 50.0,
+          "c2x": 10.0,
+          "c2y": 50.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 40.0,
+          "ry": 30.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 90.0,
+          "y": 50.0
+        }
+      ],
+      "d": "M10 50 A40 30 0 0 1 90 50",
+      "id": "arc-basic"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 50.0,
+          "c2x": 10.0,
+          "c2y": 50.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": true,
+          "rotation": 0.0,
+          "rx": 40.0,
+          "ry": 30.0,
+          "sweep": false,
+          "type": "arc",
+          "x": 90.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": true,
+          "rotation": 0.0,
+          "rx": 40.0,
+          "ry": 30.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 10.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 40.0,
+          "ry": 30.0,
+          "sweep": false,
+          "type": "arc",
+          "x": 90.0,
+          "y": 50.0
+        }
+      ],
+      "d": "M10 50 A40 30 0 1 0 90 50 A40 30 0 1 1 10 50 A40 30 0 0 0 90 50",
+      "id": "arc-large-sweep-variants"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 20.0,
+          "c1y": 60.0,
+          "c2x": 20.0,
+          "c2y": 60.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 20.0,
+          "y": 60.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 30.0,
+          "rx": 50.0,
+          "ry": 20.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 120.0,
+          "y": 60.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": true,
+          "rotation": -45.0,
+          "rx": 50.0,
+          "ry": 20.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 20.0,
+          "y": 60.0
+        }
+      ],
+      "d": "M20 60 A50 20 30 0 1 120 60 A50 20 -45 1 1 20 60",
+      "id": "arc-rotation"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 10.0
+        }
+      ],
+      "d": "M10 10 a5 5 0 1010 10 a5 5 0 0110 -10",
+      "id": "arc-packed-flags"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 5.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 50.0,
+          "y": 50.0
+        }
+      ],
+      "d": "M10 10 A0 5 0 0 1 50 50",
+      "id": "arc-zero-radius-is-line"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 10.0,
+          "c2x": 10.0,
+          "c2y": 10.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 5.0,
+          "ry": 5.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 10.0,
+          "y": 10.0
+        },
+        {
+          "c1x": 20.0,
+          "c1y": 20.0,
+          "c2x": 20.0,
+          "c2y": 20.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "line",
+          "x": 20.0,
+          "y": 20.0
+        }
+      ],
+      "d": "M10 10 A5 5 0 0 1 10 10 L20 20",
+      "id": "arc-identical-endpoints-omitted"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 50.0,
+          "c2x": 10.0,
+          "c2y": 50.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": -40.0,
+          "ry": -30.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 90.0,
+          "y": 50.0
+        }
+      ],
+      "d": "M10 50 A-40 -30 0 0 1 90 50",
+      "id": "arc-negative-radii"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 50.0,
+          "c2x": 10.0,
+          "c2y": 50.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 5.0,
+          "ry": 5.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 190.0,
+          "y": 50.0
+        }
+      ],
+      "d": "M10 50 A5 5 0 0 1 190 50",
+      "id": "arc-radii-too-small-scaled"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 10.0,
+          "c1y": 50.0,
+          "c2x": 10.0,
+          "c2y": 50.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 10.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 40.0,
+          "ry": 30.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 90.0,
+          "y": 50.0
+        },
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 40.0,
+          "ry": 30.0,
+          "sweep": true,
+          "type": "arc",
+          "x": 10.0,
+          "y": 50.0
+        }
+      ],
+      "d": "m10 50 a40 30 0 0 1 80 0 a40 30 0 0 1 -80 0",
+      "id": "arc-relative"
+    },
+    {
+      "commands": [],
+      "d": "",
+      "id": "empty"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 5.0,
+          "c1y": 5.0,
+          "c2x": 5.0,
+          "c2y": 5.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "move",
+          "x": 5.0,
+          "y": 5.0
+        }
+      ],
+      "d": "M5 5",
+      "id": "only-move"
+    },
+    {
+      "commands": [
+        {
+          "c1x": 0.0,
+          "c1y": 0.0,
+          "c2x": 0.0,
+          "c2y": 0.0,
+          "largeArc": false,
+          "rotation": 0.0,
+          "rx": 0.0,
+          "ry": 0.0,
+          "sweep": false,
+          "type": "close",
+          "x": 0.0,
+          "y": 0.0
+        }
+      ],
+      "d": "Z",
+      "id": "lone-close"
+    }
+  ]
+}

@@ -1,0 +1,734 @@
+{
+  "source": "docs/images at the pinned upstream commit",
+  "images": [
+    {
+      "path": "animation/breathing-circle.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 363020,
+      "sha256": "dd2ec7e5881354e06f9dc8056e0a45561a9822d0906a02a3a636feb025a79a81",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "animation/fast-jitter.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 225950,
+      "sha256": "23be31467b488bd091eb35edfee56a938f150c04a167ff2eec36ccd3407e9324",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "animation/long-cycle.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 81546,
+      "sha256": "72de418a11b8a6921948439ff20375f1c1aba7a65333a1826ed228209c1a6143",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "animation/low-wobble.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 24335,
+      "sha256": "751da6154e06c5d7bff718ec774dcba3117851df555475bd4b81ad981369e71a",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "animation/scribble-wobble.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 71786,
+      "sha256": "a6223f5f61df8c7bfe56cf341eb627efc00048839a494b1abb2be69dcd7e9d94",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "animation/sketch-cycle.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 118468,
+      "sha256": "13ed6387a9eafe83729bdb6fad7548831382a8c2001a7ecae449062119197a45",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "animation/slow-breath.gif",
+      "group": "animation",
+      "format": "gif",
+      "bytes": 231985,
+      "sha256": "d25ae61c85a45702690bb632e464323c5cebd8d013db63c7ee3e064f294652cb",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "basics/hachure-rectangle.png",
+      "group": "basics",
+      "format": "png",
+      "bytes": 46473,
+      "sha256": "31ad16919e3feb747e38871c74e5cd6fddc84bbba743deac2211a904d41dbbf2",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/calligraphic.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 3165,
+      "sha256": "2b8bb099e7cbe5e172a801ce3f885591bed4f057cff1fcb459c4df74005db138",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/crayon-fill.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 61844,
+      "sha256": "f41225d1645f2bb2bf4b1f3479b2ec7eaf558ac763f28f7d55549b5ada8c6b9e",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/crayon.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 15161,
+      "sha256": "8c4f8a09b9477384c76b4214e7e212d66c464bb886a0e0e87c43de828fa35980",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/marker.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 1353,
+      "sha256": "2350a76150409947344f6977e1533743ec0de937456088b6cf855aa9445f8cef",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/pen.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 3459,
+      "sha256": "1366f7d202b33eb538ce62dc35d949c3a91cb66e79889f4369338c35f1f4889a",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/tapered-stroke.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 3281,
+      "sha256": "526d3f8c10c5e30d7027a6ad4a868b585ee7e97df944f944bb61294c7f43cc37",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/variable-marker.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 580,
+      "sha256": "d608ad108cb79db95d5a54b5349c4a4a23d46694f7edf62a459de7d8972ee7f8",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/variable-opacity.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 5841,
+      "sha256": "9dd286add1922b062ce804ac9e04e967741a21e4a5b2a45b0457d025fe348af9",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/watercolor-fill.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 7342,
+      "sha256": "8d753055a2238683ba109988f878cd1a18b2b0bc533e83709fc8302a9bf6893c",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/watercolor-overlap.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 6372,
+      "sha256": "8a9e4d07a75be1ea8464064c53de69e568b3c2c146674a3f51a8ef43b40c2ad3",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/watercolor.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 6093,
+      "sha256": "4a1c22ca91c0222df7ad08996c4ff074bb7b7b802d58d4ebb6df688b5dd9316b",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "brushes/width-stops.png",
+      "group": "brushes",
+      "format": "png",
+      "bytes": 2279,
+      "sha256": "277ad3b9ac0b136e610999b52f347e588953fb573a96a0525758b539ea2a07af",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/brush-scribble.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 8557,
+      "sha256": "ef849dabe22d0a18fbc30488d1ed6a1eb5a1937e7b4d6935803c3bf1fb5163cf",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/clockwise-hachure.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 30252,
+      "sha256": "2bf25c510257cb1ee47928faa6c410238b869e7346acb9f66d5fa314ee8ae350",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/cross-hatch.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 44213,
+      "sha256": "28b523866b8333d80d7e433f5d39beca8dc91dbd64febfaecfc7f20e1d985da4",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/curved-scribble.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 7040,
+      "sha256": "1730c01759b1dca9da9af227607e5fa8b297107535bb5705affc127d1d356ca4",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/dashed-fill.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 36975,
+      "sha256": "85bd1044e6250b315dce01cfdc48221122de977ab5f9b4f0c398c13aac8d4b6a",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/dots.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 7953,
+      "sha256": "bc7aff7e106f41af7f06f0140b9f07a4ae31b8bf11fc293156ee42520f82d19d",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/fill-offset.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 36514,
+      "sha256": "b047d688c226a937f29407fe726ea455b2ba371262c087c8b7381f6d29bc0d94",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/fill-padding-outset.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 18607,
+      "sha256": "2dd14e09e44fe103d026eef31c02977da3578e7524291c10bb185fdb428f7020",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/fill-padding-zero.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 14651,
+      "sha256": "2d0aec748c4397a5c5d2f8c93669f1bf476a96312524a868b1f284de518b7453",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/fill-padding.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 13275,
+      "sha256": "d0900580ec90d7a8aafea3edc89f7ac49c9e2f8e0f9df36f5341da27171f2c0e",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/heavy-fill.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 16715,
+      "sha256": "dd48b0a3cc03e9c57a5bc2a34da8fe9890633a1123623c49cf07bb77527d753f",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/horizontal-hachure.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 13973,
+      "sha256": "ddac02b7941374804dc3025bc36548c73edc704324f110f83bb86a412671b578",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/scribble-bands.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 4752,
+      "sha256": "9eaa15f076861d9653996517dba92b476f3ce0a923444954fd9a3bc1dbc6e424",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/scribble.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 6569,
+      "sha256": "6ca94d335ac3b4d55fb04da1b53b752f30fe0eab8986f4dceec0d4c812771b12",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/solid-fill.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 3761,
+      "sha256": "ce984a56ac40d01600b4e8ce4c710c8f49836a51de6d15066e7ddc77f5e16ffd",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/spacing-pattern.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 4926,
+      "sha256": "2fef8910965f9b723bac5b7e55b4e80e1bd182142ae12d21a1960f10f5d51f59",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/sunburst.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 37689,
+      "sha256": "f9711efde435288197aec56cf7769091a5417f160c063e3ec9677e989f33d7df",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/vertical-hachure.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 19839,
+      "sha256": "b174e62bb89e75517e27524170ba5abd98bfee9570de95f76ffc359ed7d7dd18",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/wide-gap.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 10854,
+      "sha256": "1a4eaa4c8a2b7b3cfcc664e9b6c827cfa8f41c8498405aefdc2d8726b63b6573",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/zigzag-fill.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 53196,
+      "sha256": "ca92a988f302f2699df92168bbc7a44aaa5677ce8837c1c53f4ac23152b635e4",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "fills/zigzag-line.png",
+      "group": "fills",
+      "format": "png",
+      "bytes": 12779,
+      "sha256": "6e549ba123e944b1c58c6098256cab46907cd7ef98ee08cb5bef480170aaec18",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "header.png",
+      "group": "root",
+      "format": "png",
+      "bytes": 142307,
+      "sha256": "d7d83f09aa0d8289b64d4794abef2ed59c688ac6a34ba48e9d766c03eb771e40",
+      "width": 1600,
+      "height": 400
+    },
+    {
+      "path": "hero.png",
+      "group": "root",
+      "format": "png",
+      "bytes": 110787,
+      "sha256": "992b54b62a23e6950b243906cba6723ce1cefdc35428e7caddf630413d59ba4d",
+      "width": 1280,
+      "height": 480
+    },
+    {
+      "path": "roughness/bowed.png",
+      "group": "roughness",
+      "format": "png",
+      "bytes": 5185,
+      "sha256": "fe6a75b75a8dedbf3df5e38ee9083d32a524cee44d3f025afcfe8c83cb1bea97",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "roughness/loose-wobble.png",
+      "group": "roughness",
+      "format": "png",
+      "bytes": 863,
+      "sha256": "0e2792ff338f566111e62e61ef5075b2f47e870f4bcf98f3b5733988f8a49e41",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "roughness/rough.png",
+      "group": "roughness",
+      "format": "png",
+      "bytes": 50149,
+      "sha256": "35efe416306c73a0a8e867db77bd114f1fe54f83cd2139b7f2401bbb461e7c29",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "roughness/smooth.png",
+      "group": "roughness",
+      "format": "png",
+      "bytes": 294,
+      "sha256": "15c85bdf58242586235944a5c83dd35d8910b04e46a0cb97bee53c0b82aa53a0",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "seeding/seed-ninety-nine.png",
+      "group": "seeding",
+      "format": "png",
+      "bytes": 39651,
+      "sha256": "f8924683edbe703203e54db45b2e75c9498bc6ec668a22c6247d0516540eb34a",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "seeding/seed-seven-again.png",
+      "group": "seeding",
+      "format": "png",
+      "bytes": 43463,
+      "sha256": "a7c224e2344c427fd8dca6969a16b59d5ac93502e507ffcf301243735c0f5f50",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "seeding/seed-seven.png",
+      "group": "seeding",
+      "format": "png",
+      "bytes": 43463,
+      "sha256": "a7c224e2344c427fd8dca6969a16b59d5ac93502e507ffcf301243735c0f5f50",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/circle.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 37080,
+      "sha256": "5127b7db197a14169323391549227c91ba631108e1f2376e3ad67cd07a2e9ad8",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/closed-arc.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 14125,
+      "sha256": "e6c82b1abfc8b2b1d2c9c972123959abecb4599c51e2c20439506b446bbe9df8",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/curve.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 2093,
+      "sha256": "b8b85d6ae1a57e5ed8481335d073dbdb9dc4a95e0f2e73a1c7b7ce3321f887e4",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/egg.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 35384,
+      "sha256": "ff35f1b3b7a5f22a2dff36439eb77cbee449fcf34267c572c79b546ece249b72",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/ellipse.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 19311,
+      "sha256": "1ff85debc59bc9e102e45e793a568a340ac3bf252b56fa2a0ffe03931abbcd6c",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/line.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 1221,
+      "sha256": "216c6ded4022818393b843212677585734c58e020e5fa30d6ac002b075d42bf1",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/linear-path.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 2965,
+      "sha256": "dbf53afdf575e0a1457aa8d22e57d8d1abcea84635eef80b6a2aacf45b4f8b14",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/open-arc.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 998,
+      "sha256": "6e6616d291525db7bbc5cac9f3c7ae4eea0f04cb62392f2f2d168647e5784a4b",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/polygon.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 15880,
+      "sha256": "cafde8762fa4e27c0129c65279dd6cd10ddbb86bd8fe1e5379dd5d91e8a53f4d",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "shapes/rounded-rectangle.png",
+      "group": "shapes",
+      "format": "png",
+      "bytes": 41454,
+      "sha256": "aaeae2a9927b2971485c0dff7aef08193b0c7a639cfc67532e4f684f1cbb81ea",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-crayon.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 34766,
+      "sha256": "0837e65a3232c9fdfd63a609ce75cc29ecffea56eb7af8a610021acfda7bcfc9",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-fully-smooth.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 7773,
+      "sha256": "f3d16ac2b3e59a7f18bd9355d51db90fa34d787463fa2cdeb7f5a8030ada96a2",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-group.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 8926,
+      "sha256": "c735953fed9841f3f116d143045bd79cd3b2415b50e238d011fbb5d6cbdd5ca3",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-image.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 34183,
+      "sha256": "0247fa1edd7461f33da3288a839cce703ca86337ac7669a037bd79007a6f3ac2",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-paper.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 22630,
+      "sha256": "ac2ef57db7859e97f8da6d5985ffdb24bf67013f04c048634322af5a8c36fced",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-shadow.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 8173,
+      "sha256": "379a6abd273cc96753f829dd5734665aae7d85e50fc8dd5575548bd95f1671ae",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-star.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 7990,
+      "sha256": "55c8a288082657aab9b57dded5605aa6e30002c6d558a7806e799578e852b960",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "stickers/sticker-torn.png",
+      "group": "stickers",
+      "format": "png",
+      "bytes": 8259,
+      "sha256": "bd641bafe61d543d8b6257ee0a3b30a81666cddea514972d533d2ea49f4d0f9b",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "strokes/fill-opacity.png",
+      "group": "strokes",
+      "format": "png",
+      "bytes": 2820,
+      "sha256": "6160c0f34c58f5a80e9008f67b7f12704c97217340b562dba84aa9f45a1f7130",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "strokes/several-lines.png",
+      "group": "strokes",
+      "format": "png",
+      "bytes": 657,
+      "sha256": "bbbba68017b5a882c18055f7f30e24e6df7bf3b643645abd8213a0c7254c776c",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "strokes/stroke-opacity.png",
+      "group": "strokes",
+      "format": "png",
+      "bytes": 3377,
+      "sha256": "825336c62c01a6964e4bd3334d17d8fad923f02b581758431598ffaa7b930776",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "strokes/thick-stroke.png",
+      "group": "strokes",
+      "format": "png",
+      "bytes": 1876,
+      "sha256": "6eb9a567562614b780ac45ad9ff81f0c0de354c92681b2f1cee8da7904dbdc60",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "svg/svg-arcs.png",
+      "group": "svg",
+      "format": "png",
+      "bytes": 16073,
+      "sha256": "115f0ee789161a1fa86d4fd48b13f4d12fe7177a1d36dbaa0c81f1c4bf998f40",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "svg/svg-outside.png",
+      "group": "svg",
+      "format": "png",
+      "bytes": 10532,
+      "sha256": "d829581bc697710e3536a92d46bfdf6587ff907010f8973a146a15c9b1217431",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "svg/svg-star.png",
+      "group": "svg",
+      "format": "png",
+      "bytes": 12481,
+      "sha256": "3d6824d40df6124a1a512a4773746f9aafee1cddca2ec81f1bfafa15a4b9e909",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "text/attributed-text.png",
+      "group": "text",
+      "format": "png",
+      "bytes": 2055,
+      "sha256": "f1eb47ac8fca182143183c26ce5211f25390ff0786307bd35c2148679cc7fd70",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "text/leading-text.png",
+      "group": "text",
+      "format": "png",
+      "bytes": 2266,
+      "sha256": "c69b7951ba270257214478fcfcf0283dc4cbca80e03dcd62b1420d56ab3f5738",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "text/named-font.png",
+      "group": "text",
+      "format": "png",
+      "bytes": 3559,
+      "sha256": "91108900d51a581b83e5c8230ae29a76ec8a0e63b3c0e27c6f4564298e8f58ef",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "text/offset-text.png",
+      "group": "text",
+      "format": "png",
+      "bytes": 2195,
+      "sha256": "650eaded13ad3546e635c2d50956626c3368fe817dbacf33564ba0f4129cfbe7",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "text/rough-text.png",
+      "group": "text",
+      "format": "png",
+      "bytes": 4813,
+      "sha256": "a9baf369bad5f86f517768c31352c4039332789d404a5389a78992648faed12c",
+      "width": 480,
+      "height": 480
+    },
+    {
+      "path": "text/rough-word.png",
+      "group": "text",
+      "format": "png",
+      "bytes": 6497,
+      "sha256": "4f0a4b993542137730e5c1b563dc0fc6ec010e6015f2ea651a162f4397ee2f69",
+      "width": 480,
+      "height": 480
+    }
+  ]
+}
