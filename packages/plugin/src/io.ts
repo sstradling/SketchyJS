@@ -22,6 +22,8 @@ export interface FillBase {
   readonly angle: number;
   readonly color: Color;
   readonly opacity: number;
+  /** The shape's outline width in px, used by fills that keep a minimum gap (API 1.1). */
+  readonly strokeWidth?: number;
 }
 
 export interface FillInput {

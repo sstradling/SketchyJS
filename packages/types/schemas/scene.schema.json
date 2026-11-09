@@ -305,6 +305,18 @@
           "type": "number",
           "description": "Stroke width in scene units for `stroke` layers rendered as strokes; absent for filled areas."
         },
+        "cap": {
+          "$ref": "#/definitions/BrushCap",
+          "description": "Line cap of stroked layers; renderers default to `round` (Sketchy's default brush)."
+        },
+        "join": {
+          "$ref": "#/definitions/BrushJoin",
+          "description": "Line join of stroked layers; renderers default to `round`."
+        },
+        "miterLimit": {
+          "type": "number",
+          "description": "Miter limit used with the `miter` join."
+        },
         "clip": {
           "$ref": "#/definitions/ClipDescriptor"
         }
@@ -432,6 +444,47 @@
         }
       ]
     },
+    "BrushCap": {
+      "type": "string",
+      "enum": [
+        "butt",
+        "round",
+        "square"
+      ]
+    },
+    "BrushJoin": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "miter"
+        },
+        {
+          "type": "string",
+          "const": "round"
+        },
+        {
+          "type": "string",
+          "const": "bevel"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "curvedBevel"
+            },
+            "bulge": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "bulge"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
     "ClipDescriptor": {
       "type": "object",
       "properties": {
@@ -443,6 +496,10 @@
         },
         "fillRule": {
           "$ref": "#/definitions/FillRule"
+        },
+        "inverse": {
+          "type": "boolean",
+          "description": "When true the layer is visible outside `paths` instead of inside (outside stroke alignment)."
         }
       },
       "required": [

@@ -1,5 +1,6 @@
 import type { Color } from "./color.js";
 import type { Matrix2D, Rect, Size } from "./geometry.js";
+import type { BrushCap, BrushJoin } from "./options.js";
 import type { FillRule, Path } from "./path.js";
 
 /** What a layer paints with. `stroke`, `fill` and `paper` refer to the owning shape's colors. */
@@ -24,6 +25,8 @@ export type LayerRole =
 export interface ClipDescriptor {
   paths: readonly Path[];
   fillRule: FillRule;
+  /** When true the layer is visible outside `paths` instead of inside (outside stroke alignment). */
+  inverse?: boolean;
 }
 
 /** One painted group of paths. */
@@ -34,6 +37,12 @@ export interface DrawLayer {
   paint: Paint;
   /** Stroke width in scene units for `stroke` layers rendered as strokes; absent for filled areas. */
   strokeWidth?: number;
+  /** Line cap of stroked layers; renderers default to `round` (Sketchy's default brush). */
+  cap?: BrushCap;
+  /** Line join of stroked layers; renderers default to `round`. */
+  join?: BrushJoin;
+  /** Miter limit used with the `miter` join. */
+  miterLimit?: number;
   clip?: ClipDescriptor;
 }
 
