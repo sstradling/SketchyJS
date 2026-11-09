@@ -1,1 +1,12 @@
-export {};
+export { createSketchy, SketchyRegistry } from "./registry.js";
+export type { EmptyRegistry, EntryOf, ResolvedPlugin } from "./registry.js";
+export { PluginNotRegisteredError, PluginRegistrationError } from "./errors.js";
+export { RoughView } from "./view.js";
+export type { ViewOptions, ViewState } from "./view.js";
+export { buildScene } from "./build.js";
+export type { DrawItem, FillResolver } from "./build.js";
+export { sketchScene } from "./functional.js";
+export { assembleDrawing, alignFillStroke } from "./assemble.js";
+export { computeSvgTransform, transformPath, IDENTITY } from "./transform.js";
+export { createFillStage, toFillRegion, partsToSets } from "./fill-stage.js";
+export { resolvePluginOptions, bridgeShapeOptions } from "./options-resolve.js";

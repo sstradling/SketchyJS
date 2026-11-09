@@ -11,6 +11,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./basic": {
+      "types": "./dist/basic.d.ts",
+      "import": "./dist/basic.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -23,7 +27,8 @@
   "dependencies": {
     "@sketchy-js/types": "workspace:*",
     "@sketchy-js/plugin": "workspace:*",
-    "@sketchy-js/core": "workspace:*"
+    "@sketchy-js/core": "workspace:*",
+    "@sketchy-js/fills": "workspace:*"
   },
   "peerDependencies": {
     "@sketchy-js/stickers": "workspace:^"
