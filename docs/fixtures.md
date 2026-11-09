@@ -24,7 +24,7 @@ fixtures/swift-reference/v1.5.0/
 | `pnpm fixtures:regen -- --allow-missing-swift` | Explicitly skip regeneration when Swift is unavailable (for environments that only run manifest checks). |
 | `pnpm fixtures:import-assets`                  | Copy upstream docs images, test assets and license into the corpus and write `images/catalog.json`.      |
 
-`fixtures:regen -- --check` fails when no Swift toolchain is on `PATH` (set `SWIFT_BIN` to override). Only pass `--allow-missing-swift` when skipping regeneration is intentional; that mode exits 0 without checking anything. CI uses `fixtures:verify` for the committed corpus and must use the explicit flag if it invokes regeneration. The check was run with Swift 6.0.3 on Linux for Phase 0 and reported "exporter output is reproducible and matches 9 committed fixtures".
+`fixtures:regen -- --check` fails when no Swift toolchain is on `PATH` (set `SWIFT_BIN` to override). Only pass `--allow-missing-swift` when skipping regeneration is intentional; that mode exits 0 without checking anything. CI runs `fixtures:verify` for the committed corpus, then installs Swift 6.0.3 on `ubuntu-24.04` and runs `fixtures:regen -- --check` without the flag, so a missing toolchain fails the job. The check was run with Swift 6.0.3 on Linux for Phase 0 and reported "exporter output is reproducible and matches 9 committed fixtures".
 
 ## How the exporter works on Linux
 

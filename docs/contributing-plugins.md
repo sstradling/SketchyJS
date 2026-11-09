@@ -1,6 +1,6 @@
 # Contributing a plugin
 
-> **Status: design.** The generator, test suite, and `packages/contrib` described here do not exist yet. They are the Phase 0 deliverables of [the plan](plan.md) and the target interface for contributors. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
+> **Status: design.** The generator (`pnpm new`), the `@sketchy-js/testkit` suite (`describePlugin`), and `packages/contrib` described here do not exist yet; they are the target interface for contributors. What does exist is the plugin contract (API 1.1) and a set of conformance helpers in `@sketchy-js/plugin`; [section 3](#3-the-conformance-suite) says exactly which checks those cover. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
 
 This is a walkthrough from idea to merged pull request. For general repository rules (setup, commits, code style) see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -122,6 +122,30 @@ flowchart LR
 ```
 
 ## 3. The conformance suite
+
+### 3.0 What is implemented today
+
+The suite below is the **target**. Today the repository has individual helper functions exported from `@sketchy-js/plugin` (`packages/plugin/src/conformance.ts`, tests in `packages/plugin/test/conformance.test.ts`). Each throws on failure, so it works in any test runner, and a plugin's own test file calls them directly. There is no `describePlugin`, no auto-discovery, no `expectedFailures`, and no gallery or snapshot machinery yet.
+
+| Guarantee | Status | Helper or note |
+| --- | --- | --- |
+| Repeatability: same call twice gives identical JSON | Implemented | `assertDeterministic(generate)` (also runs under the guard below) |
+| No unseeded randomness or clock reads | Implemented for `Math.random`, `Date.now`, `performance.now`, `crypto.getRandomValues`, `crypto.randomUUID` | `withRandomGuard(callback)` replaces them with throwing functions and always restores them |
+| Global replacement of `new Date()` with no arguments, `document`, `window`, `Path2D`, `OffscreenCanvas`, `fetch` | Planned | Needs a `Date` shim and a runner with those globals defined |
+| Frozen inputs and no output aliasing | Implemented | `assertInputImmutable(generate, input)` runs `generate` on a deep-frozen structural copy and fails on a write or on output that reuses an input object or array |
+| Interleaving: A, B, A gives the same A | Implemented for a pair of calls | `assertInterleavingStable(a, b)`. Planned: checking two instances with different overrides automatically |
+| Output budget | Implemented | `assertWithinBudget(output, maxOps)` counts path operations and requires finite numbers. Planned: the `overflow` bound check |
+| Import graph limited to relative files and `@sketchy-js/plugin` | Planned | Needs the esbuild metafile; also the empty-bundle tree-shaking check |
+| Fresh module (`vi.resetModules()` and re-import) | Planned | |
+| Seed sensitivity and `stochastic: false` verification | Planned | Needs a call-counting RNG |
+| Option-order independence, dead-option detection | Planned | |
+| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/plugin/schema`, and `defineX` runs them outside production; `api` support is checked by `checkPluginApi` but not by the registry; examples, id pattern, and length limits are not checked |
+| Edge-case corpus per kind, all-min and all-max options, pairwise sampling | Planned | The nine built-in fills have a hand-written subset in `packages/scene/test/fills-conformance.test.ts` (degenerate and far-off regions, angles, huge and tiny gaps, determinism, metadata) |
+| Cross-platform snapshots, SVG vs Canvas visual parity | Planned | Built-in fills are compared with the Swift reference fixtures instead |
+
+### The target suite
+
+Everything from here to the end of this section describes the target suite and is not implemented except as listed above.
 
 Every plugin must pass the same automatic suite, from `@sketchy-js/testkit`. You do not write it and cannot forget it:
 

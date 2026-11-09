@@ -16,7 +16,14 @@ export type {
   Overrides,
 } from "./options.js";
 export { defineBrush, defineFill, defineTexture, defineStickerEdge } from "./define.js";
-export { assertDeterministic, withRandomGuard } from "./conformance.js";
+export {
+  assertDeterministic,
+  assertInputImmutable,
+  assertInterleavingStable,
+  assertWithinBudget,
+  countOps,
+  withRandomGuard,
+} from "./conformance.js";
 export type {
   Rng,
   FlatSubpath,
