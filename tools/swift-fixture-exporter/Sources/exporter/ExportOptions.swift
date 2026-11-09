@@ -130,9 +130,16 @@ func exportClamps() -> J {
         },
     ]
     let sampleImage: UIImage = {
+        #if os(iOS)
+        return UIGraphicsImageRenderer(size: CGSize(width: 100, height: 50)).image { context in
+            UIColor.white.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 100, height: 50))
+        }
+        #else
         let image = UIImage()
         image.size = CGSize(width: 100, height: 50)
         return image
+        #endif
     }()
     let image: [J] = [
         table("opacity", kind: "cgfloat", inputs: doubleInputs) { .double(Double(StickerImage(image: sampleImage, opacity: CGFloat($0)).opacity)) },

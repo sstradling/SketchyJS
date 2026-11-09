@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { classify, exporterDir, listFiles, pending, referenceDir, sha256File, sha256Text, statSync, upstream } from "./lib.mjs";
+import { acceptedReferences, classify, exporterDir, listFiles, pending, referenceDir, sha256File, sha256Text, statSync, upstream } from "./lib.mjs";
 
 /**
  * Builds `manifest.json`: provenance, per-file SHA-256, fidelity and platform tags, the pending
@@ -24,7 +24,16 @@ export function buildManifest(dir = referenceDir) {
       upstreamFilesSha256: upstreamFiles,
       note: "Engine files are verbatim upstream; UIKit, CoreGraphics, SwiftUI and CoreText are Linux shims. See docs/fixtures.md.",
     },
+    darwin: {
+      name: "darwin-fixture-exporter",
+      swift: "6.2",
+      platform: "darwin-x86_64",
+      sdk: "iphonesimulator",
+      minimumOS: "17.0",
+      note: "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline.",
+    },
     pending,
+    accepted: acceptedReferences(entries),
     treeSha256,
     files: entries,
   };

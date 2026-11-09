@@ -1,0 +1,100 @@
+{
+  "unit": "px",
+  "baseline": "linux-x86_64 committed fixtures",
+  "candidate": "darwin-x86_64 iOS simulator replay of the same exporter functions",
+  "recommendedTolerancePx": 0.0001,
+  "alignedMaxAbsPx": 2.842170943040401e-14,
+  "note": "The recommended tolerance covers groups with the same JSON shape. fills/fills.json and fills/direct-fillers.json each have two sunburst or starburst concave cases whose operation lists differ in length, so their large deltas are misaligned points rather than libm noise. options/defaults.json differs only in UIColor mirror fields that the Linux shim exposes and UIKit does not.",
+  "groups": [
+    {
+      "group": "rng",
+      "linux": "rng/splitmix64.json",
+      "darwin": "darwin/rng/splitmix64.json",
+      "numericCount": 3,
+      "maxAbs": 0,
+      "meanAbs": 0,
+      "maxPath": "$",
+      "structuralMismatches": 0
+    },
+    {
+      "group": "rng",
+      "linux": "rng/unit-float.json",
+      "darwin": "darwin/rng/unit-float.json",
+      "numericCount": 3104,
+      "maxAbs": 0,
+      "meanAbs": 0,
+      "maxPath": "$",
+      "structuralMismatches": 0
+    },
+    {
+      "group": "options",
+      "linux": "options/defaults.json",
+      "darwin": "darwin/options/defaults.json",
+      "numericCount": 59,
+      "maxAbs": 0,
+      "meanAbs": 0,
+      "maxPath": "$",
+      "structuralMismatches": 16
+    },
+    {
+      "group": "options",
+      "linux": "options/clamps.json",
+      "darwin": "darwin/options/clamps.json",
+      "numericCount": 1536,
+      "maxAbs": 0,
+      "meanAbs": 0,
+      "maxPath": "$",
+      "structuralMismatches": 0
+    },
+    {
+      "group": "shapes",
+      "linux": "shapes/shapes.json",
+      "darwin": "darwin/shapes/shapes.json",
+      "numericCount": 3114,
+      "maxAbs": 0,
+      "meanAbs": 0,
+      "maxPath": "$",
+      "structuralMismatches": 0
+    },
+    {
+      "group": "fills",
+      "linux": "fills/fills.json",
+      "darwin": "darwin/fills/fills.json",
+      "numericCount": 82416,
+      "maxAbs": 11.879440000000017,
+      "meanAbs": 0.017077692338866475,
+      "maxPath": "$.cases[17].drawing.sets[0].ops[291][5]",
+      "structuralMismatches": 2
+    },
+    {
+      "group": "fills",
+      "linux": "fills/direct-fillers.json",
+      "darwin": "darwin/fills/direct-fillers.json",
+      "numericCount": 60939,
+      "maxAbs": 11.879440000000017,
+      "meanAbs": 0.019077064431645408,
+      "maxPath": "$.cases[16].result.ops[291][5]",
+      "structuralMismatches": 2
+    },
+    {
+      "group": "fills",
+      "linux": "fills/scribble.json",
+      "darwin": "darwin/fills/scribble.json",
+      "numericCount": 332,
+      "maxAbs": 0,
+      "meanAbs": 0,
+      "maxPath": "$",
+      "structuralMismatches": 0
+    },
+    {
+      "group": "svg",
+      "linux": "svg/path-parse.json",
+      "darwin": "darwin/svg/path-parse.json",
+      "numericCount": 857,
+      "maxAbs": 2.842170943040401e-14,
+      "meanAbs": 2.114217008387696e-16,
+      "maxPath": "$.arcConversion[4].result.curves[1][0]",
+      "structuralMismatches": 0
+    }
+  ]
+}

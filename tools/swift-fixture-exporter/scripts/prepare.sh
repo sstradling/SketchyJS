@@ -31,7 +31,11 @@ done
 for name in SVGPath.swift SVGArcConverter.swift CGPathToSVG.swift; do
   cp "$SRC/Render/$name" "$DEST/$name"
 done
-sed -i '/^import os\.signpost$/d' "$DEST"/*.swift
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  sed -i '' '/^import os\.signpost$/d' "$DEST"/*.swift
+else
+  sed -i '/^import os\.signpost$/d' "$DEST"/*.swift
+fi
 
 node -e '
 const fs=require("fs"),crypto=require("crypto"),path=require("path");

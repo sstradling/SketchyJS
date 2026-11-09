@@ -29,6 +29,11 @@ export interface PluginMeta<S extends OptionSchema, Id extends string> {
   readonly stochastic?: boolean;
   readonly stream?: "isolated" | "shared";
   readonly overflow?: number;
+  /**
+   * Fill plugins only (API 1.1). `"area"` declares that the plugin paints its region as an area, so
+   * hosts can use an SVG path directly instead of running the plugin (Sketchy's solid shortcut).
+   */
+  readonly paints?: "area" | "strokes";
   readonly examples?: readonly PluginExample<S>[];
 }
 
