@@ -65,58 +65,58 @@ importers:
 
   packages/animate:
     dependencies:
-      '@sketchy/core':
+      '@sketchy-js/core':
         specifier: workspace:*
         version: link:../core
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 
   packages/brushes:
     dependencies:
-      '@sketchy/plugin':
+      '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
 
   packages/canvas-renderer:
     dependencies:
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 
   packages/contrib:
     dependencies:
-      '@sketchy/plugin':
+      '@sketchy-js/plugin':
         specifier: workspace:^
         version: link:../plugin
 
   packages/core:
     dependencies:
-      '@sketchy/plugin':
+      '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 
   packages/fills:
     dependencies:
-      '@sketchy/plugin':
+      '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
 
   packages/plugin:
     dependencies:
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 
   packages/react:
     dependencies:
-      '@sketchy/scene':
+      '@sketchy-js/scene':
         specifier: workspace:*
         version: link:../scene
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
       react:
@@ -125,28 +125,28 @@ importers:
 
   packages/scene:
     dependencies:
-      '@sketchy/core':
+      '@sketchy-js/core':
         specifier: workspace:*
         version: link:../core
-      '@sketchy/plugin':
+      '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
-      '@sketchy/stickers':
+      '@sketchy-js/stickers':
         specifier: workspace:^
         version: link:../stickers
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 
   packages/stickers:
     dependencies:
-      '@sketchy/plugin':
+      '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
 
   packages/svg-renderer:
     dependencies:
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 
@@ -154,10 +154,10 @@ importers:
 
   packages/web-components:
     dependencies:
-      '@sketchy/scene':
+      '@sketchy-js/scene':
         specifier: workspace:*
         version: link:../scene
-      '@sketchy/types':
+      '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
 

@@ -16,7 +16,7 @@ Thanks for helping. SketchyJS is a TypeScript port of the Swift library [Sketchy
 
 ## Setup
 
-Requirements: Node.js (current LTS, pinned in `.nvmrc`) and pnpm (pinned by the `packageManager` field; enable with `corepack enable`).
+Requirements: Node.js 22+ (pinned in `.nvmrc`) and pnpm (pinned by the `packageManager` field; enable with `corepack enable`).
 
 ```bash
 git clone https://github.com/sstradling/SketchyJS.git

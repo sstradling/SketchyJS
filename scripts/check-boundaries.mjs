@@ -26,7 +26,8 @@ for (const name of dirs.filter((d) => declared.includes(d))) {
   }
   const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
   const where = `packages/${name}/package.json`;
-  if (pkg.name !== `@sketchy/${name}`) problems.push(`${where}: name must be @sketchy/${name}`);
+  if (pkg.name !== `@sketchy-js/${name}`)
+    problems.push(`${where}: name must be @sketchy-js/${name}`);
   if (pkg.type !== "module") problems.push(`${where}: type must be "module"`);
   if (pkg.sideEffects !== false) problems.push(`${where}: sideEffects must be false`);
   const root_ = pkg.exports?.["."];
@@ -38,8 +39,8 @@ for (const name of dirs.filter((d) => declared.includes(d))) {
   }
   const sketchy = (record = {}) =>
     Object.keys(record)
-      .filter((k) => k.startsWith("@sketchy/"))
-      .map((k) => k.slice("@sketchy/".length));
+      .filter((k) => k.startsWith("@sketchy-js/"))
+      .map((k) => k.slice("@sketchy-js/".length));
   const allowed = new Set([
     ...rule.dependencies,
     ...(rule.peers ?? []),
@@ -53,14 +54,14 @@ for (const name of dirs.filter((d) => declared.includes(d))) {
   for (const dep of used)
     if (!allowed.has(dep))
       problems.push(
-        `${where}: @sketchy/${dep} is not an allowed dependency (tools/boundaries.json)`,
+        `${where}: @sketchy-js/${dep} is not an allowed dependency (tools/boundaries.json)`,
       );
   for (const dep of rule.dependencies)
     if (!sketchy(pkg.dependencies).includes(dep))
-      problems.push(`${where}: missing dependency @sketchy/${dep}`);
+      problems.push(`${where}: missing dependency @sketchy-js/${dep}`);
   for (const dep of rule.peers ?? [])
     if (!sketchy(pkg.peerDependencies).includes(dep))
-      problems.push(`${where}: missing peer dependency @sketchy/${dep}`);
+      problems.push(`${where}: missing peer dependency @sketchy-js/${dep}`);
   graph.set(name, [...rule.dependencies, ...(rule.peers ?? []), ...(rule.optionalPeers ?? [])]);
 }
 

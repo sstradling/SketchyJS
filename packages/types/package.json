@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/types",
+  "name": "@sketchy-js/types",
   "version": "0.0.0",
   "description": "SketchyJS types package.",
   "type": "module",
@@ -21,5 +21,9 @@
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

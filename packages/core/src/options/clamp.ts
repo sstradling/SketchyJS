@@ -35,9 +35,9 @@ export function resolveTileWidth(scale: number, imageWidth: number): number {
   return Math.max(4, scale > 0 ? scale : natural);
 }
 
-/** `StickerImage.resolvedFitScale`: multiplier for stretch and fill; `0` means 1. */
+/** `StickerImage.resolvedFitScale`: Swift's floor for stretch and fill is 0.05. */
 export function resolveFitScale(scale: number): number {
-  return scale > 0 ? scale : 1;
+  return Math.max(scale, 0.05);
 }
 
 /** `Options.effectiveFillWeight`: `-1` means half the stroke width, at least 1. */

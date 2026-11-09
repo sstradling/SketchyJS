@@ -5,6 +5,7 @@ import {
   defineFill,
   defineStickerEdge,
   defineTexture,
+  assertDeterministic,
   s,
   type BrushPlugin,
   type PluginContext,
@@ -101,5 +102,26 @@ describe("define*", () => {
 
   it("exposes the API version constant", () => {
     expect(PLUGIN_API_VERSION).toEqual({ major: 1, minor: 0 });
+  });
+
+  it("validates definition shape and option defaults in development", () => {
+    expect(() => defineBrush({ ...meta, id: "", generate: () => [] })).toThrow(/id/);
+    expect(() =>
+      defineBrush({
+        ...meta,
+        id: "bad/default",
+        options: { passes: s.int({ default: 4, min: 1, max: 3, description: "Bad." }) },
+        generate: () => [],
+      }),
+    ).toThrow(/outside/);
+    expect(() => defineBrush({ ...meta, id: "bad/generate", generate: "nope" as never })).toThrow(
+      /generate/,
+    );
+  });
+
+  it("provides deterministic and Math.random conformance checks", () => {
+    expect(() => assertDeterministic(() => ({ value: 1 }))).not.toThrow();
+    expect(() => assertDeterministic(() => ({ value: Math.random() }))).toThrow(/Math.random/);
+    expect(() => assertDeterministic(() => ({ value: Math.random() }))).toThrow(/Math.random/);
   });
 });

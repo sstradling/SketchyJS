@@ -16,6 +16,7 @@ export type {
   Overrides,
 } from "./options.js";
 export { defineBrush, defineFill, defineTexture, defineStickerEdge } from "./define.js";
+export { assertDeterministic, withRandomGuard } from "./conformance.js";
 export type { Rng, FlatSubpath, Sample, Segment, GeometryKit, PluginContext } from "./services.js";
 export type {
   StrokeBase,
@@ -47,4 +48,4 @@ export type {
   AnyPlugin,
 } from "./plugin.js";
 export type { MergeRegistry, RegistryShape, Spec, UseOptions, Sketchy } from "./registry.js";
-export type { Point, Rect, Color, PathOp, Path, FillRule } from "@sketchy/types";
+export type { Point, Rect, Color, PathOp, Path, FillRule } from "@sketchy-js/types";

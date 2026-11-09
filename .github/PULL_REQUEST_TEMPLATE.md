@@ -24,7 +24,7 @@
 Plugin id and kind: `contrib/<name>` / brush | fill | texture | edge
 
 - [ ] Generated with `pnpm new` (or the same structure) and placed in the right package
-- [ ] Pure: only `@sketchy/plugin` imports, no DOM or Canvas, no module-level mutable state
+- [ ] Pure: only `@sketchy-js/plugin` imports, no DOM or Canvas, no module-level mutable state
 - [ ] `defineX(...)` is annotated `/*#__PURE__*/`; the module exports only the plugin and types
 - [ ] Every option has `min`, `max`, `default`, `unit`, and an artist-readable `description`
 - [ ] At least two `examples` with fixed seeds; defaults look good with no tuning

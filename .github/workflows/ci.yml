@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22]
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -29,5 +29,6 @@ jobs:
       - run: pnpm test
       - run: pnpm schemas:check
       - run: pnpm fixtures:verify
+      - run: pnpm fixtures:regen -- --check --allow-missing-swift
       - run: pnpm smoke:exports
       - run: pnpm docs:api

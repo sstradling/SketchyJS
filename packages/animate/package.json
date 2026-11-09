@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/animate",
+  "name": "@sketchy-js/animate",
   "version": "0.0.0",
   "description": "SketchyJS animate package.",
   "type": "module",
@@ -21,7 +21,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/types": "workspace:*",
-    "@sketchy/core": "workspace:*"
+    "@sketchy-js/types": "workspace:*",
+    "@sketchy-js/core": "workspace:*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

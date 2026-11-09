@@ -1,4 +1,4 @@
-import type { SketchOptions } from "@sketchy/types";
+import type { SketchOptions } from "@sketchy-js/types";
 import { SKETCH_OPTIONS } from "./spec.js";
 
 type ScalarKey = keyof typeof SKETCH_OPTIONS;

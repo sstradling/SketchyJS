@@ -27,7 +27,7 @@ export interface UseOptions {
 }
 
 /**
- * Host registry contract. The implementation (`createSketchy`) lives in `@sketchy/scene`; only
+ * Host registry contract. The implementation (`createSketchy`) lives in `@sketchy-js/scene`; only
  * the types are part of the plugin contract so plugin and tool code can refer to them.
  */
 export interface Sketchy<R extends RegistryShape> {

@@ -21,9 +21,10 @@ fixtures/swift-reference/v1.5.0/
 | `pnpm fixtures:manifest`                       | Rebuild `manifest.json` from the files on disk.                                                          |
 | `pnpm fixtures:regen`                          | Run the Swift exporter and overwrite the committed JSON. Needs a Swift 6 toolchain and network.          |
 | `pnpm fixtures:regen -- --check`               | Export twice into temp directories; fail if the runs differ or differ from the committed files.          |
+| `pnpm fixtures:regen -- --allow-missing-swift` | Explicitly skip regeneration when Swift is unavailable (for environments that only run manifest checks). |
 | `pnpm fixtures:import-assets`                  | Copy upstream docs images, test assets and license into the corpus and write `images/catalog.json`.      |
 
-`fixtures:regen -- --check` exits 0 without checking anything when no Swift toolchain is on `PATH` (set `SWIFT_BIN` to override). Treat a green run on a machine without Swift as unverified. It was run with Swift 6.0.3 on Linux for Phase 0 and reported "exporter output is reproducible and matches 9 committed fixtures".
+`fixtures:regen -- --check` fails when no Swift toolchain is on `PATH` (set `SWIFT_BIN` to override). Only pass `--allow-missing-swift` when skipping regeneration is intentional; that mode exits 0 without checking anything. CI uses `fixtures:verify` for the committed corpus and must use the explicit flag if it invokes regeneration. The check was run with Swift 6.0.3 on Linux for Phase 0 and reported "exporter output is reproducible and matches 9 committed fixtures".
 
 ## How the exporter works on Linux
 

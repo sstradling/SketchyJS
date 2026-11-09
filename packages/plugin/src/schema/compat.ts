@@ -29,7 +29,7 @@ export function checkPluginApi(
       ok: false,
       error: new PluginApiError(
         "api-major-mismatch",
-        `${pluginId} needs plugin API ${api}, host provides ${host.major}.${host.minor}. ${major > host.major ? "Upgrade @sketchy/scene." : "Update the plugin."}`,
+        `${pluginId} needs plugin API ${api}, host provides ${host.major}.${host.minor}. ${major > host.major ? "Upgrade @sketchy-js/scene." : "Update the plugin."}`,
       ),
     };
   }
@@ -38,7 +38,7 @@ export function checkPluginApi(
       ok: false,
       error: new PluginApiError(
         "api-minor-too-high",
-        `${pluginId} needs plugin API ${api}, host provides ${host.major}.${host.minor}. Upgrade @sketchy/scene.`,
+        `${pluginId} needs plugin API ${api}, host provides ${host.major}.${host.minor}. Upgrade @sketchy-js/scene.`,
       ),
     };
   }

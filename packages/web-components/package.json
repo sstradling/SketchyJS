@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/web-components",
+  "name": "@sketchy-js/web-components",
   "version": "0.0.0",
   "description": "SketchyJS web-components package.",
   "type": "module",
@@ -21,7 +21,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/types": "workspace:*",
-    "@sketchy/scene": "workspace:*"
+    "@sketchy-js/types": "workspace:*",
+    "@sketchy-js/scene": "workspace:*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

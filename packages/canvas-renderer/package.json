@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/canvas-renderer",
+  "name": "@sketchy-js/canvas-renderer",
   "version": "0.0.0",
   "description": "SketchyJS canvas-renderer package.",
   "type": "module",
@@ -21,6 +21,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/types": "workspace:*"
+    "@sketchy-js/types": "workspace:*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

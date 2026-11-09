@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/plugin",
+  "name": "@sketchy-js/plugin",
   "version": "0.0.0",
   "description": "SketchyJS plugin package.",
   "type": "module",
@@ -25,6 +25,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/types": "workspace:*"
+    "@sketchy-js/types": "workspace:*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

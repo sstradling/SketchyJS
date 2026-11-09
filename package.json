@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.33.4",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "scripts": {
     "build": "turbo run build",
@@ -14,14 +14,14 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "boundaries": "node scripts/check-boundaries.mjs",
-    "schemas": "pnpm --filter @sketchy/schema-tools run generate",
-    "schemas:check": "pnpm --filter @sketchy/schema-tools run check",
+    "schemas": "pnpm --filter @sketchy-js/schema-tools run generate",
+    "schemas:check": "pnpm --filter @sketchy-js/schema-tools run check",
     "fixtures:verify": "node tools/fixtures/verify.mjs",
     "fixtures:manifest": "node tools/fixtures/build-manifest.mjs",
     "fixtures:regen": "node tools/fixtures/regenerate.mjs",
     "fixtures:import-assets": "node tools/fixtures/import-assets.mjs",
     "smoke:exports": "node tools/consumer-smoke/run.mjs",
-    "bench:clipper": "pnpm --filter @sketchy/clipper-bench run bench",
+    "bench:clipper": "pnpm --filter @sketchy-js/clipper-bench run bench",
     "docs:api": "typedoc",
     "changeset": "changeset"
   },
@@ -49,5 +49,6 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
-  }
+  },
+  "license": "MIT"
 }

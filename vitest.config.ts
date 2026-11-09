@@ -10,10 +10,10 @@ const packages = ["types", "plugin", "core", "fills", "brushes", "stickers", "sc
 export default defineConfig({
   resolve: {
     alias: [
-      { find: /^@sketchy\/plugin\/schema$/, replacement: src("plugin", "schema/index.ts") },
-      { find: /^@sketchy\/core\/options$/, replacement: src("core", "options/index.ts") },
+      { find: /^@sketchy-js\/plugin\/schema$/, replacement: src("plugin", "schema/index.ts") },
+      { find: /^@sketchy-js\/core\/options$/, replacement: src("core", "options/index.ts") },
       ...packages.map((name) => ({
-        find: new RegExp(`^@sketchy/${name}$`),
+        find: new RegExp(`^@sketchy-js/${name}$`),
         replacement: src(name),
       })),
     ],

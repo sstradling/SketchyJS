@@ -1,5 +1,5 @@
-import type { Rng as PluginRng } from "@sketchy/plugin";
-import type { Seed } from "@sketchy/types";
+import type { Rng as PluginRng } from "@sketchy-js/plugin";
+import type { Seed } from "@sketchy-js/types";
 import { fnv1a64 } from "./fnv.js";
 import { SplitMix64, mix64, wrap64 } from "./splitmix64.js";
 import { swiftDoubleInRange, swiftFloatInRange, swiftUnitFloat } from "./swift-random.js";

@@ -50,6 +50,34 @@ export function containsPoint(multi: MultiPolygon, [px, py]: Pt): boolean {
   return inside;
 }
 
+/** Samples both sides of every input edge and selects the side belonging to the filled region. */
+export function containmentSamples(multi: MultiPolygon): Pt[] {
+  const xs = multi.flatMap((polygon) => polygon.flatMap((ring) => ring.map((point) => point[0])));
+  const ys = multi.flatMap((polygon) => polygon.flatMap((ring) => ring.map((point) => point[1])));
+  const epsilon =
+    Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys), 1) * 1e-7;
+  const samples: Pt[] = [];
+  for (const polygon of multi) {
+    for (const ring of polygon) {
+      for (let i = 0; i < ring.length; i++) {
+        const a = ring[i] as Pt;
+        const b = ring[(i + 1) % ring.length] as Pt;
+        for (const t of [0, 0.25, 0.5, 0.75]) {
+          const x = a[0] + (b[0] - a[0]) * t;
+          const y = a[1] + (b[1] - a[1]) * t;
+          const length = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1;
+          const normal: Pt = [-(b[1] - a[1]) / length, (b[0] - a[0]) / length];
+          const left: Pt = [x + normal[0] * epsilon, y + normal[1] * epsilon];
+          const right: Pt = [x - normal[0] * epsilon, y - normal[1] * epsilon];
+          if (containsPoint(multi, left)) samples.push(left);
+          else if (containsPoint(multi, right)) samples.push(right);
+        }
+      }
+    }
+  }
+  return samples;
+}
+
 function orient(a: Pt, b: Pt, c: Pt): number {
   return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]);
 }

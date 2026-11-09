@@ -19,7 +19,7 @@ export function importRestrictions(name) {
     ...(entry.peers ?? []),
     ...(entry.optionalPeers ?? []),
   ]);
-  const groups = allPackages.filter((p) => !allowed.has(p)).map((p) => `@sketchy/${p}`);
+  const groups = allPackages.filter((p) => !allowed.has(p)).map((p) => `@sketchy-js/${p}`);
   if (groups.length === 0) return {};
   return {
     "no-restricted-imports": [

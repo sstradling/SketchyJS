@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/scene",
+  "name": "@sketchy-js/scene",
   "version": "0.0.0",
   "description": "SketchyJS scene package.",
   "type": "module",
@@ -21,16 +21,20 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/types": "workspace:*",
-    "@sketchy/plugin": "workspace:*",
-    "@sketchy/core": "workspace:*"
+    "@sketchy-js/types": "workspace:*",
+    "@sketchy-js/plugin": "workspace:*",
+    "@sketchy-js/core": "workspace:*"
   },
   "peerDependencies": {
-    "@sketchy/stickers": "workspace:^"
+    "@sketchy-js/stickers": "workspace:^"
   },
   "peerDependenciesMeta": {
-    "@sketchy/stickers": {
+    "@sketchy-js/stickers": {
       "optional": true
     }
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

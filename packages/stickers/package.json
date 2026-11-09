@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/stickers",
+  "name": "@sketchy-js/stickers",
   "version": "0.0.0",
   "description": "SketchyJS stickers package.",
   "type": "module",
@@ -21,6 +21,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/plugin": "workspace:*"
+    "@sketchy-js/plugin": "workspace:*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

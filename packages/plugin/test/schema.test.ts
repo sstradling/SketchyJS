@@ -253,7 +253,7 @@ describe("plugin API compatibility", () => {
       expect(result.error).toBeInstanceOf(PluginApiError);
       expect(result.error.code).toBe("api-minor-too-high");
       expect(result.error.message).toBe(
-        "acme/chalk needs plugin API 1.2, host provides 1.1. Upgrade @sketchy/scene.",
+        "acme/chalk needs plugin API 1.2, host provides 1.1. Upgrade @sketchy-js/scene.",
       );
     }
   });

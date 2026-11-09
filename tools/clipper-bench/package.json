@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/clipper-bench",
+  "name": "@sketchy-js/clipper-bench",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,5 +11,8 @@
     "clipper2-ts": "2.0.1-19",
     "clipper2-wasm": "^0.4.0",
     "polygon-clipping": "^0.15.7"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

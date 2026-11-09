@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { classify, exporterDir, listFiles, referenceDir } from "./lib.mjs";
 
 const check = process.argv.includes("--check");
+const allowMissingSwift = process.argv.includes("--allow-missing-swift");
 const swiftBin = process.env.SWIFT_BIN ?? "swift";
 
 function run(command, args, options = {}) {
@@ -25,7 +26,7 @@ const exporterFiles = (dir) => listFiles(dir).filter((p) => p !== "manifest.json
 function main() {
   if (spawnSync(swiftBin, ["--version"], { stdio: "ignore" }).status !== 0) {
     console.error("swift toolchain not found; set SWIFT_BIN or add swift to PATH");
-    process.exit(check ? 0 : 1);
+    process.exit(allowMissingSwift ? 0 : 1);
   }
   run("bash", [join(exporterDir, "scripts", "prepare.sh")]);
   run(swiftBin, ["build", "--package-path", exporterDir]);

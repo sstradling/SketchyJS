@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/contrib",
+  "name": "@sketchy-js/contrib",
   "version": "0.0.0",
   "description": "SketchyJS contrib package.",
   "type": "module",
@@ -21,6 +21,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "peerDependencies": {
-    "@sketchy/plugin": "workspace:^"
+    "@sketchy-js/plugin": "workspace:^"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

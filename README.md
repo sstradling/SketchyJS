@@ -6,7 +6,7 @@ SketchyJS is a TypeScript port of [Sketchy](https://github.com/sstradling/Sketch
 
 ## Design at a glance
 
-- **ESM pnpm monorepo** of small packages: `@sketchy/types`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, and optional `animate`, `react`, `web-components`.
+- **ESM pnpm monorepo** of small packages: `@sketchy-js/types`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, and optional `animate`, `react`, `web-components`.
 - **Deterministic.** Same seed, same drawing. The core is browser-independent and uses Sketchy's SplitMix64 sequence.
 - **Tree-shakeable.** Import only what you use; stickers, watercolor, and framework bindings are separate imports.
 - **Plugin-based.** Brushes, fills, textures, and sticker edges are pure plugins, and the built-ins use the same API as community plugins.
@@ -22,4 +22,4 @@ SketchyJS is a TypeScript port of [Sketchy](https://github.com/sstradling/Sketch
 
 ## Contributing
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md). Adding a brush, fill, texture, or sticker edge is designed to be one command, `pnpm new brush <name>`, and one file of real code.
+Requirements: Node.js 22+ (see `.nvmrc`) and pnpm 10.33.4. Start with [CONTRIBUTING.md](CONTRIBUTING.md). Adding a brush, fill, texture, or sticker edge is designed to be one command, `pnpm new brush <name>`, and one file of real code.

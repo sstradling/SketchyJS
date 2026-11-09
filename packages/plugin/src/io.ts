@@ -1,4 +1,4 @@
-import type { Color, FillRule, Path, Point, Rect } from "@sketchy/types";
+import type { Color, FillRule, Path, Point, Rect } from "@sketchy-js/types";
 import type { FillRegion, FlatSubpath } from "./services.js";
 
 export interface StrokeBase {

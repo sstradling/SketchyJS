@@ -777,7 +777,7 @@
         "seed"
       ],
       "additionalProperties": false,
-      "description": "Crayon brush parameters. Ranges and defaults live in `@sketchy/core/options`."
+      "description": "Crayon brush parameters. Ranges and defaults live in `@sketchy-js/core/options`."
     },
     "WatercolorStyle": {
       "type": "object",

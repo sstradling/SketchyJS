@@ -51,11 +51,11 @@ for (const dir of packageDirs) {
 }
 
 const files = readdirSync(tarballs).sort();
-const tarballFor = (name) => files.find((f) => f.startsWith(`sketchy-${name}-`));
+const tarballFor = (name) => files.find((f) => f.startsWith(`sketchy-js-${name}-`));
 
 const dependencies = {};
 for (const dir of packageDirs)
-  dependencies[`@sketchy/${dir}`] = `file:${join(tarballs, tarballFor(dir))}`;
+  dependencies[`@sketchy-js/${dir}`] = `file:${join(tarballs, tarballFor(dir))}`;
 writeFileSync(
   join(consumer, "package.json"),
   JSON.stringify(
@@ -77,8 +77,8 @@ if (!install.ok) {
 
 /** Public entry points and one symbol each must expose. Skeleton packages export nothing yet. */
 const expectations = {
-  "@sketchy/types": { symbols: [], skeleton: false, note: "types only" },
-  "@sketchy/plugin": {
+  "@sketchy-js/types": { symbols: [], skeleton: false, note: "types only" },
+  "@sketchy-js/plugin": {
     symbols: [
       "defineBrush",
       "defineFill",
@@ -88,11 +88,11 @@ const expectations = {
       "PLUGIN_API_VERSION",
     ],
   },
-  "@sketchy/plugin/schema": {
+  "@sketchy-js/plugin/schema": {
     symbols: ["resolveOptions", "validateSchema", "toJsonSchema", "hashOptions", "checkPluginApi"],
   },
-  "@sketchy/core": { symbols: ["SplitMix64", "Rng", "swiftUnitFloat"] },
-  "@sketchy/core/options": { symbols: ["defaultSketchOptions", "applyRule", "SKETCH_OPTIONS"] },
+  "@sketchy-js/core": { symbols: ["SplitMix64", "Rng", "swiftUnitFloat"] },
+  "@sketchy-js/core/options": { symbols: ["defaultSketchOptions", "applyRule", "SKETCH_OPTIONS"] },
 };
 const skeletons = [
   "fills",
@@ -110,7 +110,7 @@ const skeletons = [
 writeFileSync(
   join(consumer, "check.mjs"),
   `const expectations = ${JSON.stringify(expectations)};
-const skeletons = ${JSON.stringify(skeletons.map((s) => `@sketchy/${s}`))};
+const skeletons = ${JSON.stringify(skeletons.map((s) => `@sketchy-js/${s}`))};
 let bad = 0;
 for (const [specifier, { symbols }] of Object.entries(expectations)) {
   const mod = await import(specifier);
@@ -120,11 +120,11 @@ for (const specifier of skeletons) {
   const mod = await import(specifier);
   if (Object.keys(mod).length !== 0) { console.error("skeleton package now has exports; update the smoke test:", specifier); bad++; }
 }
-const { SplitMix64 } = await import("@sketchy/core");
+const { SplitMix64 } = await import("@sketchy-js/core");
 const rng = new SplitMix64(42n);
 const first = rng.nextU64();
 if (first !== 13679457532755275413n) { console.error("SplitMix64(42) first value", first); bad++; }
-const schemaUrl = import.meta.resolve("@sketchy/types/schemas/options.schema.json");
+const schemaUrl = import.meta.resolve("@sketchy-js/types/schemas/options.schema.json");
 const { readFileSync } = await import("node:fs");
 const schema = JSON.parse(readFileSync(new URL(schemaUrl), "utf8"));
 if (!schema.definitions?.SketchOptions) { console.error("options schema not published"); bad++; }
@@ -138,11 +138,11 @@ else console.log(node.stdout.trim());
 
 writeFileSync(
   join(consumer, "types-check.ts"),
-  `import type { SketchOptions, Scene, PathOp } from "@sketchy/types";
-import { defineBrush, s, type Resolved } from "@sketchy/plugin";
-import { resolveOptions } from "@sketchy/plugin/schema";
-import { Rng, SplitMix64 } from "@sketchy/core";
-import { defaultSketchOptions } from "@sketchy/core/options";
+  `import type { SketchOptions, Scene, PathOp } from "@sketchy-js/types";
+import { defineBrush, s, type Resolved } from "@sketchy-js/plugin";
+import { resolveOptions } from "@sketchy-js/plugin/schema";
+import { Rng, SplitMix64 } from "@sketchy-js/core";
+import { defaultSketchOptions } from "@sketchy-js/core/options";
 
 const options: SketchOptions = defaultSketchOptions();
 const op: PathOp = { op: "M", x: options.roughness, y: 0 };
@@ -190,7 +190,7 @@ for (const resolution of [
 }
 
 for (const dir of packageDirs) {
-  const installed = join(consumer, "node_modules", "@sketchy", dir);
+  const installed = join(consumer, "node_modules", "@sketchy-js", dir);
   const publint = run(
     "node",
     [join(root, "node_modules", "publint", "src", "cli.js"), installed, "--strict"],
@@ -253,27 +253,27 @@ async function bundle(label, code, mustNotContain) {
 }
 await bundle(
   "core: SplitMix64 only",
-  `import { SplitMix64 } from "@sketchy/core"; console.log(new SplitMix64(1n).nextU64());`,
+  `import { SplitMix64 } from "@sketchy-js/core"; console.log(new SplitMix64(1n).nextU64());`,
   ["Box-Muller", "Math.cos", "FNV"],
 );
 await bundle(
   "plugin: s only",
-  `import { s } from "@sketchy/plugin"; console.log(s.number({ default: 1, min: 0, max: 2, description: "x" }));`,
+  `import { s } from "@sketchy-js/plugin"; console.log(s.number({ default: 1, min: 0, max: 2, description: "x" }));`,
   ["deepFreeze", "~sketchy"],
 );
 await bundle(
   "plugin: defineBrush",
-  `import { defineBrush } from "@sketchy/plugin"; console.log(defineBrush({ id: "a", version: "1.0.0", api: "1.0", title: "t", description: "d", options: {}, generate: () => [] }));`,
+  `import { defineBrush } from "@sketchy-js/plugin"; console.log(defineBrush({ id: "a", version: "1.0.0", api: "1.0", title: "t", description: "d", options: {}, generate: () => [] }));`,
   ["PluginOptionError"],
 );
 await bundle(
   "plugin/schema: resolveOptions",
-  `import { resolveOptions } from "@sketchy/plugin/schema"; console.log(resolveOptions({}, {}));`,
+  `import { resolveOptions } from "@sketchy-js/plugin/schema"; console.log(resolveOptions({}, {}));`,
   ["PluginApiError"],
 );
 await bundle(
   "core/options: applyRule",
-  `import { applyRule } from "@sketchy/core/options"; console.log(applyRule(1, { type: "float", default: 0, enforcedBy: "none", swift: "x" }));`,
+  `import { applyRule } from "@sketchy-js/core/options"; console.log(applyRule(1, { type: "float", default: 0, enforcedBy: "none", swift: "x" }));`,
   ["Options.roughness"],
 );
 console.log("bundle sizes (minified, gzip):");

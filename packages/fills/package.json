@@ -1,5 +1,5 @@
 {
-  "name": "@sketchy/fills",
+  "name": "@sketchy-js/fills",
   "version": "0.0.0",
   "description": "SketchyJS fills package.",
   "type": "module",
@@ -21,6 +21,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy/plugin": "workspace:*"
+    "@sketchy-js/plugin": "workspace:*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
   }
 }

@@ -9,6 +9,7 @@ import {
 import { fixtures } from "./fixtures.ts";
 import {
   containsPoint,
+  containmentSamples,
   holeCount,
   multiArea,
   selfIntersections,
@@ -31,7 +32,7 @@ export interface CaseResult {
   area: number;
   selfIntersections: number;
   deterministic: boolean;
-  /** Offset only: share of original outer-ring vertices that lie inside the result. */
+  /** Offset only: share of sampled original filled-region edges that lie inside the result. */
   containsOriginal?: number;
 }
 
@@ -90,7 +91,7 @@ async function main(): Promise<CaseResult> {
     deterministic: JSON.stringify(first) === JSON.stringify(last),
   };
   if (request.operation !== "union") {
-    const probes = fixture.polygons.flatMap((polygon) => polygon[0] ?? []);
+    const probes = containmentSamples(fixture.polygons);
     result.containsOriginal =
       probes.filter((point) => containsPoint(last, point)).length / probes.length;
   }

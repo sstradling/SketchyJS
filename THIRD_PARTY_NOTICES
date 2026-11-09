@@ -1,0 +1,18 @@
+SketchyJS third-party notices
+
+SketchyJS incorporates or distributes the following third-party software.
+
+clipper2-ts and clipper2-wasm
+--------------------------------
+Copyright (c) Angus Johnson
+
+These packages are licensed under the Boost Software License 1.0 (BSL-1.0).
+The complete license text is available at:
+https://www.boost.org/LICENSE_1_0.txt
+
+Sketchy upstream reference corpus
+---------------------------------
+The upstream Sketchy license is included verbatim at:
+fixtures/swift-reference/v1.5.0/UPSTREAM-LICENSE
+
+The source and license for every dependency are pinned by pnpm-lock.yaml.

@@ -1,6 +1,6 @@
 # Phase 0 status: contracts and reference corpus
 
-Scope is `docs/plan.md`, "Phase 0". Nothing from Phase 1 is implemented: the 13 packages other than `types`, `plugin`, and `core` are empty skeletons, and `@sketchy/core` contains only the RNG and the option tables.
+Scope is `docs/plan.md`, "Phase 0". Nothing from Phase 1 is implemented: the 13 packages other than `types`, `plugin`, and `core` are empty skeletons, and `@sketchy-js/core` contains only the RNG and the option tables.
 
 ## Exit criteria
 
@@ -15,8 +15,8 @@ Scope is `docs/plan.md`, "Phase 0". Nothing from Phase 1 is implemented: the 13 
 | Item                                              | Status  | Evidence and caveats                                                                                                                                                                                                                                                                              |
 | ------------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Workspace, boundaries, lint/type/test rules       | Done    | pnpm + Turborepo, strict `tsconfig.base.json`, ESLint flat config with package-boundary and determinism rules (`tools/eslint`, `scripts/check-boundaries.mjs`, 12 rule tests), Prettier, vitest.                                                                                                  |
-| CI definition                                     | Partial | `.github/workflows/ci.yml` runs format, lint, build, typecheck, test, schemas, fixtures, smoke, and docs on Node 20 and 22. It has not run on GitHub yet, and everything was verified locally on Node 22 only. `fixtures:regen -- --check` is not in CI because the runner has no Swift toolchain. |
-| Generated API documentation                       | Partial | `pnpm docs:api` (TypeDoc, packages mode) builds for `types`, `plugin`, `core` with 3 warnings (two schema tags `@asType`/`@minimum` unknown to TypeDoc; `Entry` not exported from `@sketchy/plugin`). Output is not published or checked for completeness.                                           |
+| CI definition                                     | Partial | `.github/workflows/ci.yml` runs format, lint, build, typecheck, test, schemas, fixtures, smoke, and docs on Node 22 and 24. It has not run on GitHub yet, and everything was verified locally on Node 22 only. `fixtures:regen -- --check --allow-missing-swift` is explicit in CI because the runner has no Swift toolchain; `fixtures:verify` performs the actual committed-corpus check. |
+| Generated API documentation                       | Partial | `pnpm docs:api` (TypeDoc, packages mode) builds for `types`, `plugin`, `core` with 3 warnings (two schema tags `@asType`/`@minimum` unknown to TypeDoc; `Entry` not exported from `@sketchy-js/plugin`). Output is not published or checked for completeness.                                           |
 | Consumer fixture                                  | Done    | `tools/consumer-smoke`. Uses `npm` for the consumer on purpose, since consumers are not on pnpm.                                                                                                                                                                                                  |
 | JSON schemas                                      | Done    | Six schemas in `packages/types/schemas`: options, path operations, scene, geometry snapshot, color, seed. Generated from TypeScript types by `tools/schemas` (`pnpm schemas:check` fails on drift) and exercised with ajv (29 tests). Plugin option schemas also export through `toJsonSchema`. |
 | Clamping and defaults in one source of truth      | Done    | `packages/core/src/options/spec.ts` covers sketch options, crayon, watercolor, sticker tear/texture/shadow/backing/image, and animation. 42 tests compare every default and clamp with the Swift dump, including Swift's NaN-to-lower-bound `min`/`max` behavior. Groups not in Swift's `Options` (for example plugin-defined brushes) are out of scope here. |
@@ -46,8 +46,8 @@ Run on Linux x86_64, Node 22.23, pnpm 10.33.
 2. **macOS fixtures.** Someone with a Mac must run the pending exporters (see `docs/fixtures.md`). Phase 2 and Phase 3 depend on them. Decide whether those phases wait for them.
 3. **Clipper decision.** Confirm `clipper2-ts` as the default and `clipper2-wasm` as optional only, or ask for a browser benchmark first.
 4. **Float tolerance.** The Darwin-versus-Linux comparison sets the tolerance for libm-dependent fixtures. Until then Phase 1 tests need a provisional tolerance; propose `1e-4` CSS pixels.
-5. **Node floor.** `engines` says `>=20`. Confirm Node 20 is a supported floor, since only 22 was run locally.
-6. **Publishing scope.** `@sketchy/*` scope ownership has not been verified on npm.
+5. **Node floor.** Node 22 is the minimum supported runtime (`.nvmrc` and all package manifests); CI covers Node 22 and 24.
+6. **Publishing scope.** `@sketchy-js/*` scope ownership has not been verified on npm.
 
 ## Known limits
 

@@ -1,8 +1,8 @@
 # ADR 0001: Polygon union and offset backend
 
-- Status: Accepted for Phase 0 (revisit after the Phase 3 sticker fixtures; see "Open items")
+- Status: Accepted (provisional)
 - Date: 2026-11-09
-- Scope: `@sketchy/stickers` (and `SketchGroup` silhouette union). Nothing else may depend on the chosen library.
+- Scope: `@sketchy-js/stickers` (and `SketchGroup` silhouette union). Nothing else may depend on the chosen library.
 
 ## Context
 
@@ -25,7 +25,7 @@ Stickers need two geometric operations on flattened polygons:
 
 ## Method
 
-`tools/clipper-bench` (`pnpm bench:clipper`). Each case runs in a fresh worker with a time limit, five timed runs after warm-up, median reported. Every case runs twice to check byte-identical output. Output is checked for self-intersections and, for offsets, that the result contains the input.
+`tools/clipper-bench` (`pnpm bench:clipper`). Each case runs in a fresh worker with a time limit, five timed runs after warm-up, median reported. Every case runs twice to check byte-identical output. Output is checked for self-intersections and, for offsets, that the result contains sampled points along every filled side of every input edge, including edges around holes.
 
 Fixtures (all synthetic, generated deterministically):
 
@@ -73,18 +73,18 @@ Bundle cost (gzip, only the operations we need, tree-shaken):
 1. **Default backend: `clipper2-ts`.** It is correct on every fixture, handles round and miter offsets natively, is deterministic, has no WASM or async initialisation, and works unchanged in Node, browsers, workers, and SSR. Its worst case here (200 overlapping shapes, 8,800 input vertices) is about 42 ms, which is acceptable for a result that is cached by option hash.
 2. **`clipper2-wasm` is a supported optional backend, not the default.** It is about 2x faster on large round offsets and up to 3.6x on miter offsets, with roughly parity on small unions, but adds 82 KB gzip of WASM, async init, and manual memory management that leaks if mishandled. Implement it behind the same adapter only if Phase 3 profiling shows group union or offset dominating frame time.
 3. **`polygon-clipping` is rejected.** No offset, and the dilation workaround failed on 5 of 6 round-offset fixtures.
-4. **Adapter boundary.** `@sketchy/stickers` defines a small `PolygonBackend` interface (`union(rings[]) -> rings[]`, `offset(rings[], delta, join) -> rings[]`) over plain `Float64`-compatible point arrays with even-odd/non-zero fill declared explicitly. The library is imported in exactly one module; a boundary rule for that is added in Phase 3 together with the adapter. Public APIs never expose library types.
+4. **Adapter boundary.** `@sketchy-js/stickers` defines a small `PolygonBackend` interface (`union(rings[]) -> rings[]`, `offset(rings[], delta, join) -> rings[]`) over plain `Float64`-compatible point arrays with even-odd/non-zero fill declared explicitly. The library is imported in exactly one module; a boundary rule for that is added in Phase 3 together with the adapter. Public APIs never expose library types.
 5. **Coordinate precision.** Clipper's core works on integer coordinates. The adapter owns the scale factor and rounding so that both Clipper builds see identical integer input; the factor is chosen in Phase 3 and changing it afterwards is a geometry (seeded-output) change.
 
 ## Consequences
 
 - Positive: no handwritten boolean code, one dependency, no async surface in the sticker API, and a clear escape hatch.
-- Negative: roughly 17 KB gzip lands in any bundle that imports `@sketchy/stickers`, which is why stickers stay a separate package and `StickerImage` stays on a subpath. Both Clipper builds are BSL-1.0; it is permissive and requires no attribution in binaries, but the license notice must ship in the repository's third-party notices.
+- Negative: roughly 17 KB gzip lands in any bundle that imports `@sketchy-js/stickers`, which is why stickers stay a separate package and `StickerImage` stays on a subpath. Both Clipper builds are BSL-1.0; it is permissive and requires no attribution in binaries, but the license notice must ship in the repository's third-party notices.
 - Negative: `clipper2-ts` is a younger port than Clipper2 itself. Mitigation (to build in Phase 3): run the adapter contract tests (concave, holes, dense group) against both Clipper builds so a regression in the port is visible against the reference implementation.
 
 ## Open items
 
 - The benchmark fixtures are synthetic. Swift's actual sticker contours (`sticker-backing-contours`) are pending a macOS export (see `docs/fixtures.md`). Re-run the adapter contract tests on those before the first public sticker release.
 - Swift offsets with CoreGraphics stroking semantics (miter limit, how inner joins collapse) have not been compared with Clipper's `InflatePaths`. The Phase 3 geometric fixtures are the real check; expect small per-vertex differences and agree tolerances there.
-- Timings are Node only. Browser numbers for the TS build should be taken during Phase 3.
+- Timings are Node only. Browser numbers for the TS build should be taken during Phase 3. The default choice remains provisional until both real Swift contours and browser timings confirm it.
 - Which BSL-1.0 notice wording to ship is a maintainer decision (see Phase 0 open decisions).

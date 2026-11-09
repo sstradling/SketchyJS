@@ -1,4 +1,4 @@
-import type { FillRule, Path, Point, Rect } from "@sketchy/types";
+import type { FillRule, Path, Point, Rect } from "@sketchy-js/types";
 
 /** Seeded random stream owned by one plugin call. */
 export interface Rng {

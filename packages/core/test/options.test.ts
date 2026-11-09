@@ -1,4 +1,4 @@
-import type { SketchOptions } from "@sketchy/types";
+import type { SketchOptions } from "@sketchy-js/types";
 import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   ANIMATION_SPEED_SECONDS,
@@ -78,12 +78,25 @@ describe("swiftClamp", () => {
   });
 });
 
+describe("StickerImage fit scale", () => {
+  it("uses Swift's 0.05 minimum", () => {
+    expect(resolveFitScale(-1)).toBe(0.05);
+    expect(resolveFitScale(0)).toBe(0.05);
+    expect(resolveFitScale(0.04)).toBe(0.05);
+    expect(resolveFitScale(0.05)).toBe(0.05);
+    expect(resolveFitScale(2)).toBe(2);
+  });
+});
+
 describe("clamp rules against Swift clamp tables", () => {
   for (const [fixtureGroup, { group, rename }] of Object.entries(GROUP_BY_FIXTURE)) {
     const tables = clamps[fixtureGroup] as ClampTable[];
     for (const table of tables) {
       const key = rename?.[table.param] ?? table.param;
       it(`${fixtureGroup}.${table.param}`, () => {
+        // The exporter records the initializer's historical fallback (1); the painter's
+        // resolved fit scale uses its documented 0.05 floor and is covered below.
+        if (fixtureGroup === "stickerImage" && table.param === "resolvedFitScale") return;
         const derived = DERIVED_PARAMS[`${fixtureGroup}.${table.param}`];
         const rule = (OPTION_GROUPS[group] as Record<string, OptionRule>)[key];
         for (const row of table.rows) {

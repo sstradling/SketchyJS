@@ -82,7 +82,7 @@ export type OpacityProfile =
   | { kind: "stops"; stops: readonly OpacityStop[] }
   | { kind: "noise"; noise: OpacityNoise };
 
-/** Crayon brush parameters. Ranges and defaults live in `@sketchy/core/options`. */
+/** Crayon brush parameters. Ranges and defaults live in `@sketchy-js/core/options`. */
 export interface CrayonStyle {
   grain: number;
   edgeRoughness: number;
