@@ -1,6 +1,6 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { classify, exporterDir, listFiles, pending, referenceDir, sha256File, sha256Text, statSync, upstream } from "./lib.mjs";
+import { acceptedReferences, classify, exporterDir, listFiles, pending, referenceDir, sha256File, sha256Text, statSync, upstream } from "./lib.mjs";
 
 /**
  * Builds `manifest.json`: provenance, per-file SHA-256, fidelity and platform tags, the pending
@@ -33,6 +33,7 @@ export function buildManifest(dir = referenceDir) {
       note: "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline.",
     },
     pending,
+    accepted: acceptedReferences(entries),
     treeSha256,
     files: entries,
   };
