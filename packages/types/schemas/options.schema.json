@@ -1,0 +1,1035 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:sketchyjs:schema:options:v1",
+  "title": "Sketchy options",
+  "$ref": "#/definitions/SketchOptions",
+  "definitions": {
+    "SketchOptions": {
+      "type": "object",
+      "properties": {
+        "roughness": {
+          "type": "number",
+          "default": 1
+        },
+        "bowing": {
+          "type": "number",
+          "default": 1
+        },
+        "maxRandomnessOffset": {
+          "type": "number",
+          "default": 2
+        },
+        "curveTightness": {
+          "type": "number",
+          "default": 0
+        },
+        "curveStepCount": {
+          "type": "number",
+          "default": 9
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        },
+        "strokeContinuity": {
+          "enum": [
+            "continuous",
+            "legacy"
+          ],
+          "default": "continuous"
+        },
+        "strokeColor": {
+          "$ref": "#/definitions/Color"
+        },
+        "strokeWidth": {
+          "type": "number",
+          "default": 1
+        },
+        "strokeOpacity": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "strokeMiterLimit": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1
+        },
+        "fillStyle": {
+          "enum": [
+            "hachure",
+            "solid",
+            "zigzag",
+            "crossHatch",
+            "dots",
+            "sunBurst",
+            "starBurst",
+            "dashed",
+            "zigzagLine",
+            "scribble",
+            "watercolor"
+          ],
+          "default": "hachure"
+        },
+        "fillColor": {
+          "$ref": "#/definitions/Color"
+        },
+        "fillOpacity": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "fillWeight": {
+          "type": "number",
+          "default": -1
+        },
+        "fillSpacing": {
+          "type": "number",
+          "default": 4,
+          "minimum": 0.5,
+          "maximum": 100
+        },
+        "fillSpacingPattern": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "fillAngle": {
+          "type": "number",
+          "default": 45
+        },
+        "fillPadding": {
+          "type": "number",
+          "default": 0
+        },
+        "fillOffset": {
+          "$ref": "#/definitions/Point"
+        },
+        "dashOffset": {
+          "type": "number",
+          "default": -1
+        },
+        "dashGap": {
+          "type": "number",
+          "default": -1
+        },
+        "zigzagOffset": {
+          "type": "number",
+          "default": -1
+        },
+        "scribbleOrigin": {
+          "type": "number",
+          "default": 0
+        },
+        "scribbleTightness": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 100
+        },
+        "scribbleTightnessPattern": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "scribbleCurvature": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 50
+        },
+        "scribbleUseBrushStroke": {
+          "type": "boolean",
+          "default": false
+        },
+        "svgFillWeight": {
+          "type": "number"
+        },
+        "svgStrokeWidth": {
+          "type": "number"
+        },
+        "svgFillStrokeAlignment": {
+          "enum": [
+            "center",
+            "inside",
+            "outside"
+          ],
+          "default": "center"
+        },
+        "brushProfile": {
+          "$ref": "#/definitions/BrushProfile"
+        },
+        "stickerBacking": {
+          "$ref": "#/definitions/StickerBacking"
+        }
+      },
+      "required": [
+        "roughness",
+        "bowing",
+        "maxRandomnessOffset",
+        "curveTightness",
+        "curveStepCount",
+        "strokeContinuity",
+        "strokeColor",
+        "strokeWidth",
+        "strokeOpacity",
+        "strokeMiterLimit",
+        "fillStyle",
+        "fillColor",
+        "fillOpacity",
+        "fillWeight",
+        "fillSpacing",
+        "fillAngle",
+        "fillPadding",
+        "fillOffset",
+        "dashOffset",
+        "dashGap",
+        "zigzagOffset",
+        "scribbleOrigin",
+        "scribbleTightness",
+        "scribbleCurvature",
+        "scribbleUseBrushStroke",
+        "svgFillStrokeAlignment",
+        "brushProfile"
+      ],
+      "additionalProperties": false,
+      "description": "All sketch options. Field names match Swift `Options`, except where noted: `seed` is `undefined` when unseeded (Swift uses `nil`), colors are `Color`, and `fillOffset` is a `Point` (Swift `CGSize`)."
+    },
+    "Seed": {
+      "description": "Deterministic seed: a non-negative safe integer, or a decimal string for values up to 2^64 - 1.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{1,20}$"
+        }
+      ]
+    },
+    "StrokeContinuity": {
+      "type": "string",
+      "enum": [
+        "continuous",
+        "legacy"
+      ],
+      "description": "How consecutive rough passes of one outline are joined."
+    },
+    "Color": {
+      "description": "A CSS color string, or an sRGB tuple [r, g, b] or [r, g, b, a] with components in 0..1.",
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      ]
+    },
+    "FillStyle": {
+      "type": "string",
+      "enum": [
+        "hachure",
+        "solid",
+        "zigzag",
+        "crossHatch",
+        "dots",
+        "sunBurst",
+        "starBurst",
+        "dashed",
+        "zigzagLine",
+        "scribble",
+        "watercolor"
+      ],
+      "description": "Fill styles. The names are camelCase here and map to Swift raw values at the fixture boundary: `crossHatch` is `cross-hatch`, `sunBurst` is `sunburst`, `starBurst` is `starburst` and `zigzagLine` is `zigzag-line`."
+    },
+    "Point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "description": "A point in scene coordinates (y grows downward, as in SVG and Canvas)."
+    },
+    "SvgFillStrokeAlignment": {
+      "type": "string",
+      "enum": [
+        "center",
+        "inside",
+        "outside"
+      ],
+      "description": "How an SVG fill's stroke is positioned relative to the fitted path."
+    },
+    "BrushProfile": {
+      "type": "object",
+      "properties": {
+        "tip": {
+          "$ref": "#/definitions/BrushTip"
+        },
+        "thicknessProfile": {
+          "$ref": "#/definitions/ThicknessProfile"
+        },
+        "cap": {
+          "$ref": "#/definitions/BrushCap"
+        },
+        "join": {
+          "$ref": "#/definitions/BrushJoin"
+        },
+        "opacityProfile": {
+          "$ref": "#/definitions/OpacityProfile"
+        },
+        "crayon": {
+          "$ref": "#/definitions/CrayonStyle"
+        },
+        "watercolor": {
+          "$ref": "#/definitions/WatercolorStyle"
+        }
+      },
+      "required": [
+        "tip",
+        "thicknessProfile",
+        "cap",
+        "join",
+        "opacityProfile"
+      ],
+      "additionalProperties": false
+    },
+    "BrushTip": {
+      "type": "object",
+      "properties": {
+        "roundness": {
+          "type": "number"
+        },
+        "angle": {
+          "type": "number",
+          "description": "Radians."
+        },
+        "directionSensitive": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "roundness",
+        "angle",
+        "directionSensitive"
+      ],
+      "additionalProperties": false,
+      "description": "Elliptical brush tip. `roundness` 1 is a circle."
+    },
+    "ThicknessProfile": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "uniform"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "taperIn"
+            },
+            "start": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "start"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "taperOut"
+            },
+            "end": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "taperBoth"
+            },
+            "start": {
+              "type": "number"
+            },
+            "end": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "pressure"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "custom"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "stops"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/WidthStop"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "stops"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "variable"
+            },
+            "width": {
+              "$ref": "#/definitions/VariableStrokeWidth"
+            }
+          },
+          "required": [
+            "kind",
+            "width"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "WidthStop": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "number"
+        },
+        "width": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "position",
+        "width"
+      ],
+      "additionalProperties": false
+    },
+    "VariableStrokeWidth": {
+      "type": "object",
+      "properties": {
+        "variation": {
+          "type": "number"
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "taperStart": {
+          "type": "number"
+        },
+        "taperEnd": {
+          "type": "number"
+        },
+        "pressure": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        },
+        "frequency": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "variation",
+        "taperStart",
+        "taperEnd",
+        "pressure",
+        "seed",
+        "frequency"
+      ],
+      "additionalProperties": false
+    },
+    "BrushCap": {
+      "type": "string",
+      "enum": [
+        "butt",
+        "round",
+        "square"
+      ]
+    },
+    "BrushJoin": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "miter"
+        },
+        {
+          "type": "string",
+          "const": "round"
+        },
+        {
+          "type": "string",
+          "const": "bevel"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "curvedBevel"
+            },
+            "bulge": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "bulge"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "OpacityProfile": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "uniform"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "values"
+            },
+            "values": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "values"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "stops"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/OpacityStop"
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "stops"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "noise"
+            },
+            "noise": {
+              "$ref": "#/definitions/OpacityNoise"
+            }
+          },
+          "required": [
+            "kind",
+            "noise"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "OpacityStop": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "number"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "position",
+        "opacity"
+      ],
+      "additionalProperties": false
+    },
+    "OpacityNoise": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "variation": {
+          "type": "number"
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        },
+        "frequency": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "minimum",
+        "maximum",
+        "variation",
+        "seed",
+        "frequency"
+      ],
+      "additionalProperties": false
+    },
+    "CrayonStyle": {
+      "type": "object",
+      "properties": {
+        "grain": {
+          "type": "number",
+          "default": 0.28,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edgeRoughness": {
+          "type": "number",
+          "default": 0.75,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "widthVariation": {
+          "type": "number",
+          "default": 0.18,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "opacityVariation": {
+          "type": "number",
+          "default": 0.35,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "passes": {
+          "type": "integer",
+          "default": 2,
+          "minimum": 1,
+          "maximum": 3
+        },
+        "baseOpacity": {
+          "type": "number",
+          "default": 0.8,
+          "minimum": 0.2,
+          "maximum": 1
+        },
+        "baseSoftness": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "grit": {
+          "type": "number",
+          "default": 0.92,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "flakeSize": {
+          "type": "number",
+          "default": 1.45,
+          "minimum": 0.35,
+          "maximum": 3
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        }
+      },
+      "required": [
+        "grain",
+        "edgeRoughness",
+        "widthVariation",
+        "opacityVariation",
+        "passes",
+        "baseOpacity",
+        "baseSoftness",
+        "grit",
+        "flakeSize",
+        "seed"
+      ],
+      "additionalProperties": false,
+      "description": "Crayon brush parameters. Ranges and defaults live in `@sketchy/core/options`."
+    },
+    "WatercolorStyle": {
+      "type": "object",
+      "properties": {
+        "pigment": {
+          "type": "number",
+          "default": 0.72,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "wetness": {
+          "type": "number",
+          "default": 0.6,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edgeDarkening": {
+          "type": "number",
+          "default": 0.75,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "layers": {
+          "type": "integer",
+          "default": 3,
+          "minimum": 1,
+          "maximum": 5
+        },
+        "variation": {
+          "type": "number",
+          "default": 0.45,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "bleed": {
+          "type": "number",
+          "default": 0.5,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        }
+      },
+      "required": [
+        "pigment",
+        "wetness",
+        "edgeDarkening",
+        "layers",
+        "variation",
+        "bleed",
+        "seed"
+      ],
+      "additionalProperties": false,
+      "description": "Watercolor brush parameters."
+    },
+    "StickerBacking": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0
+        },
+        "smoothness": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "edge": {
+          "$ref": "#/definitions/StickerEdge"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "texture": {
+          "$ref": "#/definitions/StickerTexture"
+        },
+        "image": {
+          "$ref": "#/definitions/StickerImage"
+        },
+        "shadow": {
+          "$ref": "#/definitions/StickerShadow"
+        }
+      },
+      "required": [
+        "width",
+        "smoothness",
+        "edge",
+        "color"
+      ],
+      "additionalProperties": false
+    },
+    "StickerEdge": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "smooth"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "fullySmooth"
+            },
+            "radius": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "radius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "torn"
+            },
+            "depth": {
+              "type": "number"
+            },
+            "length": {
+              "type": "number"
+            },
+            "jaggedness": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "depth",
+            "length",
+            "jaggedness"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "StickerTexture": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "default": 0.45,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "scale": {
+          "type": "number",
+          "default": 11,
+          "minimum": 4
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        }
+      },
+      "required": [
+        "amount",
+        "scale"
+      ],
+      "additionalProperties": false
+    },
+    "StickerImage": {
+      "type": "object",
+      "properties": {
+        "source": {},
+        "placement": {
+          "$ref": "#/definitions/StickerImagePlacement"
+        },
+        "scale": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0
+        },
+        "opacity": {
+          "type": "number",
+          "default": 1,
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "source",
+        "placement",
+        "scale",
+        "opacity"
+      ],
+      "additionalProperties": false,
+      "description": "Image-masked sticker texture (Sketchy v1.5.0). `source` is an opaque, already-decoded handle."
+    },
+    "StickerImagePlacement": {
+      "type": "string",
+      "enum": [
+        "tile",
+        "stretch",
+        "fill"
+      ]
+    },
+    "StickerShadow": {
+      "type": "object",
+      "properties": {
+        "opacity": {
+          "type": "number",
+          "default": 0.35,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "x": {
+          "type": "number",
+          "default": 0
+        },
+        "y": {
+          "type": "number",
+          "default": 8
+        },
+        "radius": {
+          "type": "number",
+          "default": 8,
+          "minimum": 0
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        }
+      },
+      "required": [
+        "opacity",
+        "x",
+        "y",
+        "radius",
+        "color"
+      ],
+      "additionalProperties": false
+    },
+    "SerializedSeed": {
+      "description": "Deterministic seed: a non-negative safe integer, or a decimal string for values up to 2^64 - 1.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{1,20}$"
+        }
+      ]
+    }
+  }
+}

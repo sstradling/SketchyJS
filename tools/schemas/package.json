@@ -1,0 +1,11 @@
+{
+  "name": "@sketchy/schema-tools",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Generates the JSON Schemas shipped in @sketchy/types from its TypeScript declarations and the option spec tables.",
+  "scripts": {
+    "generate": "tsx generate.ts",
+    "check": "tsx generate.ts --check"
+  }
+}
