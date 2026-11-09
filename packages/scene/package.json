@@ -1,0 +1,45 @@
+{
+  "name": "@sketchy-js/scene",
+  "version": "0.0.0",
+  "description": "SketchyJS scene package.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./basic": {
+      "types": "./dist/basic.d.ts",
+      "import": "./dist/basic.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@sketchy-js/types": "workspace:*",
+    "@sketchy-js/plugin": "workspace:*",
+    "@sketchy-js/core": "workspace:*",
+    "@sketchy-js/fills": "workspace:*"
+  },
+  "peerDependencies": {
+    "@sketchy-js/stickers": "workspace:^"
+  },
+  "peerDependenciesMeta": {
+    "@sketchy-js/stickers": {
+      "optional": true
+    }
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  }
+}

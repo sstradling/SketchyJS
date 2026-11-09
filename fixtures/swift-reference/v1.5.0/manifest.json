@@ -1,0 +1,1561 @@
+{
+  "schema": 1,
+  "source": {
+    "repo": "https://github.com/sstradling/Sketchy",
+    "tag": "v1.5.0",
+    "commit": "fb17a6e7344f46da994ece07da1505be7d431b16"
+  },
+  "exporter": {
+    "name": "swift-fixture-exporter",
+    "swift": "6.0.3",
+    "platform": "linux-x86_64",
+    "upstreamFilesSha256": "afacd9de0c523c3a0966af7ac1197e8a3a91821ae767fca74380263b9d51128e",
+    "note": "Engine files are verbatim upstream; UIKit, CoreGraphics, SwiftUI and CoreText are Linux shims. See docs/fixtures.md."
+  },
+  "darwin": {
+    "name": "darwin-fixture-exporter",
+    "swift": "6.2",
+    "platform": "darwin-x86_64",
+    "sdk": "iphonesimulator",
+    "minimumOS": "17.0",
+    "note": "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline."
+  },
+  "pending": [],
+  "accepted": [
+    {
+      "id": "reference-image-regeneration",
+      "status": "accepted: upstream copies",
+      "source": {
+        "repo": "https://github.com/sstradling/Sketchy",
+        "tag": "v1.5.0",
+        "commit": "fb17a6e7344f46da994ece07da1505be7d431b16",
+        "paths": [
+          "docs/images",
+          "Tests/SketchyTests/Fixtures",
+          "LICENSE"
+        ]
+      },
+      "followUp": "Regeneration via DocsGalleryRenderer is deferred until pixel parity work.",
+      "files": [
+        {
+          "path": "UPSTREAM-LICENSE",
+          "sourcePath": "LICENSE",
+          "sha256": "19f1724fda46a61b982cf78c0ba14bf25eeb29933cf609d3167d078f2cd16d2a",
+          "bytes": 1129
+        },
+        {
+          "path": "assets/seth-input-v3.svg",
+          "sourcePath": "Tests/SketchyTests/Fixtures/seth-input-v3.svg",
+          "sha256": "173064691b8d189f747a0b49753ed9c19bfd9189358db48398d178958cbe74c0",
+          "bytes": 29846
+        },
+        {
+          "path": "assets/sticker-weave.png",
+          "sourcePath": "Tests/SketchyTests/Fixtures/sticker-weave.png",
+          "sha256": "43bb10cc43cc10e8174ff8d0fc134d4ddd00badac0207c85e92bd960e9ddd1e1",
+          "bytes": 111
+        },
+        {
+          "path": "assets/watercolor-paper.jpg",
+          "sourcePath": "Tests/SketchyTests/Fixtures/watercolor-paper.jpg",
+          "sha256": "13a2d76f7cc3110eb35b6022ec267b7b625d8e0b670f8d1e89a97082437debff",
+          "bytes": 38687
+        },
+        {
+          "path": "images/animation/breathing-circle.gif",
+          "sourcePath": "docs/images/animation/breathing-circle.gif",
+          "sha256": "dd2ec7e5881354e06f9dc8056e0a45561a9822d0906a02a3a636feb025a79a81",
+          "bytes": 363020
+        },
+        {
+          "path": "images/animation/fast-jitter.gif",
+          "sourcePath": "docs/images/animation/fast-jitter.gif",
+          "sha256": "23be31467b488bd091eb35edfee56a938f150c04a167ff2eec36ccd3407e9324",
+          "bytes": 225950
+        },
+        {
+          "path": "images/animation/long-cycle.gif",
+          "sourcePath": "docs/images/animation/long-cycle.gif",
+          "sha256": "72de418a11b8a6921948439ff20375f1c1aba7a65333a1826ed228209c1a6143",
+          "bytes": 81546
+        },
+        {
+          "path": "images/animation/low-wobble.gif",
+          "sourcePath": "docs/images/animation/low-wobble.gif",
+          "sha256": "751da6154e06c5d7bff718ec774dcba3117851df555475bd4b81ad981369e71a",
+          "bytes": 24335
+        },
+        {
+          "path": "images/animation/scribble-wobble.gif",
+          "sourcePath": "docs/images/animation/scribble-wobble.gif",
+          "sha256": "a6223f5f61df8c7bfe56cf341eb627efc00048839a494b1abb2be69dcd7e9d94",
+          "bytes": 71786
+        },
+        {
+          "path": "images/animation/sketch-cycle.gif",
+          "sourcePath": "docs/images/animation/sketch-cycle.gif",
+          "sha256": "13ed6387a9eafe83729bdb6fad7548831382a8c2001a7ecae449062119197a45",
+          "bytes": 118468
+        },
+        {
+          "path": "images/animation/slow-breath.gif",
+          "sourcePath": "docs/images/animation/slow-breath.gif",
+          "sha256": "d25ae61c85a45702690bb632e464323c5cebd8d013db63c7ee3e064f294652cb",
+          "bytes": 231985
+        },
+        {
+          "path": "images/basics/hachure-rectangle.png",
+          "sourcePath": "docs/images/basics/hachure-rectangle.png",
+          "sha256": "31ad16919e3feb747e38871c74e5cd6fddc84bbba743deac2211a904d41dbbf2",
+          "bytes": 46473
+        },
+        {
+          "path": "images/brushes/calligraphic.png",
+          "sourcePath": "docs/images/brushes/calligraphic.png",
+          "sha256": "2b8bb099e7cbe5e172a801ce3f885591bed4f057cff1fcb459c4df74005db138",
+          "bytes": 3165
+        },
+        {
+          "path": "images/brushes/crayon-fill.png",
+          "sourcePath": "docs/images/brushes/crayon-fill.png",
+          "sha256": "f41225d1645f2bb2bf4b1f3479b2ec7eaf558ac763f28f7d55549b5ada8c6b9e",
+          "bytes": 61844
+        },
+        {
+          "path": "images/brushes/crayon.png",
+          "sourcePath": "docs/images/brushes/crayon.png",
+          "sha256": "8c4f8a09b9477384c76b4214e7e212d66c464bb886a0e0e87c43de828fa35980",
+          "bytes": 15161
+        },
+        {
+          "path": "images/brushes/marker.png",
+          "sourcePath": "docs/images/brushes/marker.png",
+          "sha256": "2350a76150409947344f6977e1533743ec0de937456088b6cf855aa9445f8cef",
+          "bytes": 1353
+        },
+        {
+          "path": "images/brushes/pen.png",
+          "sourcePath": "docs/images/brushes/pen.png",
+          "sha256": "1366f7d202b33eb538ce62dc35d949c3a91cb66e79889f4369338c35f1f4889a",
+          "bytes": 3459
+        },
+        {
+          "path": "images/brushes/tapered-stroke.png",
+          "sourcePath": "docs/images/brushes/tapered-stroke.png",
+          "sha256": "526d3f8c10c5e30d7027a6ad4a868b585ee7e97df944f944bb61294c7f43cc37",
+          "bytes": 3281
+        },
+        {
+          "path": "images/brushes/variable-marker.png",
+          "sourcePath": "docs/images/brushes/variable-marker.png",
+          "sha256": "d608ad108cb79db95d5a54b5349c4a4a23d46694f7edf62a459de7d8972ee7f8",
+          "bytes": 580
+        },
+        {
+          "path": "images/brushes/variable-opacity.png",
+          "sourcePath": "docs/images/brushes/variable-opacity.png",
+          "sha256": "9dd286add1922b062ce804ac9e04e967741a21e4a5b2a45b0457d025fe348af9",
+          "bytes": 5841
+        },
+        {
+          "path": "images/brushes/watercolor-fill.png",
+          "sourcePath": "docs/images/brushes/watercolor-fill.png",
+          "sha256": "8d753055a2238683ba109988f878cd1a18b2b0bc533e83709fc8302a9bf6893c",
+          "bytes": 7342
+        },
+        {
+          "path": "images/brushes/watercolor-overlap.png",
+          "sourcePath": "docs/images/brushes/watercolor-overlap.png",
+          "sha256": "8a9e4d07a75be1ea8464064c53de69e568b3c2c146674a3f51a8ef43b40c2ad3",
+          "bytes": 6372
+        },
+        {
+          "path": "images/brushes/watercolor.png",
+          "sourcePath": "docs/images/brushes/watercolor.png",
+          "sha256": "4a1c22ca91c0222df7ad08996c4ff074bb7b7b802d58d4ebb6df688b5dd9316b",
+          "bytes": 6093
+        },
+        {
+          "path": "images/brushes/width-stops.png",
+          "sourcePath": "docs/images/brushes/width-stops.png",
+          "sha256": "277ad3b9ac0b136e610999b52f347e588953fb573a96a0525758b539ea2a07af",
+          "bytes": 2279
+        },
+        {
+          "path": "images/catalog.json",
+          "sourcePath": "generated by tools/fixtures/import-assets.mjs from docs/images",
+          "sha256": "5cebe68884ee5a3cded003e5fe7e2e2ec2a798097917e53e519fc246a2a33fdc",
+          "bytes": 20106
+        },
+        {
+          "path": "images/fills/brush-scribble.png",
+          "sourcePath": "docs/images/fills/brush-scribble.png",
+          "sha256": "ef849dabe22d0a18fbc30488d1ed6a1eb5a1937e7b4d6935803c3bf1fb5163cf",
+          "bytes": 8557
+        },
+        {
+          "path": "images/fills/clockwise-hachure.png",
+          "sourcePath": "docs/images/fills/clockwise-hachure.png",
+          "sha256": "2bf25c510257cb1ee47928faa6c410238b869e7346acb9f66d5fa314ee8ae350",
+          "bytes": 30252
+        },
+        {
+          "path": "images/fills/cross-hatch.png",
+          "sourcePath": "docs/images/fills/cross-hatch.png",
+          "sha256": "28b523866b8333d80d7e433f5d39beca8dc91dbd64febfaecfc7f20e1d985da4",
+          "bytes": 44213
+        },
+        {
+          "path": "images/fills/curved-scribble.png",
+          "sourcePath": "docs/images/fills/curved-scribble.png",
+          "sha256": "1730c01759b1dca9da9af227607e5fa8b297107535bb5705affc127d1d356ca4",
+          "bytes": 7040
+        },
+        {
+          "path": "images/fills/dashed-fill.png",
+          "sourcePath": "docs/images/fills/dashed-fill.png",
+          "sha256": "85bd1044e6250b315dce01cfdc48221122de977ab5f9b4f0c398c13aac8d4b6a",
+          "bytes": 36975
+        },
+        {
+          "path": "images/fills/dots.png",
+          "sourcePath": "docs/images/fills/dots.png",
+          "sha256": "bc7aff7e106f41af7f06f0140b9f07a4ae31b8bf11fc293156ee42520f82d19d",
+          "bytes": 7953
+        },
+        {
+          "path": "images/fills/fill-offset.png",
+          "sourcePath": "docs/images/fills/fill-offset.png",
+          "sha256": "b047d688c226a937f29407fe726ea455b2ba371262c087c8b7381f6d29bc0d94",
+          "bytes": 36514
+        },
+        {
+          "path": "images/fills/fill-padding-outset.png",
+          "sourcePath": "docs/images/fills/fill-padding-outset.png",
+          "sha256": "2dd14e09e44fe103d026eef31c02977da3578e7524291c10bb185fdb428f7020",
+          "bytes": 18607
+        },
+        {
+          "path": "images/fills/fill-padding-zero.png",
+          "sourcePath": "docs/images/fills/fill-padding-zero.png",
+          "sha256": "2d0aec748c4397a5c5d2f8c93669f1bf476a96312524a868b1f284de518b7453",
+          "bytes": 14651
+        },
+        {
+          "path": "images/fills/fill-padding.png",
+          "sourcePath": "docs/images/fills/fill-padding.png",
+          "sha256": "d0900580ec90d7a8aafea3edc89f7ac49c9e2f8e0f9df36f5341da27171f2c0e",
+          "bytes": 13275
+        },
+        {
+          "path": "images/fills/heavy-fill.png",
+          "sourcePath": "docs/images/fills/heavy-fill.png",
+          "sha256": "dd48b0a3cc03e9c57a5bc2a34da8fe9890633a1123623c49cf07bb77527d753f",
+          "bytes": 16715
+        },
+        {
+          "path": "images/fills/horizontal-hachure.png",
+          "sourcePath": "docs/images/fills/horizontal-hachure.png",
+          "sha256": "ddac02b7941374804dc3025bc36548c73edc704324f110f83bb86a412671b578",
+          "bytes": 13973
+        },
+        {
+          "path": "images/fills/scribble-bands.png",
+          "sourcePath": "docs/images/fills/scribble-bands.png",
+          "sha256": "9eaa15f076861d9653996517dba92b476f3ce0a923444954fd9a3bc1dbc6e424",
+          "bytes": 4752
+        },
+        {
+          "path": "images/fills/scribble.png",
+          "sourcePath": "docs/images/fills/scribble.png",
+          "sha256": "6ca94d335ac3b4d55fb04da1b53b752f30fe0eab8986f4dceec0d4c812771b12",
+          "bytes": 6569
+        },
+        {
+          "path": "images/fills/solid-fill.png",
+          "sourcePath": "docs/images/fills/solid-fill.png",
+          "sha256": "ce984a56ac40d01600b4e8ce4c710c8f49836a51de6d15066e7ddc77f5e16ffd",
+          "bytes": 3761
+        },
+        {
+          "path": "images/fills/spacing-pattern.png",
+          "sourcePath": "docs/images/fills/spacing-pattern.png",
+          "sha256": "2fef8910965f9b723bac5b7e55b4e80e1bd182142ae12d21a1960f10f5d51f59",
+          "bytes": 4926
+        },
+        {
+          "path": "images/fills/sunburst.png",
+          "sourcePath": "docs/images/fills/sunburst.png",
+          "sha256": "f9711efde435288197aec56cf7769091a5417f160c063e3ec9677e989f33d7df",
+          "bytes": 37689
+        },
+        {
+          "path": "images/fills/vertical-hachure.png",
+          "sourcePath": "docs/images/fills/vertical-hachure.png",
+          "sha256": "b174e62bb89e75517e27524170ba5abd98bfee9570de95f76ffc359ed7d7dd18",
+          "bytes": 19839
+        },
+        {
+          "path": "images/fills/wide-gap.png",
+          "sourcePath": "docs/images/fills/wide-gap.png",
+          "sha256": "1a4eaa4c8a2b7b3cfcc664e9b6c827cfa8f41c8498405aefdc2d8726b63b6573",
+          "bytes": 10854
+        },
+        {
+          "path": "images/fills/zigzag-fill.png",
+          "sourcePath": "docs/images/fills/zigzag-fill.png",
+          "sha256": "ca92a988f302f2699df92168bbc7a44aaa5677ce8837c1c53f4ac23152b635e4",
+          "bytes": 53196
+        },
+        {
+          "path": "images/fills/zigzag-line.png",
+          "sourcePath": "docs/images/fills/zigzag-line.png",
+          "sha256": "6e549ba123e944b1c58c6098256cab46907cd7ef98ee08cb5bef480170aaec18",
+          "bytes": 12779
+        },
+        {
+          "path": "images/header.png",
+          "sourcePath": "docs/images/header.png",
+          "sha256": "d7d83f09aa0d8289b64d4794abef2ed59c688ac6a34ba48e9d766c03eb771e40",
+          "bytes": 142307
+        },
+        {
+          "path": "images/hero.png",
+          "sourcePath": "docs/images/hero.png",
+          "sha256": "992b54b62a23e6950b243906cba6723ce1cefdc35428e7caddf630413d59ba4d",
+          "bytes": 110787
+        },
+        {
+          "path": "images/roughness/bowed.png",
+          "sourcePath": "docs/images/roughness/bowed.png",
+          "sha256": "fe6a75b75a8dedbf3df5e38ee9083d32a524cee44d3f025afcfe8c83cb1bea97",
+          "bytes": 5185
+        },
+        {
+          "path": "images/roughness/loose-wobble.png",
+          "sourcePath": "docs/images/roughness/loose-wobble.png",
+          "sha256": "0e2792ff338f566111e62e61ef5075b2f47e870f4bcf98f3b5733988f8a49e41",
+          "bytes": 863
+        },
+        {
+          "path": "images/roughness/rough.png",
+          "sourcePath": "docs/images/roughness/rough.png",
+          "sha256": "35efe416306c73a0a8e867db77bd114f1fe54f83cd2139b7f2401bbb461e7c29",
+          "bytes": 50149
+        },
+        {
+          "path": "images/roughness/smooth.png",
+          "sourcePath": "docs/images/roughness/smooth.png",
+          "sha256": "15c85bdf58242586235944a5c83dd35d8910b04e46a0cb97bee53c0b82aa53a0",
+          "bytes": 294
+        },
+        {
+          "path": "images/seeding/seed-ninety-nine.png",
+          "sourcePath": "docs/images/seeding/seed-ninety-nine.png",
+          "sha256": "f8924683edbe703203e54db45b2e75c9498bc6ec668a22c6247d0516540eb34a",
+          "bytes": 39651
+        },
+        {
+          "path": "images/seeding/seed-seven-again.png",
+          "sourcePath": "docs/images/seeding/seed-seven-again.png",
+          "sha256": "a7c224e2344c427fd8dca6969a16b59d5ac93502e507ffcf301243735c0f5f50",
+          "bytes": 43463
+        },
+        {
+          "path": "images/seeding/seed-seven.png",
+          "sourcePath": "docs/images/seeding/seed-seven.png",
+          "sha256": "a7c224e2344c427fd8dca6969a16b59d5ac93502e507ffcf301243735c0f5f50",
+          "bytes": 43463
+        },
+        {
+          "path": "images/shapes/circle.png",
+          "sourcePath": "docs/images/shapes/circle.png",
+          "sha256": "5127b7db197a14169323391549227c91ba631108e1f2376e3ad67cd07a2e9ad8",
+          "bytes": 37080
+        },
+        {
+          "path": "images/shapes/closed-arc.png",
+          "sourcePath": "docs/images/shapes/closed-arc.png",
+          "sha256": "e6c82b1abfc8b2b1d2c9c972123959abecb4599c51e2c20439506b446bbe9df8",
+          "bytes": 14125
+        },
+        {
+          "path": "images/shapes/curve.png",
+          "sourcePath": "docs/images/shapes/curve.png",
+          "sha256": "b8b85d6ae1a57e5ed8481335d073dbdb9dc4a95e0f2e73a1c7b7ce3321f887e4",
+          "bytes": 2093
+        },
+        {
+          "path": "images/shapes/egg.png",
+          "sourcePath": "docs/images/shapes/egg.png",
+          "sha256": "ff35f1b3b7a5f22a2dff36439eb77cbee449fcf34267c572c79b546ece249b72",
+          "bytes": 35384
+        },
+        {
+          "path": "images/shapes/ellipse.png",
+          "sourcePath": "docs/images/shapes/ellipse.png",
+          "sha256": "1ff85debc59bc9e102e45e793a568a340ac3bf252b56fa2a0ffe03931abbcd6c",
+          "bytes": 19311
+        },
+        {
+          "path": "images/shapes/line.png",
+          "sourcePath": "docs/images/shapes/line.png",
+          "sha256": "216c6ded4022818393b843212677585734c58e020e5fa30d6ac002b075d42bf1",
+          "bytes": 1221
+        },
+        {
+          "path": "images/shapes/linear-path.png",
+          "sourcePath": "docs/images/shapes/linear-path.png",
+          "sha256": "dbf53afdf575e0a1457aa8d22e57d8d1abcea84635eef80b6a2aacf45b4f8b14",
+          "bytes": 2965
+        },
+        {
+          "path": "images/shapes/open-arc.png",
+          "sourcePath": "docs/images/shapes/open-arc.png",
+          "sha256": "6e6616d291525db7bbc5cac9f3c7ae4eea0f04cb62392f2f2d168647e5784a4b",
+          "bytes": 998
+        },
+        {
+          "path": "images/shapes/polygon.png",
+          "sourcePath": "docs/images/shapes/polygon.png",
+          "sha256": "cafde8762fa4e27c0129c65279dd6cd10ddbb86bd8fe1e5379dd5d91e8a53f4d",
+          "bytes": 15880
+        },
+        {
+          "path": "images/shapes/rounded-rectangle.png",
+          "sourcePath": "docs/images/shapes/rounded-rectangle.png",
+          "sha256": "aaeae2a9927b2971485c0dff7aef08193b0c7a639cfc67532e4f684f1cbb81ea",
+          "bytes": 41454
+        },
+        {
+          "path": "images/stickers/sticker-crayon.png",
+          "sourcePath": "docs/images/stickers/sticker-crayon.png",
+          "sha256": "0837e65a3232c9fdfd63a609ce75cc29ecffea56eb7af8a610021acfda7bcfc9",
+          "bytes": 34766
+        },
+        {
+          "path": "images/stickers/sticker-fully-smooth.png",
+          "sourcePath": "docs/images/stickers/sticker-fully-smooth.png",
+          "sha256": "f3d16ac2b3e59a7f18bd9355d51db90fa34d787463fa2cdeb7f5a8030ada96a2",
+          "bytes": 7773
+        },
+        {
+          "path": "images/stickers/sticker-group.png",
+          "sourcePath": "docs/images/stickers/sticker-group.png",
+          "sha256": "c735953fed9841f3f116d143045bd79cd3b2415b50e238d011fbb5d6cbdd5ca3",
+          "bytes": 8926
+        },
+        {
+          "path": "images/stickers/sticker-image.png",
+          "sourcePath": "docs/images/stickers/sticker-image.png",
+          "sha256": "0247fa1edd7461f33da3288a839cce703ca86337ac7669a037bd79007a6f3ac2",
+          "bytes": 34183
+        },
+        {
+          "path": "images/stickers/sticker-paper.png",
+          "sourcePath": "docs/images/stickers/sticker-paper.png",
+          "sha256": "ac2ef57db7859e97f8da6d5985ffdb24bf67013f04c048634322af5a8c36fced",
+          "bytes": 22630
+        },
+        {
+          "path": "images/stickers/sticker-shadow.png",
+          "sourcePath": "docs/images/stickers/sticker-shadow.png",
+          "sha256": "379a6abd273cc96753f829dd5734665aae7d85e50fc8dd5575548bd95f1671ae",
+          "bytes": 8173
+        },
+        {
+          "path": "images/stickers/sticker-star.png",
+          "sourcePath": "docs/images/stickers/sticker-star.png",
+          "sha256": "55c8a288082657aab9b57dded5605aa6e30002c6d558a7806e799578e852b960",
+          "bytes": 7990
+        },
+        {
+          "path": "images/stickers/sticker-torn.png",
+          "sourcePath": "docs/images/stickers/sticker-torn.png",
+          "sha256": "bd641bafe61d543d8b6257ee0a3b30a81666cddea514972d533d2ea49f4d0f9b",
+          "bytes": 8259
+        },
+        {
+          "path": "images/strokes/fill-opacity.png",
+          "sourcePath": "docs/images/strokes/fill-opacity.png",
+          "sha256": "6160c0f34c58f5a80e9008f67b7f12704c97217340b562dba84aa9f45a1f7130",
+          "bytes": 2820
+        },
+        {
+          "path": "images/strokes/several-lines.png",
+          "sourcePath": "docs/images/strokes/several-lines.png",
+          "sha256": "bbbba68017b5a882c18055f7f30e24e6df7bf3b643645abd8213a0c7254c776c",
+          "bytes": 657
+        },
+        {
+          "path": "images/strokes/stroke-opacity.png",
+          "sourcePath": "docs/images/strokes/stroke-opacity.png",
+          "sha256": "825336c62c01a6964e4bd3334d17d8fad923f02b581758431598ffaa7b930776",
+          "bytes": 3377
+        },
+        {
+          "path": "images/strokes/thick-stroke.png",
+          "sourcePath": "docs/images/strokes/thick-stroke.png",
+          "sha256": "6eb9a567562614b780ac45ad9ff81f0c0de354c92681b2f1cee8da7904dbdc60",
+          "bytes": 1876
+        },
+        {
+          "path": "images/svg/svg-arcs.png",
+          "sourcePath": "docs/images/svg/svg-arcs.png",
+          "sha256": "115f0ee789161a1fa86d4fd48b13f4d12fe7177a1d36dbaa0c81f1c4bf998f40",
+          "bytes": 16073
+        },
+        {
+          "path": "images/svg/svg-outside.png",
+          "sourcePath": "docs/images/svg/svg-outside.png",
+          "sha256": "d829581bc697710e3536a92d46bfdf6587ff907010f8973a146a15c9b1217431",
+          "bytes": 10532
+        },
+        {
+          "path": "images/svg/svg-star.png",
+          "sourcePath": "docs/images/svg/svg-star.png",
+          "sha256": "3d6824d40df6124a1a512a4773746f9aafee1cddca2ec81f1bfafa15a4b9e909",
+          "bytes": 12481
+        },
+        {
+          "path": "images/text/attributed-text.png",
+          "sourcePath": "docs/images/text/attributed-text.png",
+          "sha256": "f1eb47ac8fca182143183c26ce5211f25390ff0786307bd35c2148679cc7fd70",
+          "bytes": 2055
+        },
+        {
+          "path": "images/text/leading-text.png",
+          "sourcePath": "docs/images/text/leading-text.png",
+          "sha256": "c69b7951ba270257214478fcfcf0283dc4cbca80e03dcd62b1420d56ab3f5738",
+          "bytes": 2266
+        },
+        {
+          "path": "images/text/named-font.png",
+          "sourcePath": "docs/images/text/named-font.png",
+          "sha256": "91108900d51a581b83e5c8230ae29a76ec8a0e63b3c0e27c6f4564298e8f58ef",
+          "bytes": 3559
+        },
+        {
+          "path": "images/text/offset-text.png",
+          "sourcePath": "docs/images/text/offset-text.png",
+          "sha256": "650eaded13ad3546e635c2d50956626c3368fe817dbacf33564ba0f4129cfbe7",
+          "bytes": 2195
+        },
+        {
+          "path": "images/text/rough-text.png",
+          "sourcePath": "docs/images/text/rough-text.png",
+          "sha256": "a9baf369bad5f86f517768c31352c4039332789d404a5389a78992648faed12c",
+          "bytes": 4813
+        },
+        {
+          "path": "images/text/rough-word.png",
+          "sourcePath": "docs/images/text/rough-word.png",
+          "sha256": "4f0a4b993542137730e5c1b563dc0fc6ec010e6015f2ea651a162f4397ee2f69",
+          "bytes": 6497
+        }
+      ]
+    }
+  ],
+  "treeSha256": "3f024ad923ef68068c59f230899a379a9a159b59152109acdd11efcc41fa6c91",
+  "files": [
+    {
+      "path": "UPSTREAM-LICENSE",
+      "sha256": "19f1724fda46a61b982cf78c0ba14bf25eeb29933cf609d3167d078f2cd16d2a",
+      "bytes": 1129,
+      "kind": "asset",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "animation/frames.json",
+      "sha256": "893e289c4feeec434f09333277aa7c8c325cb13c28aa874a61ef0ecacd91fab7",
+      "bytes": 10586,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "assets/seth-input-v3.svg",
+      "sha256": "173064691b8d189f747a0b49753ed9c19bfd9189358db48398d178958cbe74c0",
+      "bytes": 29846,
+      "kind": "asset",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "assets/sticker-weave.png",
+      "sha256": "43bb10cc43cc10e8174ff8d0fc134d4ddd00badac0207c85e92bd960e9ddd1e1",
+      "bytes": 111,
+      "kind": "asset",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "assets/watercolor-paper.jpg",
+      "sha256": "13a2d76f7cc3110eb35b6022ec267b7b625d8e0b670f8d1e89a97082437debff",
+      "bytes": 38687,
+      "kind": "asset",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "brushes/crayon-watercolor.json",
+      "sha256": "ef652d8125bd1d07a5682664252aa6b7c8f12f10bb7a590681f485c352813cd4",
+      "bytes": 3336504,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "comparison/darwin-linux.json",
+      "sha256": "d280103407601917222910c6def9a9a5a7cbb9780b86bcdcba108d591bf0ecc1",
+      "bytes": 3039,
+      "kind": "data",
+      "fidelity": "comparison",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/fills/direct-fillers.json",
+      "sha256": "a098316bda457e776c75cebf16791c79526c04bf71239935c8ea1091ced8bc45",
+      "bytes": 889545,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/fills/fills.json",
+      "sha256": "48be1e2af26f05e8dbbf31924a8ea2054801d165d14207e4c160411e5ab7454e",
+      "bytes": 1288168,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/fills/scribble.json",
+      "sha256": "e8b547fe7a7eebf77b913cda7e6287e590dc97f77fa71d800448819fdfd8d246",
+      "bytes": 7655,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/options/clamps.json",
+      "sha256": "21015d4daa67731cc6c6f7b3000e135b5b1a10501e507a082b1704121335c42e",
+      "bytes": 38796,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/options/defaults.json",
+      "sha256": "b4bf200b8c6456c8ad97f95dba2c7a9cc705914e4e8926be3e22c2cf1359e02d",
+      "bytes": 2997,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/rng/splitmix64.json",
+      "sha256": "658c4c132f95ed5e9fc0ea9b553be73ca51626f867caeb218682dee18ea17ad5",
+      "bytes": 14546,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/rng/unit-float.json",
+      "sha256": "6bf95b1cdcc793116a970bc494d514c5ce99d37f09f20407a9f6c25a907fbd81",
+      "bytes": 81363,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/shapes/shapes.json",
+      "sha256": "fd42543b729acf381400485864b56b1e79ade297920167ee455963a14d9deb5e",
+      "bytes": 61748,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "darwin/svg/path-parse.json",
+      "sha256": "4d2081d17d683850c0ad7be760d22c2ca2b36065453f90f5d6f0fcdd6caad2aa",
+      "bytes": 30473,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "fills/direct-fillers.json",
+      "sha256": "561a0d8bf431cf86f5c6ce483058e2ad202a1248a0be1306b0c35ad9b580ffb4",
+      "bytes": 890012,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "libm-dependent",
+      "platform": "linux-x86_64"
+    },
+    {
+      "path": "fills/fills.json",
+      "sha256": "bfa2bfef96d8eba2607c13391a6d72c4332d1a74b7ef54faded5143352ad1006",
+      "bytes": 1288629,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "libm-dependent",
+      "platform": "linux-x86_64"
+    },
+    {
+      "path": "fills/scribble.json",
+      "sha256": "e8b547fe7a7eebf77b913cda7e6287e590dc97f77fa71d800448819fdfd8d246",
+      "bytes": 7655,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "shim-dependent",
+      "platform": "linux-x86_64"
+    },
+    {
+      "path": "images/animation/breathing-circle.gif",
+      "sha256": "dd2ec7e5881354e06f9dc8056e0a45561a9822d0906a02a3a636feb025a79a81",
+      "bytes": 363020,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/animation/fast-jitter.gif",
+      "sha256": "23be31467b488bd091eb35edfee56a938f150c04a167ff2eec36ccd3407e9324",
+      "bytes": 225950,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/animation/long-cycle.gif",
+      "sha256": "72de418a11b8a6921948439ff20375f1c1aba7a65333a1826ed228209c1a6143",
+      "bytes": 81546,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/animation/low-wobble.gif",
+      "sha256": "751da6154e06c5d7bff718ec774dcba3117851df555475bd4b81ad981369e71a",
+      "bytes": 24335,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/animation/scribble-wobble.gif",
+      "sha256": "a6223f5f61df8c7bfe56cf341eb627efc00048839a494b1abb2be69dcd7e9d94",
+      "bytes": 71786,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/animation/sketch-cycle.gif",
+      "sha256": "13ed6387a9eafe83729bdb6fad7548831382a8c2001a7ecae449062119197a45",
+      "bytes": 118468,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/animation/slow-breath.gif",
+      "sha256": "d25ae61c85a45702690bb632e464323c5cebd8d013db63c7ee3e064f294652cb",
+      "bytes": 231985,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/basics/hachure-rectangle.png",
+      "sha256": "31ad16919e3feb747e38871c74e5cd6fddc84bbba743deac2211a904d41dbbf2",
+      "bytes": 46473,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/calligraphic.png",
+      "sha256": "2b8bb099e7cbe5e172a801ce3f885591bed4f057cff1fcb459c4df74005db138",
+      "bytes": 3165,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/crayon-fill.png",
+      "sha256": "f41225d1645f2bb2bf4b1f3479b2ec7eaf558ac763f28f7d55549b5ada8c6b9e",
+      "bytes": 61844,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/crayon.png",
+      "sha256": "8c4f8a09b9477384c76b4214e7e212d66c464bb886a0e0e87c43de828fa35980",
+      "bytes": 15161,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/marker.png",
+      "sha256": "2350a76150409947344f6977e1533743ec0de937456088b6cf855aa9445f8cef",
+      "bytes": 1353,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/pen.png",
+      "sha256": "1366f7d202b33eb538ce62dc35d949c3a91cb66e79889f4369338c35f1f4889a",
+      "bytes": 3459,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/tapered-stroke.png",
+      "sha256": "526d3f8c10c5e30d7027a6ad4a868b585ee7e97df944f944bb61294c7f43cc37",
+      "bytes": 3281,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/variable-marker.png",
+      "sha256": "d608ad108cb79db95d5a54b5349c4a4a23d46694f7edf62a459de7d8972ee7f8",
+      "bytes": 580,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/variable-opacity.png",
+      "sha256": "9dd286add1922b062ce804ac9e04e967741a21e4a5b2a45b0457d025fe348af9",
+      "bytes": 5841,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/watercolor-fill.png",
+      "sha256": "8d753055a2238683ba109988f878cd1a18b2b0bc533e83709fc8302a9bf6893c",
+      "bytes": 7342,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/watercolor-overlap.png",
+      "sha256": "8a9e4d07a75be1ea8464064c53de69e568b3c2c146674a3f51a8ef43b40c2ad3",
+      "bytes": 6372,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/watercolor.png",
+      "sha256": "4a1c22ca91c0222df7ad08996c4ff074bb7b7b802d58d4ebb6df688b5dd9316b",
+      "bytes": 6093,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/brushes/width-stops.png",
+      "sha256": "277ad3b9ac0b136e610999b52f347e588953fb573a96a0525758b539ea2a07af",
+      "bytes": 2279,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/catalog.json",
+      "sha256": "5cebe68884ee5a3cded003e5fe7e2e2ec2a798097917e53e519fc246a2a33fdc",
+      "bytes": 20106,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/brush-scribble.png",
+      "sha256": "ef849dabe22d0a18fbc30488d1ed6a1eb5a1937e7b4d6935803c3bf1fb5163cf",
+      "bytes": 8557,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/clockwise-hachure.png",
+      "sha256": "2bf25c510257cb1ee47928faa6c410238b869e7346acb9f66d5fa314ee8ae350",
+      "bytes": 30252,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/cross-hatch.png",
+      "sha256": "28b523866b8333d80d7e433f5d39beca8dc91dbd64febfaecfc7f20e1d985da4",
+      "bytes": 44213,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/curved-scribble.png",
+      "sha256": "1730c01759b1dca9da9af227607e5fa8b297107535bb5705affc127d1d356ca4",
+      "bytes": 7040,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/dashed-fill.png",
+      "sha256": "85bd1044e6250b315dce01cfdc48221122de977ab5f9b4f0c398c13aac8d4b6a",
+      "bytes": 36975,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/dots.png",
+      "sha256": "bc7aff7e106f41af7f06f0140b9f07a4ae31b8bf11fc293156ee42520f82d19d",
+      "bytes": 7953,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/fill-offset.png",
+      "sha256": "b047d688c226a937f29407fe726ea455b2ba371262c087c8b7381f6d29bc0d94",
+      "bytes": 36514,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/fill-padding-outset.png",
+      "sha256": "2dd14e09e44fe103d026eef31c02977da3578e7524291c10bb185fdb428f7020",
+      "bytes": 18607,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/fill-padding-zero.png",
+      "sha256": "2d0aec748c4397a5c5d2f8c93669f1bf476a96312524a868b1f284de518b7453",
+      "bytes": 14651,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/fill-padding.png",
+      "sha256": "d0900580ec90d7a8aafea3edc89f7ac49c9e2f8e0f9df36f5341da27171f2c0e",
+      "bytes": 13275,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/heavy-fill.png",
+      "sha256": "dd48b0a3cc03e9c57a5bc2a34da8fe9890633a1123623c49cf07bb77527d753f",
+      "bytes": 16715,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/horizontal-hachure.png",
+      "sha256": "ddac02b7941374804dc3025bc36548c73edc704324f110f83bb86a412671b578",
+      "bytes": 13973,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/scribble-bands.png",
+      "sha256": "9eaa15f076861d9653996517dba92b476f3ce0a923444954fd9a3bc1dbc6e424",
+      "bytes": 4752,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/scribble.png",
+      "sha256": "6ca94d335ac3b4d55fb04da1b53b752f30fe0eab8986f4dceec0d4c812771b12",
+      "bytes": 6569,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/solid-fill.png",
+      "sha256": "ce984a56ac40d01600b4e8ce4c710c8f49836a51de6d15066e7ddc77f5e16ffd",
+      "bytes": 3761,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/spacing-pattern.png",
+      "sha256": "2fef8910965f9b723bac5b7e55b4e80e1bd182142ae12d21a1960f10f5d51f59",
+      "bytes": 4926,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/sunburst.png",
+      "sha256": "f9711efde435288197aec56cf7769091a5417f160c063e3ec9677e989f33d7df",
+      "bytes": 37689,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/vertical-hachure.png",
+      "sha256": "b174e62bb89e75517e27524170ba5abd98bfee9570de95f76ffc359ed7d7dd18",
+      "bytes": 19839,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/wide-gap.png",
+      "sha256": "1a4eaa4c8a2b7b3cfcc664e9b6c827cfa8f41c8498405aefdc2d8726b63b6573",
+      "bytes": 10854,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/zigzag-fill.png",
+      "sha256": "ca92a988f302f2699df92168bbc7a44aaa5677ce8837c1c53f4ac23152b635e4",
+      "bytes": 53196,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/fills/zigzag-line.png",
+      "sha256": "6e549ba123e944b1c58c6098256cab46907cd7ef98ee08cb5bef480170aaec18",
+      "bytes": 12779,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/header.png",
+      "sha256": "d7d83f09aa0d8289b64d4794abef2ed59c688ac6a34ba48e9d766c03eb771e40",
+      "bytes": 142307,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/hero.png",
+      "sha256": "992b54b62a23e6950b243906cba6723ce1cefdc35428e7caddf630413d59ba4d",
+      "bytes": 110787,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/roughness/bowed.png",
+      "sha256": "fe6a75b75a8dedbf3df5e38ee9083d32a524cee44d3f025afcfe8c83cb1bea97",
+      "bytes": 5185,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/roughness/loose-wobble.png",
+      "sha256": "0e2792ff338f566111e62e61ef5075b2f47e870f4bcf98f3b5733988f8a49e41",
+      "bytes": 863,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/roughness/rough.png",
+      "sha256": "35efe416306c73a0a8e867db77bd114f1fe54f83cd2139b7f2401bbb461e7c29",
+      "bytes": 50149,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/roughness/smooth.png",
+      "sha256": "15c85bdf58242586235944a5c83dd35d8910b04e46a0cb97bee53c0b82aa53a0",
+      "bytes": 294,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/seeding/seed-ninety-nine.png",
+      "sha256": "f8924683edbe703203e54db45b2e75c9498bc6ec668a22c6247d0516540eb34a",
+      "bytes": 39651,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/seeding/seed-seven-again.png",
+      "sha256": "a7c224e2344c427fd8dca6969a16b59d5ac93502e507ffcf301243735c0f5f50",
+      "bytes": 43463,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/seeding/seed-seven.png",
+      "sha256": "a7c224e2344c427fd8dca6969a16b59d5ac93502e507ffcf301243735c0f5f50",
+      "bytes": 43463,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/circle.png",
+      "sha256": "5127b7db197a14169323391549227c91ba631108e1f2376e3ad67cd07a2e9ad8",
+      "bytes": 37080,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/closed-arc.png",
+      "sha256": "e6c82b1abfc8b2b1d2c9c972123959abecb4599c51e2c20439506b446bbe9df8",
+      "bytes": 14125,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/curve.png",
+      "sha256": "b8b85d6ae1a57e5ed8481335d073dbdb9dc4a95e0f2e73a1c7b7ce3321f887e4",
+      "bytes": 2093,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/egg.png",
+      "sha256": "ff35f1b3b7a5f22a2dff36439eb77cbee449fcf34267c572c79b546ece249b72",
+      "bytes": 35384,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/ellipse.png",
+      "sha256": "1ff85debc59bc9e102e45e793a568a340ac3bf252b56fa2a0ffe03931abbcd6c",
+      "bytes": 19311,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/line.png",
+      "sha256": "216c6ded4022818393b843212677585734c58e020e5fa30d6ac002b075d42bf1",
+      "bytes": 1221,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/linear-path.png",
+      "sha256": "dbf53afdf575e0a1457aa8d22e57d8d1abcea84635eef80b6a2aacf45b4f8b14",
+      "bytes": 2965,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/open-arc.png",
+      "sha256": "6e6616d291525db7bbc5cac9f3c7ae4eea0f04cb62392f2f2d168647e5784a4b",
+      "bytes": 998,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/polygon.png",
+      "sha256": "cafde8762fa4e27c0129c65279dd6cd10ddbb86bd8fe1e5379dd5d91e8a53f4d",
+      "bytes": 15880,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/shapes/rounded-rectangle.png",
+      "sha256": "aaeae2a9927b2971485c0dff7aef08193b0c7a639cfc67532e4f684f1cbb81ea",
+      "bytes": 41454,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-crayon.png",
+      "sha256": "0837e65a3232c9fdfd63a609ce75cc29ecffea56eb7af8a610021acfda7bcfc9",
+      "bytes": 34766,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-fully-smooth.png",
+      "sha256": "f3d16ac2b3e59a7f18bd9355d51db90fa34d787463fa2cdeb7f5a8030ada96a2",
+      "bytes": 7773,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-group.png",
+      "sha256": "c735953fed9841f3f116d143045bd79cd3b2415b50e238d011fbb5d6cbdd5ca3",
+      "bytes": 8926,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-image.png",
+      "sha256": "0247fa1edd7461f33da3288a839cce703ca86337ac7669a037bd79007a6f3ac2",
+      "bytes": 34183,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-paper.png",
+      "sha256": "ac2ef57db7859e97f8da6d5985ffdb24bf67013f04c048634322af5a8c36fced",
+      "bytes": 22630,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-shadow.png",
+      "sha256": "379a6abd273cc96753f829dd5734665aae7d85e50fc8dd5575548bd95f1671ae",
+      "bytes": 8173,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-star.png",
+      "sha256": "55c8a288082657aab9b57dded5605aa6e30002c6d558a7806e799578e852b960",
+      "bytes": 7990,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/stickers/sticker-torn.png",
+      "sha256": "bd641bafe61d543d8b6257ee0a3b30a81666cddea514972d533d2ea49f4d0f9b",
+      "bytes": 8259,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/strokes/fill-opacity.png",
+      "sha256": "6160c0f34c58f5a80e9008f67b7f12704c97217340b562dba84aa9f45a1f7130",
+      "bytes": 2820,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/strokes/several-lines.png",
+      "sha256": "bbbba68017b5a882c18055f7f30e24e6df7bf3b643645abd8213a0c7254c776c",
+      "bytes": 657,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/strokes/stroke-opacity.png",
+      "sha256": "825336c62c01a6964e4bd3334d17d8fad923f02b581758431598ffaa7b930776",
+      "bytes": 3377,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/strokes/thick-stroke.png",
+      "sha256": "6eb9a567562614b780ac45ad9ff81f0c0de354c92681b2f1cee8da7904dbdc60",
+      "bytes": 1876,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/svg/svg-arcs.png",
+      "sha256": "115f0ee789161a1fa86d4fd48b13f4d12fe7177a1d36dbaa0c81f1c4bf998f40",
+      "bytes": 16073,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/svg/svg-outside.png",
+      "sha256": "d829581bc697710e3536a92d46bfdf6587ff907010f8973a146a15c9b1217431",
+      "bytes": 10532,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/svg/svg-star.png",
+      "sha256": "3d6824d40df6124a1a512a4773746f9aafee1cddca2ec81f1bfafa15a4b9e909",
+      "bytes": 12481,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/text/attributed-text.png",
+      "sha256": "f1eb47ac8fca182143183c26ce5211f25390ff0786307bd35c2148679cc7fd70",
+      "bytes": 2055,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/text/leading-text.png",
+      "sha256": "c69b7951ba270257214478fcfcf0283dc4cbca80e03dcd62b1420d56ab3f5738",
+      "bytes": 2266,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/text/named-font.png",
+      "sha256": "91108900d51a581b83e5c8230ae29a76ec8a0e63b3c0e27c6f4564298e8f58ef",
+      "bytes": 3559,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/text/offset-text.png",
+      "sha256": "650eaded13ad3546e635c2d50956626c3368fe817dbacf33564ba0f4129cfbe7",
+      "bytes": 2195,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/text/rough-text.png",
+      "sha256": "a9baf369bad5f86f517768c31352c4039332789d404a5389a78992648faed12c",
+      "bytes": 4813,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "images/text/rough-word.png",
+      "sha256": "4f0a4b993542137730e5c1b563dc0fc6ec010e6015f2ea651a162f4397ee2f69",
+      "bytes": 6497,
+      "kind": "image",
+      "fidelity": "upstream-copy",
+      "platform": "any",
+      "generator": "import-assets"
+    },
+    {
+      "path": "options/clamps.json",
+      "sha256": "21015d4daa67731cc6c6f7b3000e135b5b1a10501e507a082b1704121335c42e",
+      "bytes": 38796,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "verbatim-engine",
+      "platform": "any"
+    },
+    {
+      "path": "options/defaults.json",
+      "sha256": "64fc45373d373a4c418996d0437294ca19b19e8a28bed4c388d3248ac63876b7",
+      "bytes": 3157,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "verbatim-engine",
+      "platform": "any"
+    },
+    {
+      "path": "rng/splitmix64.json",
+      "sha256": "658c4c132f95ed5e9fc0ea9b553be73ca51626f867caeb218682dee18ea17ad5",
+      "bytes": 14546,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "verbatim-engine",
+      "platform": "any"
+    },
+    {
+      "path": "rng/unit-float.json",
+      "sha256": "6bf95b1cdcc793116a970bc494d514c5ce99d37f09f20407a9f6c25a907fbd81",
+      "bytes": 81363,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "verbatim-engine",
+      "platform": "any"
+    },
+    {
+      "path": "shapes/shapes.json",
+      "sha256": "fd42543b729acf381400485864b56b1e79ade297920167ee455963a14d9deb5e",
+      "bytes": 61748,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "shim-dependent",
+      "platform": "linux-x86_64"
+    },
+    {
+      "path": "stickers/contours.json",
+      "sha256": "d1dd8eef8732983e05507c274d15583b3c90cb4170b6d155abfac99788668114",
+      "bytes": 327862,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "stickers/image-placement.json",
+      "sha256": "3c25b88f063e21766600d641e5da4ce7af17bef96254a30719b8b9007376f111",
+      "bytes": 348984,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "strokes/outlines.json",
+      "sha256": "8af8fe7ec5881cf14a682c02dce89b212d3c6e43dce8eb103e00131b460d6613",
+      "bytes": 13341,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "svg/path-parse.json",
+      "sha256": "22d2ac85da5c747ad342ee81aec335a8b653be630747616faff548a4c38b1722",
+      "bytes": 30476,
+      "kind": "data",
+      "generator": "swift-fixture-exporter",
+      "fidelity": "libm-dependent",
+      "platform": "linux-x86_64"
+    },
+    {
+      "path": "text/outlines.json",
+      "sha256": "639837f0dfe6ffce63e7b24570b0638fd6ddb44811bf973dc3cd1e8b87776fbf",
+      "bytes": 14982,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    }
+  ]
+}

@@ -1,0 +1,614 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:sketchyjs:schema:scene:v1",
+  "title": "Sketchy scene",
+  "$ref": "#/definitions/Scene",
+  "definitions": {
+    "Scene": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "number",
+          "const": 1
+        },
+        "size": {
+          "$ref": "#/definitions/Size"
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SceneNode"
+          }
+        },
+        "plugins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/PluginUse"
+          }
+        },
+        "diagnostics": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Diagnostic"
+          }
+        }
+      },
+      "required": [
+        "version",
+        "size",
+        "nodes"
+      ],
+      "additionalProperties": false,
+      "description": "A serializable, renderer-independent scene."
+    },
+    "Size": {
+      "type": "object",
+      "properties": {
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ],
+      "additionalProperties": false,
+      "description": "A width and height in scene units."
+    },
+    "SceneNode": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "drawing"
+            },
+            "drawing": {
+              "$ref": "#/definitions/Drawing"
+            },
+            "transform": {
+              "$ref": "#/definitions/Matrix2D"
+            }
+          },
+          "required": [
+            "type",
+            "drawing"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "group"
+            },
+            "children": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/SceneNode"
+              }
+            },
+            "transform": {
+              "$ref": "#/definitions/Matrix2D"
+            }
+          },
+          "required": [
+            "type",
+            "children"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "A node in a built scene."
+    },
+    "Drawing": {
+      "type": "object",
+      "properties": {
+        "shape": {
+          "$ref": "#/definitions/ShapeKind"
+        },
+        "outline": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Path"
+          }
+        },
+        "layers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DrawLayer"
+          }
+        }
+      },
+      "required": [
+        "shape",
+        "outline",
+        "layers"
+      ],
+      "additionalProperties": false,
+      "description": "Generated geometry for one shape."
+    },
+    "ShapeKind": {
+      "type": "string",
+      "enum": [
+        "line",
+        "rectangle",
+        "ellipse",
+        "circle",
+        "linearPath",
+        "polygon",
+        "arc",
+        "curve",
+        "roundedRectangle",
+        "egg",
+        "path"
+      ],
+      "description": "Kinds of base shape."
+    },
+    "Path": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PathOp"
+      },
+      "description": "An ordered list of operations forming one or more subpaths."
+    },
+    "PathOp": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "M"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "op",
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "L"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "op",
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "Q"
+            },
+            "cx": {
+              "type": "number"
+            },
+            "cy": {
+              "type": "number"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "op",
+            "cx",
+            "cy",
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "C"
+            },
+            "c1x": {
+              "type": "number"
+            },
+            "c1y": {
+              "type": "number"
+            },
+            "c2x": {
+              "type": "number"
+            },
+            "c2y": {
+              "type": "number"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "op",
+            "c1x",
+            "c1y",
+            "c2x",
+            "c2y",
+            "x",
+            "y"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "type": "string",
+              "const": "Z"
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "One drawing operation. Coordinates are absolute."
+    },
+    "DrawLayer": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/definitions/LayerRole"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Path"
+          }
+        },
+        "fillRule": {
+          "$ref": "#/definitions/FillRule"
+        },
+        "paint": {
+          "$ref": "#/definitions/Paint"
+        },
+        "strokeWidth": {
+          "type": "number",
+          "description": "Stroke width in scene units for `stroke` layers rendered as strokes; absent for filled areas."
+        },
+        "cap": {
+          "$ref": "#/definitions/BrushCap",
+          "description": "Line cap of stroked layers; renderers default to `round` (Sketchy's default brush)."
+        },
+        "join": {
+          "$ref": "#/definitions/BrushJoin",
+          "description": "Line join of stroked layers; renderers default to `round`."
+        },
+        "miterLimit": {
+          "type": "number",
+          "description": "Miter limit used with the `miter` join."
+        },
+        "clip": {
+          "$ref": "#/definitions/ClipDescriptor"
+        }
+      },
+      "required": [
+        "role",
+        "paths",
+        "fillRule",
+        "paint"
+      ],
+      "additionalProperties": false,
+      "description": "One painted group of paths."
+    },
+    "LayerRole": {
+      "type": "string",
+      "enum": [
+        "sheet-shadow",
+        "sheet",
+        "sticker-image",
+        "texture",
+        "fill",
+        "fill-pattern",
+        "stroke",
+        "mask"
+      ],
+      "description": "Paint order within a sticker or shape: `sheet-shadow` first, `stroke` last."
+    },
+    "FillRule": {
+      "type": "string",
+      "enum": [
+        "nonzero",
+        "evenodd"
+      ],
+      "description": "SVG fill rule. Sticker sheets use `evenodd` so holes stay empty."
+    },
+    "Paint": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "solid"
+            },
+            "color": {
+              "$ref": "#/definitions/Color"
+            },
+            "alpha": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "color"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "stroke"
+            },
+            "alpha": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "fill"
+            },
+            "alpha": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "paper"
+            },
+            "alpha": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "What a layer paints with. `stroke`, `fill` and `paper` refer to the owning shape's colors."
+    },
+    "Color": {
+      "description": "A CSS color string, or an sRGB tuple [r, g, b] or [r, g, b, a] with components in 0..1.",
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      ]
+    },
+    "BrushCap": {
+      "type": "string",
+      "enum": [
+        "butt",
+        "round",
+        "square"
+      ]
+    },
+    "BrushJoin": {
+      "anyOf": [
+        {
+          "type": "string",
+          "const": "miter"
+        },
+        {
+          "type": "string",
+          "const": "round"
+        },
+        {
+          "type": "string",
+          "const": "bevel"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "curvedBevel"
+            },
+            "bulge": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "bulge"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ClipDescriptor": {
+      "type": "object",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Path"
+          }
+        },
+        "fillRule": {
+          "$ref": "#/definitions/FillRule"
+        },
+        "inverse": {
+          "type": "boolean",
+          "description": "When true the layer is visible outside `paths` instead of inside (outside stroke alignment)."
+        }
+      },
+      "required": [
+        "paths",
+        "fillRule"
+      ],
+      "additionalProperties": false,
+      "description": "A clip applied to a layer. `path` is in the layer's coordinate space."
+    },
+    "Matrix2D": {
+      "type": "array",
+      "minItems": 6,
+      "items": [
+        {
+          "type": "number",
+          "title": "a"
+        },
+        {
+          "type": "number",
+          "title": "b"
+        },
+        {
+          "type": "number",
+          "title": "c"
+        },
+        {
+          "type": "number",
+          "title": "d"
+        },
+        {
+          "type": "number",
+          "title": "e"
+        },
+        {
+          "type": "number",
+          "title": "f"
+        }
+      ],
+      "maxItems": 6,
+      "description": "A 2D affine matrix in SVG order: `[a, b, c, d, e, f]` maps (x, y) to (ax + cy + e, bx + dy + f)."
+    },
+    "PluginUse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "api": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "api"
+      ],
+      "additionalProperties": false,
+      "description": "Which plugin produced part of a scene, so a stored scene says what built it."
+    },
+    "Diagnostic": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        },
+        "plugin": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "additionalProperties": false,
+      "description": "A non-fatal message produced while building a scene. `code` is a stable kebab-case string."
+    },
+    "Seed": {
+      "description": "Deterministic seed: a non-negative safe integer, or a decimal string for values up to 2^64 - 1.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{1,20}$"
+        }
+      ]
+    },
+    "SerializedSeed": {
+      "description": "Deterministic seed: a non-negative safe integer, or a decimal string for values up to 2^64 - 1.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{1,20}$"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,7 @@
+fixtures/
+pnpm-lock.yaml
+dist/
+docs/api/
+tools/swift-fixture-exporter/
+packages/types/schemas/
+*.md
