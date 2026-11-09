@@ -4,9 +4,9 @@ import { buildManifest } from "./build-manifest.mjs";
 import { referenceDir, upstream } from "./lib.mjs";
 
 /** Returns a list of problems with the committed manifest; empty means it matches the files on disk. */
-export function verifyManifest() {
+export function verifyManifest(dir = referenceDir) {
   const problems = [];
-  const manifestPath = join(referenceDir, "manifest.json");
+  const manifestPath = join(dir, "manifest.json");
   if (!existsSync(manifestPath)) return ["manifest.json is missing; run pnpm fixtures:manifest"];
   const committed = JSON.parse(readFileSync(manifestPath, "utf8"));
   if (committed.source?.commit !== upstream.commit || committed.source?.tag !== upstream.tag) {
@@ -15,7 +15,7 @@ export function verifyManifest() {
   if (/\b(generatedAt|timestamp|createdAt|hostname)\b/i.test(JSON.stringify(committed))) {
     problems.push("manifest contains a timestamp or host field");
   }
-  const fresh = buildManifest();
+  const fresh = buildManifest(dir);
   const byPath = new Map(committed.files.map((f) => [f.path, f]));
   for (const file of fresh.files) {
     const old = byPath.get(file.path);

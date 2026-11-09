@@ -6,10 +6,10 @@ import { classify, exporterDir, listFiles, pending, referenceDir, sha256File, sh
  * Builds `manifest.json`: provenance, per-file SHA-256, fidelity and platform tags, the pending
  * list, and a tree hash. No timestamps or host paths, so the output is reproducible.
  */
-export function buildManifest() {
-  const files = listFiles(referenceDir).filter((path) => path !== "manifest.json");
+export function buildManifest(dir = referenceDir) {
+  const files = listFiles(dir).filter((path) => path !== "manifest.json");
   const entries = files.map((path) => {
-    const full = join(referenceDir, path);
+    const full = join(dir, path);
     return { path, sha256: sha256File(full), bytes: statSync(full).size, ...classify(path) };
   });
   const treeSha256 = sha256Text(entries.map((e) => `${e.sha256}  ${e.path}\n`).join(""));
