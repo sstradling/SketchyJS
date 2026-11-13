@@ -3,6 +3,68 @@ import { join } from "node:path";
 import { buildManifest } from "./build-manifest.mjs";
 import { referenceDir, upstream } from "./lib.mjs";
 
+/** Cases added beside the original contour file. Order is part of the fixture. */
+const phase3CaseIds = [
+  "torn-chop",
+  "paper-fibers",
+  "hole-smaller-than-margin",
+  "open-ribbon",
+  "smoothness-0.5",
+  "smoothness-1.5",
+  "group-hole",
+  "group-transform",
+  "group-torn",
+  "image-hole",
+  "group-overlapping",
+  "group-corner-sharing",
+];
+
+/**
+ * Checks the Phase 3 Darwin addition. A sandbox that only copied the Linux groups
+ * does not have this file, and that is not a failure.
+ */
+function verifyPhase3(dir) {
+  const file = join(dir, "stickers/phase3.json");
+  if (!existsSync(file)) {
+    return dir === referenceDir ? ["stickers/phase3.json is missing"] : [];
+  }
+  const problems = [];
+  const text = readFileSync(file, "utf8");
+  if (/\b(generatedAt|timestamp|createdAt|hostname)\b/i.test(text) || /\/Users\/|\/tmp\/|\/home\//.test(text)) {
+    problems.push("stickers/phase3.json contains a host path or timestamp");
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return ["stickers/phase3.json is not JSON"];
+  }
+  const provenance = parsed.provenance ?? {};
+  if (provenance.commit !== upstream.commit) problems.push("stickers/phase3.json is not pinned to the Sketchy commit");
+  if (provenance.tag !== upstream.tag) problems.push("stickers/phase3.json is not pinned to the Sketchy tag");
+  if (provenance.platform !== "darwin-x86_64" || provenance.arch !== "x86_64" || provenance.os !== "darwin") {
+    problems.push("stickers/phase3.json provenance is not darwin-x86_64");
+  }
+  if (provenance.sdk !== "iphonesimulator") problems.push("stickers/phase3.json provenance is not the iOS simulator");
+  if (!provenance.xcode || !provenance.simulator || !provenance.simulatorRuntime || !provenance.swift) {
+    problems.push("stickers/phase3.json provenance is missing Xcode, simulator, or Swift");
+  }
+  const cases = Array.isArray(parsed.cases) ? parsed.cases : [];
+  const ids = cases.map((item) => item.id);
+  if (ids.join(",") !== phase3CaseIds.join(",")) {
+    problems.push(`stickers/phase3.json cases are ${ids.join(", ")}`);
+  }
+  for (const item of cases) {
+    if (!Array.isArray(item.commands) || item.commands.length === 0) problems.push(`${item.id}: no commands`);
+    if (!Array.isArray(item.centerlines) || item.centerlines.length === 0) problems.push(`${item.id}: no centerlines`);
+  }
+  const clamped = cases.find((item) => item.id === "smoothness-1.5");
+  if (clamped && clamped.storedSmoothness !== 1) {
+    problems.push("smoothness-1.5 must record StickerBacking's clamp to 1");
+  }
+  return problems;
+}
+
 /** Returns a list of problems with the committed manifest; empty means it matches the files on disk. */
 export function verifyManifest(dir = referenceDir) {
   const problems = [];
@@ -25,6 +87,7 @@ export function verifyManifest(dir = referenceDir) {
   }
   for (const path of byPath.keys()) problems.push(`${path}: in manifest but missing on disk`);
   if (committed.treeSha256 !== fresh.treeSha256) problems.push("treeSha256 differs from manifest");
+  problems.push(...verifyPhase3(dir));
   return problems;
 }
 

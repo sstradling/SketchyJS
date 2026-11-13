@@ -72,7 +72,9 @@ The RNG fixtures include the sequence quoted in the Swift test suite (`SeedDeter
 
 `manifest.json` records that decision under `accepted`, with the source repo, tag, commit, those paths, and the sha256 of every imported file. Regeneration through `DocsGalleryRenderer` is deferred until pixel parity work.
 
-The Darwin fixtures are `strokes/outlines.json`, `brushes/crayon-watercolor.json`, `stickers/contours.json`, `stickers/image-placement.json`, `animation/frames.json`, `text/outlines.json`, and `comparison/darwin-linux.json`. `darwin/` repeats the original nine exporter files against real frameworks. `pnpm fixtures:export:darwin` builds that simulator exporter. It does not replace the Linux files, so `pnpm fixtures:regen -- --check` on Linux still checks those nine.
+The Darwin fixtures are `strokes/outlines.json`, `brushes/crayon-watercolor.json`, `stickers/contours.json`, `stickers/image-placement.json`, `stickers/phase3.json`, `animation/frames.json`, `text/outlines.json`, and `comparison/darwin-linux.json`. `darwin/` repeats the original nine exporter files against real frameworks. `pnpm fixtures:export:darwin` builds that simulator exporter. It does not replace the Linux files, so `pnpm fixtures:regen -- --check` on Linux still checks those nine.
+
+`stickers/phase3.json` was exported later from the same commit and does not replace `stickers/contours.json` or `stickers/image-placement.json`. Its `provenance` object records `darwin-x86_64`, Xcode, and the iOS simulator runtime. The cases are a flat torn chop (`jaggedness` 0), paper fibers, a hole smaller than the margin, an open ribbon, smoothness `0.5`, smoothness `1.5` (stored as `1` because `StickerBacking` clamps to `0...1`), a group hole, a group affine transform, a torn group, an image masked to a holed sheet, overlapping group squares, and corner-sharing group squares. `fixtures:verify` checks that list and the pin. `fixtures:regen -- --check` ignores the file because its generator is `darwin-fixture-exporter`.
 
 ### macOS regeneration plan
 

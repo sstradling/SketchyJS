@@ -30,7 +30,7 @@ export function buildManifest(dir = referenceDir) {
       platform: "darwin-x86_64",
       sdk: "iphonesimulator",
       minimumOS: "17.0",
-      note: "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline.",
+      note: "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline. stickers/phase3.json adds torn chops, fibers, ribbons, holes, smoothness, and group sheets from that same commit; its provenance object records the Darwin arch, Xcode, and simulator.",
     },
     pending,
     accepted: acceptedReferences(entries),
