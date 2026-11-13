@@ -1,4 +1,12 @@
-import { svgPathToOps, type OperationSet, type SketchDrawing } from "@sketchy-js/core";
+import {
+  opacityRibbon,
+  opacityVaries,
+  strokeToOutline,
+  svgPathToOps,
+  thicknessVaries,
+  type OperationSet,
+  type SketchDrawing,
+} from "@sketchy-js/core";
 import type {
   ClipDescriptor,
   DrawLayer,
@@ -102,9 +110,15 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size): Drawing {
         });
         break;
       }
-      case "fillSketch":
-        layers.push(fillStrokes([transformPath(set.ops, matrix)], "fill", aligned.clip));
+      case "fillSketch": {
+        const scribbleClip = set.clip
+          ? { paths: [transformPath(set.clip, matrix)], fillRule: "nonzero" as const }
+          : undefined;
+        layers.push(
+          fillStrokes([transformPath(set.ops, matrix)], "fill", scribbleClip ?? aligned.clip),
+        );
         break;
+      }
       case "fillPath":
         layers.push({
           role: "fill",
@@ -132,5 +146,63 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size): Drawing {
       }
     }
   }
-  return { shape: drawing.shape, outline, layers };
+  return applyAdvancedStroke({ shape: drawing.shape, outline, layers }, o);
+}
+
+/**
+ * Replaces plain stroke layers when the brush cannot be a native stroke.
+ * Curved bevel, variable width, and calligraphic tips become filled outlines.
+ * A varying opacity profile becomes one luminance-mask group.
+ */
+function applyAdvancedStroke(drawing: Drawing, o: SketchOptions): Drawing {
+  const profile = o.brushProfile;
+  if (profile.crayon || profile.watercolor) return drawing;
+  const varyingOpacity = opacityVaries(profile.opacityProfile);
+  const custom =
+    typeof profile.join === "object" ||
+    thicknessVaries(profile.thicknessProfile) ||
+    (profile.tip.directionSensitive && profile.tip.roundness < 0.99);
+  if (!varyingOpacity && !custom) return drawing;
+  const layers: DrawLayer[] = [];
+  let group = 1;
+  for (const layer of drawing.layers) {
+    if (layer.role !== "stroke" || layer.strokeWidth === undefined) {
+      layers.push(layer);
+      continue;
+    }
+    if (varyingOpacity) {
+      const pieces = layer.paths.flatMap((path) =>
+        opacityRibbon(path, layer.strokeWidth ?? 0, profile, layer.paint.alpha ?? 1),
+      );
+      const id = group++;
+      for (const piece of pieces) {
+        layers.push({
+          role: "stroke",
+          paths: [piece.path],
+          fillRule: "nonzero",
+          paint: layer.paint,
+          mask: { group: id, opacity: piece.opacity },
+          ...(layer.clip ? { clip: layer.clip } : {}),
+        });
+      }
+      continue;
+    }
+    const filled = layer.paths.flatMap((path) => [
+      strokeToOutline(path, {
+        width: layer.strokeWidth ?? 0,
+        cap: profile.cap,
+        join: profile.join,
+        miterLimit: o.strokeMiterLimit,
+        profile,
+      }),
+    ]);
+    layers.push({
+      role: "stroke",
+      paths: filled,
+      fillRule: "nonzero",
+      paint: layer.paint,
+      ...(layer.clip ? { clip: layer.clip } : {}),
+    });
+  }
+  return { ...drawing, layers };
 }

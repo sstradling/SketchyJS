@@ -240,13 +240,15 @@ describe("scene building", () => {
     expect(widths[2]!).toBeGreaterThan(widths[1]!);
   });
 
-  it("reports unsupported scribble and watercolor fills once and still draws the outline", () => {
+  it("draws a scribble fill and still reports watercolor as unsupported", () => {
     const scene = sketch([rectangle(0, 0, 20, 20), rectangle(30, 30, 20, 20)], size, {
       seed: 1n,
       fillStyle: "scribble",
     });
-    expect(scene.diagnostics?.map((d) => d.code)).toEqual(["fill-style-unsupported"]);
-    expect(roles(scene)).toEqual(["stroke", "stroke"]);
+    expect(scene.diagnostics).toBeUndefined();
+    expect(roles(scene)).toEqual(["fill", "stroke", "fill", "stroke"]);
+    const watercolor = sketch(rectangle(0, 0, 20, 20), size, { seed: 1n, fillStyle: "watercolor" });
+    expect(watercolor.diagnostics?.map((d) => d.code)).toEqual(["fill-style-unsupported"]);
   });
 
   it("reports unsupported brush profiles and sticker backing", () => {

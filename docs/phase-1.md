@@ -149,6 +149,8 @@ Housekeeping:
 
 ## Decisions needed
 
+Resolved in Phase 2 (see [phase-2.md](phase-2.md)): unseeded drawings stay on seed 1; scribble is in Phase 2; Darwin stays the radial-fill oracle; the frame-sized builder stays deferred; 42 KB gzip is a ceiling; plugin API 1.1 is folded into 1.0 before the first publish.
+
 1. Should unseeded drawings stay deterministic (seed 1), or draw a random seed per build like Swift, with the seed recorded in the scene?
 2. Which phase owns scribble? Phase 2 (with watercolor and crayon, which share the renderer-side stroke code) is the lowest-risk choice.
 3. Accept Darwin-canonical for radial fills and treat the Linux 320-operation baseline as informational, or invest in a glibc `sinf`/`cosf` port for a Linux oracle?

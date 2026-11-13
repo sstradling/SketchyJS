@@ -1,4 +1,4 @@
-import type { PathOp, ShapeKind, SketchOptions } from "@sketchy-js/types";
+import type { Path, PathOp, ShapeKind, SketchOptions } from "@sketchy-js/types";
 import type { RoughCtx, Pt } from "../rough/context.js";
 
 /**
@@ -17,6 +17,8 @@ export interface OperationSet {
   readonly path?: string;
   /** Bounding box size of the SVG path for `path2DPattern`. */
   readonly size?: { readonly width: number; readonly height: number };
+  /** Clip applied to this set, in the same space as `ops` (scribble on a polygon or SVG path). */
+  readonly clip?: Path;
 }
 
 /** Generated geometry for one shape before layer assembly (`Drawing`). */

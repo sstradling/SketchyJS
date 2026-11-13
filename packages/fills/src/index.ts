@@ -6,12 +6,24 @@ import { hachure } from "./hachure.js";
 import { solid } from "./solid.js";
 import { starBurst } from "./starBurst.js";
 import { sunBurst } from "./sunBurst.js";
+import { scribble } from "./scribble.js";
 import { zigzag } from "./zigzag.js";
 import { zigzagLine } from "./zigzagLine.js";
 
-export { crossHatch, dashed, dots, hachure, solid, starBurst, sunBurst, zigzag, zigzagLine };
+export {
+  crossHatch,
+  dashed,
+  dots,
+  hachure,
+  scribble,
+  solid,
+  starBurst,
+  sunBurst,
+  zigzag,
+  zigzagLine,
+};
 
-/** Every Phase 1 fill plugin, in registration order. Importing this pulls in all of them. */
+/** Built-in fill plugins, in registration order. Importing this pulls in all of them. */
 export const builtinFills: readonly FillPlugin[] = [
   solid,
   hachure,
@@ -22,4 +34,5 @@ export const builtinFills: readonly FillPlugin[] = [
   zigzagLine,
   sunBurst,
   starBurst,
+  scribble,
 ];

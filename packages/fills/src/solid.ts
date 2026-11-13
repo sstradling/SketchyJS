@@ -10,7 +10,7 @@ import { regionView } from "./internal/region.js";
 export const solid = /*#__PURE__*/ defineFill({
   id: "solid",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Solid",
   description: "A jittered, fully painted fill that follows the outline.",
   options: {},

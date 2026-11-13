@@ -6,7 +6,7 @@ import { regionView } from "./internal/region.js";
 export const sunBurst = /*#__PURE__*/ defineFill({
   id: "sunBurst",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Sunburst",
   description: "Rough rays radiating from the center of the shape.",
   options: {},

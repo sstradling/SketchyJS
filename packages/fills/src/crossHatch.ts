@@ -18,7 +18,7 @@ function pass(input: FillInput, ctx: PluginContext, angle: number): Path[] {
 export const crossHatch = /*#__PURE__*/ defineFill({
   id: "crossHatch",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Cross-hatch",
   description: "Two perpendicular hachure passes.",
   options: {},

@@ -1,6 +1,6 @@
 # Contributing a plugin
 
-> **Status: design.** The generator (`pnpm new`), the `@sketchy-js/testkit` suite (`describePlugin`), and `packages/contrib` described here do not exist yet; they are the target interface for contributors. What does exist is the plugin contract (API 1.1) and a set of conformance helpers in `@sketchy-js/plugin`; [section 3](#3-the-conformance-suite) says exactly which checks those cover. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
+> **Status: design.** The generator (`pnpm new`), the `@sketchy-js/testkit` suite (`describePlugin`), and `packages/contrib` described here do not exist yet; they are the target interface for contributors. What does exist is the plugin contract (API 1.0) and a set of conformance helpers in `@sketchy-js/plugin`; [section 3](#3-the-conformance-suite) says exactly which checks those cover. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
 
 This is a walkthrough from idea to merged pull request. For general repository rules (setup, commits, code style) see [CONTRIBUTING.md](../CONTRIBUTING.md).
 

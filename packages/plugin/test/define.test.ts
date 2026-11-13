@@ -101,7 +101,7 @@ describe("define*", () => {
   });
 
   it("exposes the API version constant", () => {
-    expect(PLUGIN_API_VERSION).toEqual({ major: 1, minor: 1 });
+    expect(PLUGIN_API_VERSION).toEqual({ major: 1, minor: 0 });
   });
 
   it("validates definition shape and option defaults in development", () => {

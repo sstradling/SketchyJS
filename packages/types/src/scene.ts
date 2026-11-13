@@ -44,6 +44,11 @@ export interface DrawLayer {
   /** Miter limit used with the `miter` join. */
   miterLimit?: number;
   clip?: ClipDescriptor;
+  /**
+   * When set, this layer is one piece of a luminance mask. Pieces that share `group`
+   * are painted faintest-first in opaque gray, then tinted once, so overlaps do not darken.
+   */
+  mask?: { group: number; opacity: number; blur?: number };
 }
 
 /** Kinds of base shape. */

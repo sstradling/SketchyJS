@@ -12,6 +12,7 @@ export default defineConfig({
     zigzagLine: "src/zigzagLine.ts",
     sunBurst: "src/sunBurst.ts",
     starBurst: "src/starBurst.ts",
+    scribble: "src/scribble.ts",
   },
   format: ["esm"],
   dts: { compilerOptions: { composite: false } },

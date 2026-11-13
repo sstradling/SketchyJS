@@ -5,7 +5,10 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("../", import.meta.url));
 const dist = (pkg, file = "index.js") => `${root}packages/${pkg}/dist/${file}`;
 
-/** Entry points measured; `budget` is the plan's gzip range in KB (Phase 1: basic SVG scene import). */
+/**
+ * Entry points measured. `budget` is a gzip ceiling in KB: the check fails only when an entry
+ * is over its ceiling. The basic SVG scene ceiling is 42 KB. Being under a ceiling is success.
+ */
 const entries = [
   {
     name: "basic SVG scene (scene/basic + svg-renderer)",
@@ -13,17 +16,17 @@ const entries = [
 import { renderToSvgString } from "@sketchy-js/svg-renderer";
 import { rectangle } from "@sketchy-js/core";
 export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 }));`,
-    budget: [28, 42],
+    ceiling: 42,
   },
   {
     name: "core: all shapes, outlines, SVG parser (plan 12-18 KB)",
     code: `export * from "@sketchy-js/core";`,
-    budget: [12, 18],
+    ceiling: 18,
   },
   {
     name: "fills: all nine (plan 7-12 KB)",
     code: `export { builtinFills } from "@sketchy-js/fills";`,
-    budget: [7, 12],
+    ceiling: 12,
   },
   {
     name: "scene/basic only",
@@ -32,11 +35,25 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
   {
     name: "svg-renderer only (plan 5-9 KB)",
     code: `export { renderToSvgString, renderToSvgElement } from "@sketchy-js/svg-renderer";`,
-    budget: [5, 9],
+    ceiling: 9,
   },
   {
     name: "one fill plugin (hachure)",
     code: `export { hachure } from "@sketchy-js/fills/hachure";`,
+  },
+  {
+    name: "canvas-renderer (plan ceiling 12 KB)",
+    code: `export { renderToCanvas } from "@sketchy-js/canvas-renderer";`,
+    ceiling: 12,
+  },
+  {
+    name: "brushes entry (plan ceiling 20 KB)",
+    code: `export { crayon, watercolorStrokePieces } from "@sketchy-js/brushes";`,
+    ceiling: 20,
+  },
+  {
+    name: "animate (frame generator)",
+    code: `export { generateFrame, precomputeFrames } from "@sketchy-js/animate";`,
   },
 ];
 
@@ -49,6 +66,9 @@ const alias = {
   "@sketchy-js/fills": dist("fills"),
   "@sketchy-js/plugin": dist("plugin"),
   "@sketchy-js/types": dist("types"),
+  "@sketchy-js/canvas-renderer": dist("canvas-renderer"),
+  "@sketchy-js/brushes": dist("brushes"),
+  "@sketchy-js/animate": dist("animate"),
 };
 
 let failed = false;
@@ -69,11 +89,10 @@ for (const entry of entries) {
   const gz = gzipSync(bytes, { level: 9 }).length;
   const kb = (gz / 1024).toFixed(1);
   let verdict = "";
-  if (entry.budget) {
-    const [min, max] = entry.budget;
+  if (entry.ceiling) {
     const used = gz / 1024;
-    failed ||= used > max;
-    verdict = ` (plan band ${min}-${max} KB gzip: ${used > max ? "OVER" : used < min ? "below band" : "within band"})`;
+    failed ||= used > entry.ceiling;
+    verdict = ` (ceiling ${entry.ceiling} KB gzip: ${used > entry.ceiling ? "OVER" : "within"})`;
   }
   console.log(`${entry.name}: ${(bytes.length / 1024).toFixed(1)} KB min, ${kb} KB gzip${verdict}`);
 }

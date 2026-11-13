@@ -1,6 +1,6 @@
 # SketchyJS plugin architecture
 
-> **Status: design, with the contract, the builders, and a fill-only host implemented.** What exists today is listed in [Implementation status](#implementation-status). Everything else in this document, including brush, texture, and edge hosting, the ESLint preset, `@sketchy-js/testkit`, and the compat layer, is the target design and is marked *planned* where it matters. The contract in section 4 describes **plugin API 1.1**, which is what `packages/plugin/src` ships; the 1.1 additions are marked `(API 1.1)`. Whether 1.1 stays a minor release or is folded into 1.0 before the first publication is undecided (see [docs/phase-1.md](phase-1.md)). Other TypeScript sketches in sections 8 and 9 (crayon, charcoal, and the simplified hachure) are illustrations, not shipped code.
+> **Status: the contract, the builders, fill hosting, and the crayon brush are implemented.** What exists today is listed in [Implementation status](#implementation-status). Texture and edge hosting, the ESLint preset, `@sketchy-js/testkit`, and the compat layer are still the target design and are marked *planned* where it matters. The published plugin API is **1.0**. The fields that an earlier draft called API 1.1 (`FillRegion.shape`, `GeometryKit.rough`, `FillBase.strokeWidth`, `PluginMeta.paints`, and `FillBase.pattern`) are part of 1.0; nothing has been published, so the version was not bumped. `BrushInput.seed` is also part of 1.0.
 
 SketchyJS has four extension points: **brushes**, **fills**, **textures**, and **sticker edges**. Each is a plugin: a plain, frozen object holding metadata, an option schema, and one pure function. Everything the library ships in those categories (crayon, watercolor, hachure, paper grain, torn edges, ...) is implemented through the same public contract. A contributor adds a look by writing one file, and it renders in SVG and Canvas without touching a renderer.
 
@@ -12,13 +12,13 @@ Verified against the code on this branch (`packages/plugin`, `packages/fills`, `
 
 | Area | State |
 | --- | --- |
-| Contract types for all four kinds, option schema builders (`s`), `PLUGIN_API_VERSION = { major: 1, minor: 1 }` | Implemented (`@sketchy-js/plugin`) |
+| Contract types for all four kinds, option schema builders (`s`), `PLUGIN_API_VERSION = { major: 1, minor: 0 }` | Implemented (`@sketchy-js/plugin`). This is the version that will be published |
 | `defineBrush`, `defineFill`, `defineTexture`, `defineStickerEdge` (brand, deep freeze, `with()`, development-only shape and default validation) | Implemented |
 | `@sketchy-js/plugin/schema`: `resolveOptions`, `validateSchema`, `validateDefinition`, `toJsonSchema`, `hashOptions`, `checkPluginApi`/`assertPluginApi`, `PluginOptionError`, `PluginApiError` | Implemented. `checkPluginApi` is **not** called by the registry yet, so an incompatible `api` is not rejected at `use()` |
 | Conformance helpers in `@sketchy-js/plugin`: `withRandomGuard`, `assertDeterministic`, `assertInputImmutable`, `assertInterleavingStable`, `assertWithinBudget`, `countOps` | Implemented; see [section 3](#3-the-purity-contract-and-how-it-is-enforced) for exactly what each checks |
 | `createSketchy()` registry (immutable `use`, `replace`, `alias`, `has`, `list`, `resolve`, `view()`), `PluginRegistrationError`, `PluginNotRegisteredError` | Implemented for all kinds as data, in `@sketchy-js/scene` |
 | Fill hosting: `ctx.rng` (shared or forked), `ctx.geom` including `ctx.geom.rough`, `ctx.warn` to scene diagnostics, part conversion, non-finite and op-budget handling | Implemented (`scene/src/fill-stage.ts`). Nine built-in fills ship in `@sketchy-js/fills` as `defineFill` plugins |
-| Brush, texture, and edge hosting; `PluginBudgetError`; `meta.plugins` for brushes, textures, edges | Planned. The scene records `{ id, version, api }` for the fill plugin in use only |
+| Brush hosting for `crayon` | Implemented. The scene calls a registered `crayon` brush and replaces stroke layers with its wax passes. Texture and edge hosting, and `PluginBudgetError`, are still planned |
 | `@sketchy-js/testkit` (`describePlugin`, `runX` helpers, `defineDemo`), `pnpm new`, `pnpm docs:plugins`, ESLint preset `plugin`, `@sketchy-js/contrib`, `@sketchy-js/scene/compat` | Planned |
 
 ## Contents
@@ -151,7 +151,7 @@ export type Path = readonly PathOp[];
 ### 4.2 Versioning constants
 
 ```ts
-export const PLUGIN_API_VERSION = { major: 1, minor: 1 } as const;
+export const PLUGIN_API_VERSION = { major: 1, minor: 0 } as const;
 export type PluginApi = `${number}.${number}`;
 export type PluginKind = "brush" | "fill" | "texture" | "edge";
 ```
@@ -562,7 +562,7 @@ Two independent version numbers:
 | Plugin API version | The host (`PLUGIN_API_VERSION`) | `major.minor` | The shape of the contracts in section 4 and the semantics of `ctx` |
 | Plugin version | The plugin author | semver in `version` | The plugin's own behavior and output |
 
-**Current state.** `PLUGIN_API_VERSION` is `{ major: 1, minor: 1 }`. API 1.1 added, all optional or additive: `FillRegion.shape` and the `FillShape` type, `GeometryKit.rough` and the `RoughKit` type, `FillBase.strokeWidth`, and `PluginMeta.paints`. The nine built-in fills declare `api: "1.1"` and use them. A plugin that uses none of them may still declare `"1.0"`. The registry does not yet compare a plugin's `api` with the host's (`checkPluginApi` exists but is not wired in), and there is no `@sketchy-js/scene/compat` layer. Whether to publish 1.1 as the first public version or to fold its additions into 1.0 is an open decision.
+**Current state.** `PLUGIN_API_VERSION` is `{ major: 1, minor: 0 }`. The published API is 1.0. It includes `FillRegion.shape`, `GeometryKit.rough`, `FillBase.strokeWidth`, `FillBase.pattern`, `PluginMeta.paints`, and `BrushInput.seed`. Built-in fills and the crayon brush declare `api: "1.0"`. The registry does not yet compare a plugin's `api` with the host's (`checkPluginApi` exists but is not wired in), and there is no `@sketchy-js/scene/compat` layer.
 
 **Declaring and checking (target behavior).** A plugin declares `api: "1.0"`, the lowest API it needs. At `use()` or direct-use time the host checks:
 

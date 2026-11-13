@@ -47,6 +47,10 @@
       "types": "./dist/starBurst.d.ts",
       "import": "./dist/starBurst.js"
     },
+    "./scribble": {
+      "types": "./dist/scribble.d.ts",
+      "import": "./dist/scribble.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

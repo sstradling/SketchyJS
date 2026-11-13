@@ -319,6 +319,26 @@
         },
         "clip": {
           "$ref": "#/definitions/ClipDescriptor"
+        },
+        "mask": {
+          "type": "object",
+          "properties": {
+            "group": {
+              "type": "number"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "blur": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "group",
+            "opacity"
+          ],
+          "additionalProperties": false,
+          "description": "When set, this layer is one piece of a luminance mask. Pieces that share `group` are painted faintest-first in opaque gray, then tinted once, so overlaps do not darken."
         }
       },
       "required": [

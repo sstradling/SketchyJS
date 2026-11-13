@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: { index: "src/index.ts" },
+  entry: { index: "src/index.ts", crayon: "src/crayon.ts" },
   format: ["esm"],
   dts: { compilerOptions: { composite: false } },
   tsconfig: "tsconfig.build.json",

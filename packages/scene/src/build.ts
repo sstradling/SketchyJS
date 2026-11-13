@@ -1,9 +1,5 @@
 import { f, generateDrawing, type Shape } from "@sketchy-js/core";
-import {
-  defaultSketchOptions,
-  effectiveFillWeight,
-  resolveSketchOptions,
-} from "@sketchy-js/core/options";
+import { effectiveFillWeight, resolveSketchOptions } from "@sketchy-js/core/options";
 import type {
   Diagnostic,
   PluginUse,
@@ -13,6 +9,7 @@ import type {
   SketchOptions,
 } from "@sketchy-js/types";
 import { assembleDrawing } from "./assemble.js";
+import { applyCrayon } from "./brush-host.js";
 import { PluginNotRegisteredError } from "./errors.js";
 import { createFillStage } from "./fill-stage.js";
 import type { ResolvedPlugin } from "./registry.js";
@@ -30,8 +27,8 @@ export interface DrawItem {
   readonly fill?: unknown;
 }
 
-/** Styles Sketchy's renderer paints itself; they are not generator fills in this phase. */
-const RENDERER_STYLES: ReadonlySet<string> = new Set(["scribble", "watercolor"]);
+/** Styles the renderer paints itself. Scribble is a fill plugin; watercolor is a brush fill. */
+const RENDERER_STYLES: ReadonlySet<string> = new Set(["watercolor"]);
 
 /** Sketchy's `fillSpacingPattern`: one full pass per multiplier with growing fill weight. */
 function spacingPasses(o: SketchOptions): SketchOptions[] {
@@ -45,11 +42,19 @@ function spacingPasses(o: SketchOptions): SketchOptions[] {
   }));
 }
 
-/** True when the brush profile asks for rendering Phase 1 does not implement. */
-function hasUnsupportedBrush(o: SketchOptions): boolean {
-  const { cap: _cap, join: _join, ...rest } = o.brushProfile;
-  const { cap: _dc, join: _dj, ...defaults } = defaultSketchOptions().brushProfile;
-  return JSON.stringify(rest) !== JSON.stringify(defaults);
+/** Crayon and watercolor run only when that brush plugin is registered. */
+function lookupBrush(
+  resolver: FillResolver,
+  id: string,
+  fields: object,
+): ResolvedPlugin | undefined {
+  const reg = resolver as FillResolver & {
+    has?(kind: string, pluginId: string): boolean;
+    resolveSpec(kind: string, spec: unknown): ResolvedPlugin;
+  };
+  if (typeof reg.has !== "function" || !reg.has("brush", id)) return undefined;
+  const { seed: _seed, ...rest } = fields as { seed?: unknown };
+  return reg.resolveSpec("brush", { kind: id, ...rest });
 }
 
 /** Resolves the fill plugin of an item, reporting (not throwing) for unavailable built-in styles. */
@@ -101,10 +106,21 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
 
   for (const item of items) {
     const base = resolveSketchOptions(item.options);
-    if (hasUnsupportedBrush(base))
+    const crayonPlugin = base.brushProfile.crayon
+      ? lookupBrush(resolver, "crayon", base.brushProfile.crayon)
+      : undefined;
+    if ((base.brushProfile.crayon && !crayonPlugin) || base.brushProfile.watercolor)
       report({
         code: "brush-unsupported",
-        message: "brush profiles are not implemented yet; a plain stroke was drawn",
+        message: base.brushProfile.watercolor
+          ? "watercolor is not registered; a plain stroke was drawn"
+          : "crayon is not registered; a plain stroke was drawn",
+      });
+    if (crayonPlugin)
+      uses.set(crayonPlugin.plugin.id, {
+        id: crayonPlugin.plugin.id,
+        version: crayonPlugin.plugin.version,
+        api: crayonPlugin.plugin.api,
       });
     if (base.stickerBacking)
       report({
@@ -128,7 +144,11 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
         });
         continue;
       }
-      nodes.push({ type: "drawing", drawing: assembleDrawing(generated, size) });
+      const assembled = assembleDrawing(generated, size);
+      nodes.push({
+        type: "drawing",
+        drawing: crayonPlugin ? applyCrayon(assembled, crayonPlugin, options) : assembled,
+      });
     }
   }
   return {

@@ -12,7 +12,7 @@ import { renderLines } from "./internal/render.js";
 export const hachure = /*#__PURE__*/ defineFill({
   id: "hachure",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Hachure",
   description: "Parallel hand-drawn lines at the fill angle.",
   options: {},

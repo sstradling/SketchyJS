@@ -105,6 +105,7 @@ export function partsToSets(
   pluginId: string,
   maxOps: number,
   report: (d: Diagnostic) => void,
+  regionPath: Path = [],
 ): OperationSet[] {
   const sets: OperationSet[] = [];
   let total = 0;
@@ -128,7 +129,11 @@ export function partsToSets(
         });
         continue;
       }
-      sets.push({ type: part.kind === "area" ? "fillPath" : "fillSketch", ops: path });
+      sets.push({
+        type: part.kind === "area" ? "fillPath" : "fillSketch",
+        ops: path,
+        ...(part.clip === "region" ? { clip: regionPath } : {}),
+      });
     }
   }
   return sets;
@@ -175,6 +180,9 @@ export function createFillStage(init: FillStageInit): FillStage {
           color: options.fillColor,
           opacity: options.fillOpacity,
           strokeWidth: options.strokeWidth,
+          ...(options.scribbleTightnessPattern
+            ? { pattern: options.scribbleTightnessPattern }
+            : {}),
         },
       };
       const resolved = bridgeShapeOptions(
@@ -190,7 +198,13 @@ export function createFillStage(init: FillStageInit): FillStage {
         o: Record<string, unknown>,
         c: PluginContext,
       ) => readonly FillPart[];
-      return partsToSets(generate(input, resolved, pluginCtx), plugin.id, maxOps, report);
+      return partsToSets(
+        generate(input, resolved, pluginCtx),
+        plugin.id,
+        maxOps,
+        report,
+        input.region.path,
+      );
     },
   };
 }
