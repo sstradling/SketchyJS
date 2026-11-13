@@ -35,7 +35,11 @@ export interface Canvas2D {
   miterLimit: number;
   getImageData?(sx: number, sy: number, sw: number, sh: number): ImageDataLike;
   putImageData?(data: ImageDataLike, dx: number, dy: number): void;
-  drawImage?(source: CanvasImageSourceLike, dx: number, dy: number): void;
+  drawImage?(source: CanvasImageSourceLike, dx: number, dy: number, dw?: number, dh?: number): void;
+  shadowBlur?: number;
+  shadowColor?: string;
+  shadowOffsetX?: number;
+  shadowOffsetY?: number;
 }
 
 /** Minimal stand-in so the renderer does not depend on the DOM lib. */
@@ -64,4 +68,9 @@ export interface CanvasRenderOptions {
   background?: Color;
   /** Creates the luminance-mask surface. Defaults to `OffscreenCanvas` when the runtime has one. */
   createSurface?: CanvasSurfaceFactory;
+  /**
+   * Already-decoded images keyed by the sticker layer's data URL.
+   * Missing an entry throws; the renderer does not fetch.
+   */
+  images?: Readonly<Record<string, CanvasImageSourceLike>>;
 }

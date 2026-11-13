@@ -10,7 +10,7 @@ This plan targets feature parity with Sketchy `v1.5.0` (`fb17a6e`), not literal 
 
 One important feature: Sketchy `v1.5.0` ships `StickerImage`, an image-masked sticker texture alongside the seeded procedural `StickerTexture.paper(...)` fibers. `StickerImage` wraps a caller-supplied, already decoded `UIImage` (Sketchy never fetches a URL) and masks it with the sticker sheet, so the image follows `.smooth`, `.fullySmooth()`, and `.torn()` edges, holes, and shared `SketchGroup` sheets. Placement is `.tile`, `.stretch`, or `.fill`, adjusted by `scale` and `opacity`. SketchyJS ports this as `StickerImage` on `StickerBacking.image` (see the table row and the `@sketchy-js/stickers` sketch below); acceptance fixtures come from the `v1.5.0` reference exporter.
 
-Version delta from the original `v1.4.2` baseline of this plan: `v1.5.0` adds `StickerImage` and a `.smooth` sticker fix (a sheet keeps its square corner, and a hole smaller than the margin no longer collapses the offset into a round dilation, so a square backing with a small hole stays square). Sticker fixtures must be generated from `v1.5.0`, not `v1.4.2`.
+Version delta from the original `v1.4.2` baseline of this plan (that number is the old Sketchy pin, not a SketchyJS version): Sketchy `v1.5.0` adds `StickerImage` and a `.smooth` sticker fix (a sheet keeps its square corner, and a hole smaller than the margin no longer collapses the offset into a round dilation, so a square backing with a small hole stays square). Sticker fixtures must be generated from `v1.5.0`, not `v1.4.2`. The first stable SketchyJS release is 1.5.0; see [docs/versioning.md](versioning.md).
 
 ### Goals
 
@@ -403,11 +403,15 @@ On every pull request:
 6. run bundle-size budget and dependency/license audit;
 7. upload visual diff report as an artifact.
 
-On merge to `main`/`master`, rerun the same immutable build, publish preview artifacts only if configured, and generate docs preview. Use Changesets for version intent and release notes. The release workflow must:
+On merge to `main`/`master`, rerun the same immutable build, publish preview artifacts only if configured, and generate docs preview. Use Changesets for version intent and release notes.
+
+**Version policy.** SketchyJS versions match the Swift Sketchy library. The first stable JS release is **1.5.0**, the same number as Sketchy 1.5.0, and it means parity with that Swift version. After that, each JS release line tracks the Swift minor version it reaches parity with (Sketchy 1.6.x behavior ships as JS 1.6.x). Fixes that do not move Swift parity use patch numbers. Tags are `v`-prefixed (`v1.5.0`). The plugin API version (currently 1.0) is a separate number and does not follow the package version. See [docs/versioning.md](versioning.md).
+
+The release workflow must:
 
 1. verify a clean checkout and complete CI;
 2. consume changesets and publish packages with npm provenance;
-3. create one annotated, **v-prefixed** repository tag such as `v1.0.0`;
+3. create one annotated, **v-prefixed** repository tag for that release line, the first one being `v1.5.0`;
 4. publish the docs version and GitHub release notes from the same commit;
 5. verify package tarballs in a fresh consumer install.
 

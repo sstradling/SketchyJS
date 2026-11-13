@@ -15,6 +15,10 @@
       "types": "./dist/basic.d.ts",
       "import": "./dist/basic.js"
     },
+    "./stickers": {
+      "types": "./dist/stickers.d.ts",
+      "import": "./dist/stickers.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -37,6 +41,9 @@
     "@sketchy-js/stickers": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@sketchy-js/stickers": "workspace:*"
   },
   "license": "MIT",
   "engines": {

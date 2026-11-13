@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entry: { index: "src/index.ts", basic: "src/basic.ts" },
+  entry: { index: "src/index.ts", basic: "src/basic.ts", stickers: "src/stickers.ts" },
   format: ["esm"],
   dts: { compilerOptions: { composite: false } },
   tsconfig: "tsconfig.build.json",

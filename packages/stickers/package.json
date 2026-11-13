@@ -11,6 +11,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./image": {
+      "types": "./dist/image.d.ts",
+      "import": "./dist/image.js"
+    },
+    "./clipper": {
+      "types": "./dist/clipper.d.ts",
+      "import": "./dist/clipper.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -21,7 +29,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy-js/plugin": "workspace:*"
+    "@sketchy-js/core": "workspace:*",
+    "@sketchy-js/plugin": "workspace:*",
+    "@sketchy-js/types": "workspace:*",
+    "clipper2-ts": "2.0.1-19"
   },
   "license": "MIT",
   "engines": {

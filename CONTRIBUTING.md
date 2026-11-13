@@ -60,7 +60,7 @@ Package boundaries are part of the design: `core` has no browser, renderer, or p
 
 ## Workflow
 
-1. **Branch** from the default branch: `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, or `plugin/<name>`. Do not push tags; releases are created by the release workflow only, with `v`-prefixed tags like `v1.0.0`.
+1. **Branch** from the default branch: `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, or `plugin/<name>`. Do not push tags; releases are created by the release workflow only, with `v`-prefixed tags. The first stable tag is `v1.5.0` (see [docs/versioning.md](docs/versioning.md)).
 2. **Commit** with [Conventional Commits](https://www.conventionalcommits.org/) (`feat(brushes): ...`, `fix(core): ...`, `docs: ...`). Keep commits logical; do not mix refactors with behavior changes.
 3. **Add a changeset** (`pnpm changeset`) for any change that affects a published package. Say whether seeded output changes; that is a breaking change for stable plugins and built-ins.
 4. **Run `pnpm check`** before pushing. CI runs the same steps plus visual tests and the bundle-size budget.

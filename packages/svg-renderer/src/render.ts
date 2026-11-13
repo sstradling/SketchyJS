@@ -70,6 +70,125 @@ function resolvePaint(paint: Paint, options: ResolvedSvgOptions): ResolvedPaint 
 const opacityAttribute = (value: number, precision: number): string | undefined =>
   value >= 1 ? undefined : formatNumber(value, Math.max(precision, 3));
 
+/** Sheet shadow: a blurred copy offset from the paper. The image layer is not given one. */
+function shadowed(
+  layer: DrawLayer,
+  options: ResolvedSvgOptions,
+  defs: Defs,
+  d: string,
+  paint: ResolvedPaint,
+  opacity: string | undefined,
+  clipAttrs: Record<string, string>,
+): SvgElement {
+  const shadow = layer.shadow ?? { x: 0, y: 0, radius: 0 };
+  const id = `${options.idPrefix}-shadow-${defs.elements.length}`;
+  defs.elements.push(
+    el("filter", { id, x: "-50%", y: "-50%", width: "200%", height: "200%" }, [
+      el("feDropShadow", {
+        dx: formatNumber(shadow.x, 3),
+        dy: formatNumber(shadow.y, 3),
+        stdDeviation: formatNumber(shadow.radius / 2, 3),
+        "flood-color": paint.value,
+        "flood-opacity": formatNumber(paint.opacity, 3),
+      }),
+    ]),
+  );
+  return el("path", {
+    d,
+    fill: paint.value,
+    "fill-opacity": opacity,
+    "fill-rule": layer.fillRule === "evenodd" ? "evenodd" : undefined,
+    filter: `url(#${id})`,
+    ...clipAttrs,
+  });
+}
+
+/** Image masked by the sheet. `href` is a data URL; nothing is fetched. */
+function stickerImage(
+  layer: DrawLayer,
+  options: ResolvedSvgOptions,
+  _d: string,
+  clipAttrs: Record<string, string>,
+): SvgElement {
+  const image = layer.stickerImage;
+  if (!image || !image.href.startsWith("data:image/")) {
+    throw new Error("sticker image source must be a data:image URL; network URLs are not loaded");
+  }
+  const rect = image.drawRect;
+  const images: SvgElement[] = [];
+  if (image.placement === "tile") {
+    const box = controlBox(layer.paths);
+    for (let y = box.y, row = 0; y < box.y + box.height && row < 900; y += rect.height, row++) {
+      for (let x = box.x, col = 0; x < box.x + box.width && col < 900; x += rect.width, col++) {
+        images.push(
+          imageEl(image.href, x, y, rect.width, rect.height, image.opacity, options.precision),
+        );
+      }
+    }
+  } else {
+    images.push(
+      imageEl(
+        image.href,
+        rect.x,
+        rect.y,
+        rect.width,
+        rect.height,
+        image.opacity,
+        options.precision,
+      ),
+    );
+  }
+  return el("g", { ...clipAttrs }, images);
+}
+
+function imageEl(
+  href: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  opacity: number,
+  precision: number,
+): SvgElement {
+  return el("image", {
+    href,
+    x: formatNumber(x, precision),
+    y: formatNumber(y, precision),
+    width: formatNumber(w, precision),
+    height: formatNumber(h, precision),
+    opacity: opacity >= 1 ? undefined : formatNumber(opacity, 3),
+    preserveAspectRatio: "none",
+  });
+}
+
+function controlBox(paths: DrawLayer["paths"]): {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const path of paths) {
+    for (const op of path) {
+      if (op.op === "Z") continue;
+      const xs = op.op === "C" ? [op.c1x, op.c2x, op.x] : op.op === "Q" ? [op.cx, op.x] : [op.x];
+      const ys = op.op === "C" ? [op.c1y, op.c2y, op.y] : op.op === "Q" ? [op.cy, op.y] : [op.y];
+      for (const x of xs) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+      }
+      for (const y of ys) {
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+    }
+  }
+  return { x: minX, y: minY, width: Math.max(0, maxX - minX), height: Math.max(0, maxY - minY) };
+}
+
 /**
  * Renders one layer. A layer with a stroke width paints its paths as strokes (sketchy outlines
  * and hachure-style fills); one without paints filled areas.
@@ -82,6 +201,8 @@ function renderLayer(layer: DrawLayer, options: ResolvedSvgOptions, defs: Defs):
   const clip = layer.clip ? defs.attribute(layer.clip) : undefined;
   const clipAttrs = clip ? { [clip[0]]: clip[1] } : {};
 
+  if (layer.stickerImage) return stickerImage(layer, options, d, clipAttrs);
+  if (layer.shadow) return shadowed(layer, options, defs, d, paint, opacity, clipAttrs);
   if (layer.strokeWidth !== undefined) {
     const cap = layer.cap ?? "round";
     // `curvedBevel` has no SVG equivalent; it is a brush-outline feature rendered by later phases.

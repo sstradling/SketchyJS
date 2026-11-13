@@ -143,18 +143,28 @@ importers:
       '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
-      '@sketchy-js/stickers':
-        specifier: workspace:^
-        version: link:../stickers
       '@sketchy-js/types':
         specifier: workspace:*
         version: link:../types
+    devDependencies:
+      '@sketchy-js/stickers':
+        specifier: workspace:*
+        version: link:../stickers
 
   packages/stickers:
     dependencies:
+      '@sketchy-js/core':
+        specifier: workspace:*
+        version: link:../core
       '@sketchy-js/plugin':
         specifier: workspace:*
         version: link:../plugin
+      '@sketchy-js/types':
+        specifier: workspace:*
+        version: link:../types
+      clipper2-ts:
+        specifier: 2.0.1-19
+        version: 2.0.1-19
 
   packages/svg-renderer:
     dependencies:

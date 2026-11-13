@@ -58,6 +58,16 @@ export class RoughView {
   build(size: Size): Scene {
     return buildScene(this.resolver, this.state.items, size);
   }
+
+  /** Shapes and options captured so far. Group backing reads this and ignores a child's sheet. */
+  contents(): readonly DrawItem[] {
+    return this.state.items;
+  }
+
+  /** The registry this view resolves fills with. */
+  registry(): FillResolver {
+    return this.resolver;
+  }
 }
 
 function stripUndefined<T extends object>(value: T): Partial<T> {

@@ -341,16 +341,94 @@ function paintInverse(
 function renderLayer(layer: DrawLayer, context: Canvas2D, options: CanvasRenderOptions): void {
   const paint = paintOf(layer.paint, options.background, context);
   context.save();
-  if (layer.clip?.inverse) {
+  if (layer.stickerImage) {
+    paintStickerImage(layer, context, options);
+  } else if (layer.clip?.inverse) {
     paintInverse(layer, context, options, paint);
   } else {
     if (layer.clip) {
       trace(context, layer.clip.paths);
       context.clip(layer.clip.fillRule === "evenodd" ? "evenodd" : "nonzero");
     }
+    if (layer.shadow) {
+      const bytes = colorBytes(layer.paint.kind === "solid" ? layer.paint.color : "#000000");
+      context.shadowColor = `rgba(${bytes.r} ${bytes.g} ${bytes.b} / ${bytes.a})`;
+      context.shadowBlur = layer.shadow.radius;
+      context.shadowOffsetX = layer.shadow.x;
+      context.shadowOffsetY = layer.shadow.y;
+    }
     paintContent(layer, context, paint);
   }
   context.restore();
+}
+
+/**
+ * Masks a caller-decoded image to the sheet. Holes use the even-odd clip.
+ * The image is not given a shadow. A missing decode throws rather than skipping.
+ */
+function paintStickerImage(
+  layer: DrawLayer,
+  context: Canvas2D,
+  options: CanvasRenderOptions,
+): void {
+  const image = layer.stickerImage;
+  if (!image) return;
+  const source = options.images?.[image.href];
+  if (!source || !context.drawImage) {
+    throw new Error(
+      "sticker image source must be a decoded image passed in render options; network URLs are not loaded",
+    );
+  }
+  trace(context, layer.clip?.paths ?? layer.paths);
+  context.clip("evenodd");
+  context.globalAlpha = image.opacity;
+  const rect = image.drawRect;
+  if (image.placement === "tile") {
+    const bounds = controlBox(layer.paths);
+    for (
+      let y = bounds.y, row = 0;
+      y < bounds.y + bounds.height && row < 900;
+      y += rect.height, row++
+    ) {
+      for (
+        let x = bounds.x, col = 0;
+        x < bounds.x + bounds.width && col < 900;
+        x += rect.width, col++
+      ) {
+        context.drawImage(source, x, y, rect.width, rect.height);
+      }
+    }
+    return;
+  }
+  context.drawImage(source, rect.x, rect.y, rect.width, rect.height);
+}
+
+function controlBox(paths: readonly Path[]): {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const path of paths) {
+    for (const op of path) {
+      if (op.op === "Z") continue;
+      const xs = op.op === "C" ? [op.c1x, op.c2x, op.x] : op.op === "Q" ? [op.cx, op.x] : [op.x];
+      const ys = op.op === "C" ? [op.c1y, op.c2y, op.y] : op.op === "Q" ? [op.cy, op.y] : [op.y];
+      for (const x of xs) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+      }
+      for (const y of ys) {
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+    }
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
 
 function renderLayers(

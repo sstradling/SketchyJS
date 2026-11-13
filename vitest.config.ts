@@ -21,6 +21,12 @@ export default defineConfig({
     alias: [
       { find: /^@sketchy-js\/plugin\/schema$/, replacement: src("plugin", "schema/index.ts") },
       { find: /^@sketchy-js\/scene\/basic$/, replacement: src("scene", "basic.ts") },
+      { find: /^@sketchy-js\/scene\/stickers$/, replacement: src("scene", "stickers.ts") },
+      { find: /^@sketchy-js\/stickers\/image$/, replacement: src("stickers", "image/index.ts") },
+      {
+        find: /^@sketchy-js\/stickers\/clipper$/,
+        replacement: src("stickers", "clipper/adapter.ts"),
+      },
       {
         find: /^@sketchy-js\/fills\/([A-Za-z]+)$/,
         replacement: fileURLToPath(new URL("./packages/fills/src/$1.ts", import.meta.url)),
