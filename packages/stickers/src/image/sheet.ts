@@ -18,21 +18,124 @@ function finite(value: number, name: string): number {
   return value;
 }
 
-function imageHref(source: unknown): string {
-  if (typeof source === "string") return source;
-  if (source && typeof source === "object" && "href" in source && typeof source.href === "string") {
-    return source.href;
-  }
-  return "";
+function finiteSize(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
 }
 
-function imageSize(source: unknown): { width: number; height: number } {
-  if (source && typeof source === "object" && "width" in source && "height" in source) {
-    const width = Number((source as { width: unknown }).width);
-    const height = Number((source as { height: unknown }).height);
-    if (Number.isFinite(width) && Number.isFinite(height)) return { width, height };
+function firstSize(source: object, keys: readonly string[]): number | undefined {
+  const record = source as Record<string, unknown>;
+  for (const key of keys) {
+    const value = finiteSize(record[key]);
+    if (value !== undefined) return value;
   }
-  return { width: 1, height: 1 };
+  return undefined;
+}
+
+/** A canvas, image, bitmap, or video frame the caller already decoded. */
+function isDecodedImage(source: object): boolean {
+  const record = source as Record<string, unknown>;
+  return (
+    typeof record.getContext === "function" ||
+    typeof record.naturalWidth === "number" ||
+    typeof record.videoWidth === "number" ||
+    typeof record.displayWidth === "number" ||
+    typeof record.codedWidth === "number" ||
+    typeof record.close === "function"
+  );
+}
+
+function dataUrlFrom(source: object): string | undefined {
+  const toDataURL = (source as { toDataURL?: (type?: string) => unknown }).toDataURL;
+  if (typeof toDataURL !== "function") return undefined;
+  const url = toDataURL.call(source, "image/png");
+  return typeof url === "string" && url.startsWith("data:image/") ? url : undefined;
+}
+
+/**
+ * Draws a decoded image into a canvas and returns a PNG data URL.
+ * Browsers supply `document`. A source with `toDataURL` is used directly.
+ */
+export function rasterDataUrl(source: object, width: number, height: number): string | undefined {
+  const direct = dataUrlFrom(source);
+  if (direct) return direct;
+  const document = (globalThis as { document?: { createElement?: (tag: string) => unknown } })
+    .document;
+  const canvas = document?.createElement?.("canvas") as
+    | {
+        width: number;
+        height: number;
+        getContext?: (kind: string) => { drawImage?: (...args: unknown[]) => void } | null;
+        toDataURL?: (type?: string) => string;
+      }
+    | undefined;
+  if (!canvas?.getContext || !canvas.toDataURL) return undefined;
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+  if (!context?.drawImage) return undefined;
+  context.drawImage(source, 0, 0, width, height);
+  const url = canvas.toDataURL("image/png");
+  return url.startsWith("data:image/") ? url : undefined;
+}
+
+/**
+ * `source` is a decoded image, a `data:` URL wrapped with width and height, or
+ * `{ href, width, height }`. A bare string has no size and is refused. There is
+ * no 1×1 default.
+ */
+export function resolveStickerImageSource(
+  source: unknown,
+  allowSameOrigin = false,
+): { href: string; width: number; height: number } {
+  if (typeof source === "string") {
+    throw new StickerImageError(
+      "sticker-image-source",
+      "a data URL or href needs explicit width and height",
+    );
+  }
+  if (!source || typeof source !== "object") {
+    throw new StickerImageError("sticker-image-source", "sticker image source is missing");
+  }
+  if (!isDecodedImage(source) && "href" in source && typeof source.href === "string") {
+    const href = assertDataImage(source.href, allowSameOrigin);
+    const width = finiteSize((source as { width?: unknown }).width);
+    const height = finiteSize((source as { height?: unknown }).height);
+    if (width === undefined || height === undefined) {
+      throw new StickerImageError(
+        "sticker-image-source",
+        "a data URL or href needs explicit width and height",
+      );
+    }
+    return { href, width, height };
+  }
+  const width = firstSize(source, [
+    "naturalWidth",
+    "videoWidth",
+    "displayWidth",
+    "codedWidth",
+    "width",
+  ]);
+  const height = firstSize(source, [
+    "naturalHeight",
+    "videoHeight",
+    "displayHeight",
+    "codedHeight",
+    "height",
+  ]);
+  if (width === undefined || height === undefined) {
+    throw new StickerImageError(
+      "sticker-image-source",
+      "a decoded sticker image needs width and height on the object",
+    );
+  }
+  const href = rasterDataUrl(source, width, height);
+  if (!href) {
+    throw new StickerImageError(
+      "sticker-image-source",
+      "decoded sticker image has no data URL; pass a canvas with toDataURL or a data URL and size",
+    );
+  }
+  return { href, width, height };
 }
 
 /** Union of the sheet paths. Tiles start at this box, not at each ring. */
@@ -81,8 +184,7 @@ export function appendStickerImage(
   const opacity = applyRule(finite(image.opacity, "sticker image opacity"), STICKER_IMAGE.opacity);
   const scale = applyRule(finite(image.scale, "sticker image scale"), STICKER_IMAGE.scale);
   if (!(opacity > 0.001)) return layers.slice();
-  const href = assertDataImage(imageHref(image.source), allowSameOrigin);
-  const size = imageSize(image.source);
+  const size = resolveStickerImageSource(image.source, allowSameOrigin);
   const box = unionSheetBounds(sheetPaths);
   const placed = resolveImagePlacement({
     placement: image.placement,
@@ -91,23 +193,23 @@ export function appendStickerImage(
     imageHeight: size.height,
     mask: box,
   });
-  return [
-    ...layers,
-    {
-      role: "sticker-image",
-      paths: sheetPaths,
-      fillRule: "evenodd",
-      paint: { kind: "solid", color: [0, 0, 0, 0] },
-      clip: { paths: sheetPaths, fillRule: "evenodd" },
-      stickerImage: {
-        href,
-        placement: image.placement,
-        scale,
-        opacity,
-        width: size.width,
-        height: size.height,
-        drawRect: placed.drawRect,
-      },
+  const imageLayer: DrawLayer = {
+    role: "sticker-image",
+    paths: sheetPaths,
+    fillRule: "evenodd",
+    paint: { kind: "solid", color: [0, 0, 0, 0] },
+    clip: { paths: sheetPaths, fillRule: "evenodd" },
+    stickerImage: {
+      href: size.href,
+      placement: image.placement,
+      scale,
+      opacity,
+      width: size.width,
+      height: size.height,
+      drawRect: placed.drawRect,
     },
-  ];
+  };
+  const textureAt = layers.findIndex((layer) => layer.role === "texture");
+  if (textureAt < 0) return [...layers, imageLayer];
+  return [...layers.slice(0, textureAt), imageLayer, ...layers.slice(textureAt)];
 }

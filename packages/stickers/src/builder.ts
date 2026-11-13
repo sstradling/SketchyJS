@@ -118,6 +118,9 @@ export function clampStickerBacking(backing: StickerBacking): StickerBacking {
       jaggedness: applyRule(finite(edge.jaggedness, "tear jaggedness"), STICKER_TEAR.jaggedness),
     };
   }
+  if (backing.shadow && (backing.shadow as { color?: Color }).color === undefined) {
+    throw new StickerOptionsError("sticker shadow needs a color");
+  }
   const shadow = backing.shadow
     ? {
         ...backing.shadow,

@@ -13,6 +13,11 @@ export interface SvgRenderOptions {
    * The default embeds `data:image` URLs only. `blob:` and `file:` are never written.
    */
   allowSameOriginImages?: boolean;
+  /**
+   * Decoded images keyed like `renderToCanvas`'s `images`. A canvas here is
+   * serialized to a data URL. A bitmap that cannot be serialized throws.
+   */
+  images?: Readonly<Record<string, unknown>>;
 }
 
 /** Options with defaults applied. */
@@ -21,6 +26,7 @@ export interface ResolvedSvgOptions {
   background: Color | undefined;
   idPrefix: string;
   allowSameOriginImages: boolean;
+  images: Readonly<Record<string, unknown>> | undefined;
 }
 
 /** Applies defaults to renderer options. */
@@ -34,5 +40,6 @@ export function resolveSvgOptions(options: SvgRenderOptions = {}): ResolvedSvgOp
     background: options.background,
     idPrefix: options.idPrefix ?? "sk",
     allowSameOriginImages: options.allowSameOriginImages ?? false,
+    images: options.images,
   };
 }

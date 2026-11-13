@@ -103,9 +103,9 @@ The group contour is one closed cycle. Swift chains it from a `Dictionary`, and 
 | `group-overlapping` | Two 100 pt squares that overlap. One exterior ring, so the overlap stays filled | within 1e-4 |
 | `group-corner-sharing` | Two 50 pt squares that share a corner. Two rings, even-odd, matching Swift | within 1e-4 |
 | `image-hole` | Fully smooth holed sheet, plus a tile command at 24 pt | within 1e-4 |
-| `group-torn` | Torn contour from the Darwin silhouette (seed 11, offset 36×8) | within 1e-4 |
+| `group-torn` | Circles at (70, 70), diameters 70 and 56, second moved by (36, 8). Epsilon 1.8 | within 1e-4 |
 
-`group-torn` records the offset, the tear, and the seed. It does not record the two circles' centers or diameters. The parity test builds the torn sheet from the Darwin centerline. A search of nearby integer diameters did not reproduce that 21-point silhouette, so the circle placement is not claimed.
+`group-torn` is two circles centered at (70, 70), diameters 70 and 56, the second translated by (36, 8). The parity test builds that group. The pre-simplify union is 111 points in Swift's order (`startIndex` 0), Douglas–Peucker at epsilon 1.8 produces the 21-point centerline, and `offsetClosed` at distance 12 matches `offsetBeforeTear`. Epsilon 0.9 does not reproduce that centerline.
 
 Overlapping squares are unioned in the silhouette, before the backing offset, so the shared region is one ring and stays filled. Corner-sharing squares stay two rings. Their offset margins overlap, and the exported fill rule is even-odd, so that lens is open in Swift's path as well. The port matches that path. It does not merge those offset rings into one contour.
 
@@ -115,9 +115,11 @@ Overlapping squares are unioned in the silhouette, before the backing offset, so
 
 Seth's decisions, as implemented:
 
-- The source is an `ImageBitmap` or other `CanvasImageSource`, passed to `renderToCanvas` in `options.images`, or a `data:image` URL.
-- SVG export embeds `data:image` URLs. A same-origin URL is written only when `allowSameOriginImages` is set. `blob:` and `file:` throw.
-- A tainted canvas throws `StickerImageError` with code `sticker-image-taint`. `isStickerImageError` accepts that class and a renderer error with the same code.
+- A bare `ImageBitmap`, `HTMLImageElement`, `HTMLCanvasElement`, `OffscreenCanvas`, or `VideoFrame` is a source. Its size comes from the object. A canvas with `toDataURL` is embedded as a PNG data URL. A bitmap that cannot be serialized throws `sticker-image-source`.
+- A bare `data:` string or href is refused unless it carries explicit width and height. There is no 1×1 default. `{ href, width, height }` and `renderToCanvas`'s `images` map still work.
+- SVG export embeds `data:image` URLs. A same-origin URL is written only when `allowSameOriginImages` is set. `blob:` and `file:` throw `sticker-image-source`, and `isStickerImageError` accepts that SVG error.
+- A tainted canvas throws `StickerImageError` with code `sticker-image-taint` from both `prepareImages` and `renderToCanvas`. The probe is cached per source.
+- Paint order is sheet shadow, sheet, sticker image, paper fibers, then ink. Fibers cover an opaque image. A transparent image pixel shows the paper color. The image layer has no shadow. A hole in the sheet stays empty through the image.
 - `renderToCanvas` stays synchronous. `prepareImages(scene)` decodes the scene's images first.
 - Tiles start at the union of the sheet paths.
 - `resolveFitScale(0)` returns 1. The 0.05 floor is applied only when the stretch or fill rect is drawn.
@@ -129,15 +131,14 @@ Seth's decisions, as implemented:
 - A scaled `SketchPart` keeps `strokeWidth` at the authored value. A child `stickerBacking` is ignored while the group has one. An SVG path inside a group keeps its part transform and is not fitted to the canvas. A child sheet is offset after that transform, so the margin stays in unscaled points.
 - An open stroke in a group becomes a round-capped ribbon and is unioned into the sheet. Stroke width stays in points.
 - Sheet shadow opacity is applied once. The shadow color and SVG `flood-opacity` stay at 1. The paint alpha carries the opacity.
-- The silhouette union runs on the flattened centerline. Quadratics are already polylines before that union.
+- The silhouette union runs on the flattened centerline. Quadratics are already polylines before that union. Forty disjoint 3×3 squares union in about 21 ms here.
 - `clipper2-ts` is imported only from `packages/stickers/src/clipper/adapter.ts` (BSL-1.0, already in `THIRD_PARTY_NOTICES`). Integer scale is 1000. The Darwin contours do not go through Clipper: they are cubics from Sketchy's own offset, and Clipper's integer rings cannot match them at 1e-4. The adapter has a union/offset contract test.
 
 ## Known gaps
 
 - Package versions are `0.0.0`. The Phase 1 and Phase 2 changesets that would have published `0.1.0` are gone. The publishable packages are one Changesets `fixed` group. The release PR sets `1.5.0` explicitly.
 - Plugin API examples in `docs/plugins.md` use `version: "1.0.0"` for a **plugin**, not for the package. That is the plugin API line and stays.
-- `group-torn` does not record circle centers or diameters. The torn contour matches the Darwin centerline. The circle placement that produced it is not reconstructed.
-- Ink on a compound SVG path is still nonzero, so a blue fill covers a hole even when the paper punches it. The holes preview uses a clear fill so the hole shows.
+- Ink on a compound SVG path is still nonzero, so a blue fill covers a hole even when the paper punches it. The holes preview uses a clear fill so the hole shows. The image clip is even-odd, so a hole through the image stays empty.
 - One smooth corner on a ring used to collapse the sheet (Swift's `slice` returns that single point). The port walks the long way around. Fixtures have several corners and still match.
 - No browser timing for `clipper2-ts`. `clipper2-wasm` is not wired (the ADR leaves it optional).
 - Previews in `docs/examples/phase-3/` are SketchyJS SVG/Canvas renders, not Swift screenshots. The upstream PNGs under `fixtures/.../images/stickers/` were not regenerated. The preview test writes those PNGs only when `UPDATE_EXAMPLES=1`.
@@ -145,7 +146,7 @@ Seth's decisions, as implemented:
 
 ## Tests
 
-`pnpm test`: **704** tests, 44 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
+`pnpm test`: **718** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
 
 ## Bundle size
 
@@ -154,8 +155,8 @@ Seth's decisions, as implemented:
 | Entry | Gzip | Ceiling |
 | --- | --- | --- |
 | `@sketchy-js/stickers` (sheet, edges, paper, group union) | 15.3 KB | 18 KB |
-| `@sketchy-js/stickers/image` | 0.4 KB | none (placement helper; the scene entry pulls the image module) |
-| sticker scene (`scene/stickers` + sheets + image) | 33.4 KB | 65 KB |
+| `@sketchy-js/stickers/image` | 0.5 KB | none (placement helper; the scene entry pulls the image module) |
+| sticker scene (`scene/stickers` + sheets + image) | 33.9 KB | 65 KB |
 | `@sketchy-js/stickers/clipper` | 17.1 KB | 22 KB |
 
 ## Previews

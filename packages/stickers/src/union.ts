@@ -1,4 +1,4 @@
-import type { Pt } from "./geom.js";
+import { contains, signedArea, type Pt } from "./geom.js";
 
 /**
  * One closed ring in a sticker silhouette. Rings from the same shape share
@@ -217,32 +217,4 @@ function intersection(first: [Pt, Pt], second: [Pt, Pt]): [number, number] | und
 
 function pointAt(start: Pt, end: Pt, t: number): Pt {
   return { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t };
-}
-
-function contains(point: Pt, ring: readonly Pt[]): boolean {
-  if (ring.length < 3) return false;
-  let inside = false;
-  let previous = ring.length - 1;
-  for (let index = 0; index < ring.length; index++) {
-    const currentY = ring[index]!.y;
-    const previousY = ring[previous]!.y;
-    if (currentY > point.y !== previousY > point.y) {
-      const x =
-        ((ring[previous]!.x - ring[index]!.x) * (point.y - currentY)) / (previousY - currentY) +
-        ring[index]!.x;
-      if (point.x < x) inside = !inside;
-    }
-    previous = index;
-  }
-  return inside;
-}
-
-function signedArea(points: readonly Pt[]): number {
-  if (points.length < 3) return 0;
-  let area = 0;
-  for (let index = 0; index < points.length; index++) {
-    const next = points[(index + 1) % points.length]!;
-    area += points[index]!.x * next.y - next.x * points[index]!.y;
-  }
-  return area * 0.5;
 }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { line, path, rectangle } from "@sketchy-js/core";
 import { StickerOptionsError } from "@sketchy-js/stickers";
 import { RoughView } from "../src/basic.js";
-import { SketchGroup, SketchPart } from "../src/stickers.js";
+import { buildStickerScene, SketchGroup, SketchPart } from "../src/stickers.js";
 import type { DrawLayer, SceneNode } from "@sketchy-js/types";
 
 const sheet = {
@@ -127,6 +127,81 @@ describe("SketchGroup", () => {
     expect(Math.max(...ys)).toBeGreaterThan(46);
   });
 
+  it("paints shadow, sheet, image, then fibers", () => {
+    const href = "data:image/png;base64,aaaa";
+    const backing = {
+      ...sheet,
+      image: {
+        source: { href, width: 8, height: 8 },
+        placement: "tile" as const,
+        scale: 16,
+        opacity: 1,
+      },
+      texture: { amount: 0.4, scale: 12, seed: 3n },
+    };
+    const single = new RoughView()
+      .with({ seed: 1n, strokeWidth: 2, roughness: 0, stickerBacking: backing })
+      .draw(rectangle(10, 10, 40, 30));
+    const grouped = new SketchGroup(
+      [
+        new RoughView()
+          .with({ seed: 1n, strokeWidth: 2, roughness: 0 })
+          .draw(rectangle(10, 10, 40, 30)),
+      ],
+      backing,
+    ).build({ width: 120, height: 80 });
+    for (const scene of [
+      buildStickerScene(single.registry(), single.contents(), { width: 120, height: 80 }),
+      grouped,
+    ]) {
+      const roles = scene.nodes.flatMap(layersOf).map((layer) => layer.role);
+      const imageAt = roles.indexOf("sticker-image");
+      const textureAt = roles.indexOf("texture");
+      expect(roles.indexOf("sheet-shadow")).toBe(-1);
+      expect(roles.indexOf("sheet")).toBeLessThan(imageAt);
+      expect(imageAt).toBeGreaterThanOrEqual(0);
+      expect(textureAt).toBeGreaterThan(imageAt);
+    }
+  });
+
+  it("applies a part transform before the group transform", () => {
+    const view = new RoughView()
+      .with({ seed: 1n, strokeWidth: 2, roughness: 0, bowing: 0, maxRandomnessOffset: 0 })
+      .draw(rectangle(0, 0, 10, 10));
+    const scene = new SketchGroup([new SketchPart(view).offset(10, 0)])
+      .transformBy([0, 1, -1, 0, 0, 0])
+      .build({ width: 80, height: 80 });
+    const ink = scene.nodes.flatMap(layersOf).find((layer) => layer.role === "stroke");
+    const points = ink?.paths.flatMap((p) =>
+      p.flatMap((op) => (op.op === "Z" ? [] : [[op.x, op.y] as const])),
+    );
+    expect(points?.some(([x, y]) => Math.abs(x) < 1e-6 && Math.abs(y - 10) < 1e-6)).toBe(true);
+    expect(points?.some(([x, y]) => Math.abs(x + 10) < 1e-6 && Math.abs(y - 20) < 1e-6)).toBe(true);
+  });
+
+  it("composes transformBy after the transform already on the group", () => {
+    const view = new RoughView()
+      .with({ seed: 1n, strokeWidth: 2, roughness: 0, bowing: 0, maxRandomnessOffset: 0 })
+      .draw(rectangle(0, 0, 4, 4));
+    const turned = new SketchGroup([view])
+      .transformBy([0, 1, -1, 0, 0, 0])
+      .transformBy([1, 0, 0, 1, 5, 0]);
+    const movedFirst = new SketchGroup([view])
+      .transformBy([1, 0, 0, 1, 5, 0])
+      .transformBy([0, 1, -1, 0, 0, 0]);
+    const corner = (scene: ReturnType<SketchGroup["build"]>) => {
+      const ink = scene.nodes.flatMap(layersOf).find((layer) => layer.role === "stroke");
+      const points = ink?.paths.flatMap((p) =>
+        p.flatMap((op) => (op.op === "Z" ? [] : [[op.x, op.y] as const])),
+      );
+      return points?.find(([x, y]) => Math.abs(x) + Math.abs(y) > 0) ?? [0, 0];
+    };
+    const size = { width: 40, height: 40 };
+    const after = corner(turned.build(size));
+    const before = corner(movedFirst.build(size));
+    expect(Math.hypot(after[0] - before[0], after[1] - before[1])).toBeGreaterThan(1);
+  });
+
   it("throws on a non-finite backing width and clamps a negative width to no sheet", () => {
     const view = new RoughView().with({ seed: 1n, strokeWidth: 2 }).draw(rectangle(10, 10, 20, 20));
     expect(() =>
@@ -134,5 +209,16 @@ describe("SketchGroup", () => {
     ).toThrow(StickerOptionsError);
     const scene = new SketchGroup([view], { ...sheet, width: -4 }).build({ width: 80, height: 80 });
     expect(scene.nodes.flatMap(layersOf).some((layer) => layer.role === "sheet")).toBe(false);
+  });
+
+  it("throws StickerOptionsError when a group shadow has no color", () => {
+    const view = new RoughView().with({ seed: 1n, strokeWidth: 2 }).draw(rectangle(10, 10, 20, 20));
+    const backing = {
+      ...sheet,
+      shadow: { opacity: 0.4, x: 3, y: 4, radius: 2 },
+    };
+    expect(() =>
+      new SketchGroup([view], backing as unknown as typeof sheet).build({ width: 80, height: 80 }),
+    ).toThrow(StickerOptionsError);
   });
 });

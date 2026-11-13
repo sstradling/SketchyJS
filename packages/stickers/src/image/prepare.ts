@@ -2,9 +2,20 @@ import type { Scene } from "@sketchy-js/types";
 import { StickerImageError } from "./error.js";
 import { assertDataImage } from "./placement.js";
 
+/** `true` when the last probe found a tainted canvas. One readback per source. */
+const taintCache = new WeakMap<object, boolean>();
+
 /** Reads one pixel. A tainted canvas throws in the host; this turns that into `sticker-image-taint`. */
 export function assertImageUntainted(source: unknown): void {
   if (!source || typeof source !== "object") return;
+  const cached = taintCache.get(source);
+  if (cached === false) return;
+  if (cached === true) {
+    throw new StickerImageError(
+      "sticker-image-taint",
+      "sticker image canvas is tainted and its pixels cannot be read",
+    );
+  }
   const canvas = source as {
     width?: number;
     height?: number;
@@ -17,7 +28,9 @@ export function assertImageUntainted(source: unknown): void {
   if (!context?.getImageData) return;
   try {
     context.getImageData(0, 0, 1, 1);
+    taintCache.set(source, false);
   } catch (cause) {
+    taintCache.set(source, true);
     throw new StickerImageError(
       "sticker-image-taint",
       "sticker image canvas is tainted and its pixels cannot be read",

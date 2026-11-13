@@ -10,6 +10,6 @@ SketchyJS package versions match the Swift Sketchy library.
 
 Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.5.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy. The Phase 1 and Phase 2 changeset files that declared those minor bumps are not in the tree. The release PR sets `1.5.0` explicitly.
 
-`.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, and `animate`. `react`, `web-components`, and `contrib` are outside that group.
+`.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, `animate`, `react`, `web-components`, and `contrib`.
 
 `v1.4.2` appears in [plan.md](plan.md) only as the old Sketchy pin this plan was first written against. It is not a SketchyJS version.

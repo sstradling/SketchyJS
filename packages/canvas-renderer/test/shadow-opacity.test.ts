@@ -44,6 +44,16 @@ describe("sheet shadow opacity", () => {
     const svg = renderToSvgString(drawn, { background: "#ffffff" });
     expect(svg).toContain('flood-opacity="1"');
     expect(svg).toContain('fill-opacity="0.5"');
+    expect(svg).toContain('stdDeviation="0"');
+    const blurred = scene();
+    const shadow = blurred.nodes[0];
+    if (shadow?.type === "drawing") {
+      const layer = shadow.drawing.layers[0];
+      if (layer) layer.shadow = { x: 8, y: 0, radius: 10 };
+    }
+    const blurredSvg = renderToSvgString(blurred, { background: "#ffffff" });
+    expect(blurredSvg).toContain('stdDeviation="5"');
+    expect(blurredSvg).not.toContain('stdDeviation="10"');
 
     const canvas = createCanvas(80, 40);
     const context = canvas.getContext("2d");

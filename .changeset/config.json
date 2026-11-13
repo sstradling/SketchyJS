@@ -13,7 +13,10 @@
       "@sketchy-js/scene",
       "@sketchy-js/svg-renderer",
       "@sketchy-js/canvas-renderer",
-      "@sketchy-js/animate"
+      "@sketchy-js/animate",
+      "@sketchy-js/react",
+      "@sketchy-js/web-components",
+      "@sketchy-js/contrib"
     ]
   ],
   "linked": [],

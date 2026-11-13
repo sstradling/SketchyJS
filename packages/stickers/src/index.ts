@@ -18,7 +18,13 @@ export { offsetClosed } from "./offset.js";
 import { fullySmoothEdge } from "./edges/fully-smooth.js";
 import { smoothEdge } from "./edges/smooth.js";
 import { tornEdge } from "./edges/torn.js";
-export { groupCommands, groupSilhouette, multiply } from "./group.js";
+export {
+  groupCommands,
+  groupSilhouette,
+  multiply,
+  simplifyTornRing,
+  TORN_SIMPLIFY_EPSILON,
+} from "./group.js";
 export type { GroupPart } from "./group.js";
 export { combineSilhouettes } from "./union.js";
 export type { SilhouetteRing } from "./union.js";

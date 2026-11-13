@@ -66,6 +66,15 @@ describe("silhouette union", () => {
     expect(covers({ x: 25, y: 75 }, combined)).toBe(false);
   });
 
+  it("unions 40 disjoint squares", () => {
+    const rings = Array.from({ length: 40 }, (_, index) => square(index * 5, 0, 3, 3, index));
+    const started = performance.now();
+    const combined = combineSilhouettes(rings);
+    const elapsed = performance.now() - started;
+    expect(combined.filter((ring) => !ring.isHole)).toHaveLength(40);
+    expect(elapsed).toBeLessThan(1000);
+  });
+
   it("keeps a nested hole until another shape fills it", () => {
     const open = combineSilhouettes([square(0, 0, 120, 120, 0), square(40, 40, 40, 40, 0, true)]);
     expect(open.filter((ring) => ring.isHole)).toHaveLength(1);

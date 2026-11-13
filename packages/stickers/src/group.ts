@@ -79,8 +79,9 @@ export function groupSilhouette(
   const combined = combineSilhouettes(rings).reverse();
   const torn = typeof backing.edge === "object" && backing.edge.kind === "torn";
   return combined.map((ring) => {
-    const points = torn ? simplify(ring.points, 1.8) : ring.points;
-    return { points, closed: true, source: ring.points };
+    const source = torn ? startAtMaxX(ring.points) : ring.points;
+    const points = torn ? simplifyTornRing(source, TORN_SIMPLIFY_EPSILON) : source;
+    return { points, closed: true, source };
   });
 }
 
@@ -171,14 +172,29 @@ function apply(point: Pt, [a, b, c, d, e, f]: Matrix2D): Pt {
   return { x: a * point.x + c * point.y + e, y: b * point.x + d * point.y + f };
 }
 
+/** Starts a ring at its maximum-x vertex, matching the group-torn union order. */
+function startAtMaxX(points: Pt[]): Pt[] {
+  let at = 0;
+  for (let index = 1; index < points.length; index++) {
+    const point = points[index]!;
+    const best = points[at]!;
+    if (point.x > best.x || (point.x === best.x && point.y > best.y)) at = index;
+  }
+  if (at === 0) return points.slice();
+  return points.slice(at).concat(points.slice(0, at));
+}
+
+/** Douglas–Peucker epsilon in Sketchy v1.5.0 `SketchGroup`. A smaller value keeps more corners. */
+export const TORN_SIMPLIFY_EPSILON = 1.8;
+
 /** Douglas–Peucker used so a torn group edge can cut facets. */
-function simplify(points: Pt[], epsilon: number): Pt[] {
-  if (points.length <= 8) return points;
+export function simplifyTornRing(points: readonly Pt[], epsilon: number): Pt[] {
+  if (points.length <= 8) return points.slice();
   const ring = points.concat([points[0]!]);
   const reduced = rdp(ring, epsilon);
   let open = reduced;
   if (open.length >= 2 && dist(open[0]!, open[open.length - 1]!) < 0.5) open = open.slice(0, -1);
-  return open.length >= 8 ? open : points;
+  return open.length >= 8 ? open : points.slice();
 }
 
 function rdp(input: Pt[], epsilon: number): Pt[] {

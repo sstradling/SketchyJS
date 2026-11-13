@@ -112,9 +112,12 @@ function stickerImage(
   clipAttrs: Record<string, string>,
 ): SvgElement {
   const image = layer.stickerImage;
-  const href = image ? svgImageHref(image.href, options.allowSameOriginImages) : "";
+  const href = image ? svgImageHref(image.href, options.allowSameOriginImages, options.images) : "";
   if (!image || !href) {
-    throw new Error("sticker image source must be a data:image URL; network URLs are not loaded");
+    throw svgImageError(
+      "sticker-image-source",
+      "sticker image source must be a data:image URL; network URLs are not loaded",
+    );
   }
   const rect = image.drawRect;
   const opacity = image.opacity >= 1 ? undefined : formatNumber(image.opacity, 3);
@@ -148,10 +151,34 @@ function stickerImage(
   ]);
 }
 
-function svgImageHref(href: string, allowSameOrigin: boolean): string {
+function svgImageError(
+  code: "sticker-image-source" | "sticker-image-taint",
+  message: string,
+): Error {
+  const error = new Error(message);
+  error.name = "StickerImageError";
+  return Object.assign(error, { code });
+}
+
+function dataUrlOf(source: unknown): string | undefined {
+  if (!source || typeof source !== "object") return undefined;
+  const toDataURL = (source as { toDataURL?: (type?: string) => unknown }).toDataURL;
+  if (typeof toDataURL !== "function") return undefined;
+  const url = toDataURL.call(source, "image/png");
+  return typeof url === "string" && url.startsWith("data:image/") ? url : undefined;
+}
+
+function svgImageHref(
+  href: string,
+  allowSameOrigin: boolean,
+  images: Readonly<Record<string, unknown>> | undefined,
+): string {
   if (href.startsWith("data:image/")) return href;
+  const embedded = dataUrlOf(images?.[href]);
+  if (embedded) return embedded;
   if (href.startsWith("blob:") || href.startsWith("file:")) {
-    throw new Error(
+    throw svgImageError(
+      "sticker-image-source",
       "sticker image source must be a data:image URL; blob and file URLs are not loaded",
     );
   }
@@ -164,7 +191,10 @@ function svgImageHref(href: string, allowSameOrigin: boolean): string {
   ) {
     return href;
   }
-  throw new Error("sticker image source must be a data:image URL; network URLs are not loaded");
+  throw svgImageError(
+    "sticker-image-source",
+    "decoded sticker image has no data URL; pass a canvas with toDataURL or a data URL",
+  );
 }
 
 function imageEl(

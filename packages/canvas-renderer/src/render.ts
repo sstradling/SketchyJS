@@ -374,8 +374,19 @@ function imageError(code: "sticker-image-source" | "sticker-image-taint", messag
   return Object.assign(error, { code });
 }
 
+/** One taint readback per source. Later paints reuse the result. */
+const taintCache = new WeakMap<object, boolean>();
+
 function assertCanvasUntainted(source: unknown): void {
   if (!source || typeof source !== "object") return;
+  const cached = taintCache.get(source);
+  if (cached === false) return;
+  if (cached === true) {
+    throw imageError(
+      "sticker-image-taint",
+      "sticker image canvas is tainted and its pixels cannot be read",
+    );
+  }
   const canvas = source as {
     width?: number;
     height?: number;
@@ -388,7 +399,9 @@ function assertCanvasUntainted(source: unknown): void {
   if (!context?.getImageData) return;
   try {
     context.getImageData(0, 0, 1, 1);
+    taintCache.set(source, false);
   } catch {
+    taintCache.set(source, true);
     throw imageError(
       "sticker-image-taint",
       "sticker image canvas is tainted and its pixels cannot be read",

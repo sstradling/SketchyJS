@@ -1,7 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import type { Path, Scene } from "@sketchy-js/types";
 import { StickerImageError, isStickerImageError } from "../src/image/error.js";
+import { assertImageUntainted, prepareImages } from "../src/image/prepare.js";
 import { TILE_BUDGET, assertDataImage, resolveImagePlacement } from "../src/image/placement.js";
+import {
+  appendStickerImage,
+  resolveStickerImageSource,
+  unionSheetBounds,
+} from "../src/image/sheet.js";
 
 const fixture = JSON.parse(
   readFileSync(
@@ -66,6 +73,150 @@ describe("resolveImagePlacement", () => {
     const tainted = Object.assign(new Error("tainted"), { code: "sticker-image-taint" });
     expect(isStickerImageError(tainted)).toBe(true);
     expect(isStickerImageError(new Error("other"))).toBe(false);
+  });
+
+  it("floors stretch and fill at 0.05 when drawing", () => {
+    const mask = { x: 0, y: 0, width: 100, height: 80 };
+    const stretch = resolveImagePlacement({
+      placement: "stretch",
+      scale: 0.01,
+      imageWidth: 10,
+      imageHeight: 10,
+      mask,
+    });
+    expect(stretch.resolvedFitScale).toBe(0.01);
+    expect(stretch.drawRect.width).toBeCloseTo(5);
+    expect(stretch.drawRect.height).toBeCloseTo(4);
+    const fill = resolveImagePlacement({
+      placement: "fill",
+      scale: 0.01,
+      imageWidth: 10,
+      imageHeight: 10,
+      mask,
+    });
+    expect(fill.drawRect.width).toBeCloseTo(5);
+    expect(fill.drawRect.height).toBeCloseTo(5);
+  });
+
+  it("reads a decoded image's size and refuses a bare data URL", () => {
+    expect(() => resolveStickerImageSource("data:image/png;base64,aaaa")).toThrow(
+      StickerImageError,
+    );
+    expect(() => resolveStickerImageSource({ href: "data:image/png;base64,aaaa" })).toThrow(
+      /width and height/,
+    );
+    expect(
+      resolveStickerImageSource({ href: "data:image/png;base64,aaaa", width: 3, height: 5 }),
+    ).toEqual({ href: "data:image/png;base64,aaaa", width: 3, height: 5 });
+    const canvas = {
+      width: 8,
+      height: 4,
+      getContext() {
+        return null;
+      },
+      toDataURL() {
+        return "data:image/png;base64,zz";
+      },
+    };
+    expect(resolveStickerImageSource(canvas)).toEqual({
+      href: "data:image/png;base64,zz",
+      width: 8,
+      height: 4,
+    });
+    expect(() => resolveStickerImageSource({ width: 4, height: 4, close() {} })).toThrow(
+      StickerImageError,
+    );
+  });
+
+  it("tiles from the union of every ring", () => {
+    const rect = (x: number, y: number): Path => [
+      { op: "M", x, y },
+      { op: "L", x: x + 10, y },
+      { op: "L", x: x + 10, y: y + 10 },
+      { op: "L", x, y: y + 10 },
+      { op: "Z" },
+    ];
+    const first = rect(100, 40);
+    const second = rect(0, 0);
+    const box = unionSheetBounds([first, second]);
+    expect(box.x).toBe(0);
+    expect(box.y).toBe(0);
+    expect(box.width).toBe(110);
+    const layer = appendStickerImage(
+      [],
+      {
+        width: 4,
+        smoothness: 1,
+        edge: "smooth",
+        color: [1, 1, 1, 1],
+        image: {
+          source: { href: "data:image/png;base64,aaaa", width: 8, height: 8 },
+          placement: "tile",
+          scale: 12,
+          opacity: 1,
+        },
+      },
+      [first, second],
+    )[0];
+    expect(layer?.stickerImage?.drawRect.x).toBe(0);
+    expect(layer?.stickerImage?.drawRect.y).toBe(0);
+    expect(layer?.stickerImage?.drawRect.x).not.toBe(100);
+  });
+
+  it("reports a tainted canvas once from prepareImages", async () => {
+    let reads = 0;
+    const tainted = {
+      width: 2,
+      height: 2,
+      getContext() {
+        return {
+          getImageData() {
+            reads += 1;
+            throw new Error("tainted");
+          },
+        };
+      },
+    };
+    const scene: Scene = {
+      version: 1,
+      size: { width: 10, height: 10 },
+      nodes: [
+        {
+          type: "drawing",
+          drawing: {
+            shape: "rectangle",
+            outline: [],
+            layers: [
+              {
+                role: "sticker-image",
+                paths: [],
+                fillRule: "evenodd",
+                paint: { kind: "solid", color: [0, 0, 0, 1] },
+                stickerImage: {
+                  href: "data:image/png;base64,aaaa",
+                  placement: "tile",
+                  scale: 8,
+                  opacity: 1,
+                  width: 2,
+                  height: 2,
+                  drawRect: { x: 0, y: 0, width: 8, height: 8 },
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const load = () => Promise.resolve(tainted);
+    await expect(prepareImages(scene, { load })).rejects.toMatchObject({
+      code: "sticker-image-taint",
+    });
+    await expect(prepareImages(scene, { load })).rejects.toMatchObject({
+      code: "sticker-image-taint",
+    });
+    expect(reads).toBe(1);
+    expect(() => assertImageUntainted(tainted)).toThrow(StickerImageError);
+    expect(reads).toBe(1);
   });
 
   it("keeps the image class out of the main entry", () => {

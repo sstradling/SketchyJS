@@ -1,16 +1,20 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { generateDrawing, line, path, rectangle, type Shape } from "@sketchy-js/core";
+import { circle, generateDrawing, line, path, rectangle, type Shape } from "@sketchy-js/core";
 import { resolveSketchOptions } from "@sketchy-js/core/options";
+import { appendStickerImage, resolveImagePlacement } from "@sketchy-js/stickers/image";
 import {
   commandsForLines,
   groupCommands,
+  offsetClosed,
+  simplifyTornRing,
   stickerCommands,
   stickerLayers,
+  TORN_SIMPLIFY_EPSILON,
   type GroupPart,
   type StickerCommand,
 } from "@sketchy-js/stickers";
-import type { Matrix2D, StickerBacking } from "@sketchy-js/types";
+import type { DrawLayer, Matrix2D, Path, StickerBacking } from "@sketchy-js/types";
 import { basicSketchy } from "../src/basic.js";
 import { createFillStage } from "../src/fill-stage.js";
 
@@ -23,13 +27,50 @@ const phase3 = JSON.parse(
   cases: {
     id: string;
     storedSmoothness: number;
+    simplifyEpsilon?: number;
+    preSimplifyRings?: { closed: boolean; startIndex: number; points: [number, number][] }[];
+    offsetBeforeTear?: {
+      closed: boolean;
+      startIndex: number;
+      distance: number;
+      points: [number, number][];
+    }[];
+    parts?: {
+      shape: string;
+      center: [number, number];
+      diameter: number;
+      transform: [number, number, number, number, number, number];
+      strokeWidth: number;
+      roughness: number;
+      bowing: number;
+      maxRandomnessOffset: number;
+      seed: string;
+    }[];
+    groupTransform?: [number, number, number, number, number, number];
     centerlines: { closed: boolean; points: [number, number][] }[];
+    input?: {
+      imageOpacity?: number;
+      imageScale?: number;
+      imageSize?: [number, number];
+      placement?: "tile" | "stretch" | "fill";
+    };
     commands: {
       style: string;
       path: unknown[];
       lineWidth?: number;
       fillRule?: string;
-      stickerImage?: { tileWidth: number; opacity: number; scale: number };
+      cap?: string;
+      join?: string;
+      miterLimit?: number;
+      bounds?: [number, number, number, number];
+      color?: { r: number; g: number; b: number; a: number };
+      stickerImage?: {
+        imageSize: [number, number];
+        opacity: number;
+        placement: string;
+        scale: number;
+        tileWidth: number;
+      };
     }[];
   }[];
 };
@@ -63,22 +104,36 @@ function part(
   };
 }
 
+type ComparedCommand = StickerCommand & {
+  stickerImage?: {
+    opacity: number;
+    placement: string;
+    scale: number;
+    tileWidth: number;
+    imageSize: [number, number];
+  };
+};
+
 function maxDelta(
   actual: {
     centerlines: { closed: boolean; points: { x: number; y: number }[] }[];
-    commands: StickerCommand[];
+    commands: ComparedCommand[];
   },
   expected: (typeof phase3.cases)[number],
 ): number {
   expect(actual.centerlines.length, "centerline count").toBe(expected.centerlines.length);
   expect(actual.commands.length, "command count").toBe(expected.commands.length);
   let max = 0;
+  let where = "start";
   actual.centerlines.forEach((line, index) => {
     const exp = expected.centerlines[index]!;
     expect(line.closed).toBe(exp.closed);
     expect(line.points.length, `${expected.id} centerline ${index}`).toBe(exp.points.length);
     line.points.forEach((pt, i) => {
-      max = Math.max(max, Math.abs(pt.x - exp.points[i]![0]), Math.abs(pt.y - exp.points[i]![1]));
+      const dx = Math.abs(pt.x - exp.points[i]![0]);
+      const dy = Math.abs(pt.y - exp.points[i]![1]);
+      if (dx > max || dy > max) where = `centerline ${index} pt ${i}`;
+      max = Math.max(max, dx, dy);
     });
   });
   actual.commands.forEach((command, index) => {
@@ -87,16 +142,62 @@ function maxDelta(
     expect(command.path.length, `${expected.id} command ${index} ops`).toBe(exp.path.length);
     if (command.lineWidth !== undefined)
       expect(command.lineWidth).toBeCloseTo(exp.lineWidth ?? NaN, 6);
+    if (exp.fillRule) expect(command.fillRule).toBe(exp.fillRule);
+    if (exp.cap) expect(command.cap).toBe(exp.cap);
+    if (exp.join) expect(command.join).toBe(exp.join);
+    if (exp.miterLimit !== undefined) expect(command.miterLimit).toBeCloseTo(exp.miterLimit, 6);
+    if (exp.color) {
+      const parts = [
+        Math.abs(command.color.r - exp.color.r),
+        Math.abs(command.color.g - exp.color.g),
+        Math.abs(command.color.b - exp.color.b),
+        Math.abs(command.color.a - exp.color.a),
+      ];
+      parts.forEach((d, i) => {
+        if (d > max)
+          where = `${expected.id} color ${index} ch ${i} ${command.color.r},${command.color.g},${command.color.b},${command.color.a} vs ${exp.color!.r},${exp.color!.g},${exp.color!.b},${exp.color!.a}`;
+      });
+      max = Math.max(max, ...parts);
+    }
+    if (exp.bounds) {
+      const tight = pathBounds(command.path);
+      tight.forEach((value, i) => {
+        const d = Math.abs(value - exp.bounds![i]!);
+        if (d > max)
+          where = `${expected.id} bounds ${index} #${i} ${tight.join(",")} vs ${exp.bounds?.join(",")}`;
+        max = Math.max(max, d);
+      });
+    }
+    if (exp.stickerImage) {
+      expect(command.stickerImage, `${expected.id} image`).toBeDefined();
+      const image = command.stickerImage!;
+      expect(image.placement).toBe(exp.stickerImage.placement);
+      const parts = [
+        Math.abs(image.opacity - exp.stickerImage.opacity),
+        Math.abs(image.scale - exp.stickerImage.scale),
+        Math.abs(image.tileWidth - exp.stickerImage.tileWidth),
+        Math.abs(image.imageSize[0] - exp.stickerImage.imageSize[0]),
+        Math.abs(image.imageSize[1] - exp.stickerImage.imageSize[1]),
+      ];
+      parts.forEach((d, i) => {
+        if (d > max)
+          where = `${expected.id} stickerImage #${i} ${JSON.stringify(image)} vs ${JSON.stringify(exp.stickerImage)}`;
+      });
+      max = Math.max(max, ...parts);
+    }
     command.path.forEach((op, i) => {
       const row = exp.path[i] as unknown[];
       expect(op.op).toBe(row[0]);
       const nums =
         op.op === "Z" ? [] : Object.values(op).filter((v): v is number => typeof v === "number");
       nums.forEach((n, k) => {
-        max = Math.max(max, Math.abs(n - (row[k + 1] as number)));
+        const d = Math.abs(n - (row[k + 1] as number));
+        if (d > max) where = `${expected.id} op ${index}:${i} #${k}`;
+        max = Math.max(max, d);
       });
     });
   });
+  void where;
   return max;
 }
 
@@ -135,6 +236,97 @@ function alignedGroup(
     centerlines,
     commands: commandsForLines(centerlines, backing.width, backing, seed),
   };
+}
+
+function rootsInUnit(a: number, b: number, c: number): number[] {
+  const out: number[] = [];
+  if (Math.abs(a) < 1e-12) {
+    if (Math.abs(b) > 1e-12) {
+      const t = -c / b;
+      if (t > 0 && t < 1) out.push(t);
+    }
+    return out;
+  }
+  const disc = b * b - 4 * a * c;
+  if (disc < 0) return out;
+  const root = Math.sqrt(disc);
+  for (const t of [(-b + root) / (2 * a), (-b - root) / (2 * a)]) {
+    if (t > 0 && t < 1) out.push(t);
+  }
+  return out;
+}
+
+function cubicAt(p0: number, c1: number, c2: number, p1: number, t: number): number {
+  const u = 1 - t;
+  return u * u * u * p0 + 3 * u * u * t * c1 + 3 * u * t * t * c2 + t * t * t * p1;
+}
+
+function quadAt(p0: number, c: number, p1: number, t: number): number {
+  const u = 1 - t;
+  return u * u * p0 + 2 * u * t * c + t * t * p1;
+}
+
+/** Tight bounds of the drawn curves. Control-point bounds sit outside the ink. */
+function pathBounds(path: Path): [number, number, number, number] {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  let x = 0;
+  let y = 0;
+  const take = (px: number, py: number) => {
+    minX = Math.min(minX, px);
+    minY = Math.min(minY, py);
+    maxX = Math.max(maxX, px);
+    maxY = Math.max(maxY, py);
+  };
+  for (const op of path) {
+    if (op.op === "Z") continue;
+    if (op.op === "M" || op.op === "L") {
+      take(op.x, op.y);
+      x = op.x;
+      y = op.y;
+      continue;
+    }
+    if (op.op === "Q") {
+      take(op.x, op.y);
+      const ax = x - 2 * op.cx + op.x;
+      const bx = 2 * (op.cx - x);
+      const ay = y - 2 * op.cy + op.y;
+      const by = 2 * (op.cy - y);
+      const times = [...rootsInUnit(ax, bx, op.cx - x), ...rootsInUnit(ay, by, op.cy - y)];
+      for (const t of times) take(quadAt(x, op.cx, op.x, t), quadAt(y, op.cy, op.y, t));
+      x = op.x;
+      y = op.y;
+      continue;
+    }
+    take(op.x, op.y);
+    const times = [
+      ...rootsInUnit(
+        -x + 3 * op.c1x - 3 * op.c2x + op.x,
+        2 * (x - 2 * op.c1x + op.c2x),
+        op.c1x - x,
+      ),
+      ...rootsInUnit(
+        -y + 3 * op.c1y - 3 * op.c2y + op.y,
+        2 * (y - 2 * op.c1y + op.c2y),
+        op.c1y - y,
+      ),
+    ];
+    for (const t of times) {
+      take(cubicAt(x, op.c1x, op.c2x, op.x, t), cubicAt(y, op.c1y, op.c2y, op.y, t));
+    }
+    x = op.x;
+    y = op.y;
+  }
+  return [minX, minY, maxX - minX, maxY - minY];
+}
+
+function paintColor(layer: DrawLayer): { r: number; g: number; b: number; a: number } {
+  const paint = layer.paint;
+  if (paint.kind !== "solid" || typeof paint.color === "string") return { r: 0, g: 0, b: 0, a: 1 };
+  const [r, g, b, a = 1] = paint.color;
+  return { r: r ?? 0, g: g ?? 0, b: b ?? 0, a: (paint.alpha ?? 1) * a };
 }
 
 const byId = new Map(phase3.cases.map((item) => [item.id, item]));
@@ -188,6 +380,9 @@ describe("phase 3 Darwin sticker parity", () => {
       stickerBacking: backing,
     });
     const actual = stickerCommands(drawingOf(shape, options), shape, backing);
+    const start = actual.commands[0]?.path[0];
+    expect(actual.commands[0]?.cap).toBe("round");
+    expect(start).toMatchObject({ op: "M", x: 20, y: 60 });
     expect(maxDelta(actual, expected)).toBeLessThanOrEqual(1e-4);
   });
 
@@ -308,9 +503,9 @@ describe("phase 3 Darwin sticker parity", () => {
       .filter((layer) => layer.role === "texture")
       .map((layer): StickerCommand => ({
         style: "stroke",
-        color: { r: 0, g: 0, b: 0, a: 1 },
+        color: paintColor(layer),
         path: layer.paths[0] ?? [],
-        bounds: [0, 0, 0, 0],
+        bounds: pathBounds(layer.paths[0] ?? []),
         cap: "round",
         join: "round",
         miterLimit: 10,
@@ -320,6 +515,8 @@ describe("phase 3 Darwin sticker parity", () => {
         opacityMaskBlur: 0,
         ...(layer.strokeWidth !== undefined ? { lineWidth: layer.strokeWidth } : {}),
       }));
+    // Speck alpha is 0.7. Fiber RGB is the paper color shaded by 0.28 + 0.4 * amount.
+    expect(fibers[1]?.color.a).toBeCloseTo(0.7, 6);
     expect(
       maxDelta(
         { centerlines: actual.centerlines, commands: [...actual.commands, ...fibers] },
@@ -342,19 +539,52 @@ describe("phase 3 Darwin sticker parity", () => {
       roughness: 1.2,
       stickerBacking: backing,
     });
+    const input = expected.input!;
     const actual = stickerCommands(drawingOf(shape, options), shape, backing);
-    const image = actual.commands[0];
-    const withImage = image
-      ? {
-          ...actual,
-          commands: [...actual.commands, { ...image, style: "fill" as const }],
-        }
-      : actual;
-    expect(expected.commands[1]?.stickerImage).toMatchObject({
-      opacity: 0.6,
-      scale: 24,
-      tileWidth: 24,
+    const sheetPath = actual.commands[0]?.path ?? [];
+    const imageBacking = {
+      ...backing,
+      image: {
+        source: {
+          href: "data:image/png;base64,aaaa",
+          width: input.imageSize![0],
+          height: input.imageSize![1],
+        },
+        placement: input.placement!,
+        scale: input.imageScale!,
+        opacity: input.imageOpacity!,
+      },
+    };
+    const imageLayer = appendStickerImage([], imageBacking, [sheetPath])[0]?.stickerImage;
+    const placed = resolveImagePlacement({
+      placement: input.placement!,
+      scale: input.imageScale!,
+      imageWidth: input.imageSize![0],
+      imageHeight: input.imageSize![1],
+      mask: {
+        x: actual.commands[0]!.bounds[0],
+        y: actual.commands[0]!.bounds[1],
+        width: actual.commands[0]!.bounds[2],
+        height: actual.commands[0]!.bounds[3],
+      },
     });
+    const withImage = {
+      ...actual,
+      commands: [
+        ...actual.commands,
+        {
+          ...actual.commands[0]!,
+          color: { r: 0, g: 0, b: 0, a: 0 },
+          stickerImage: {
+            opacity: imageLayer!.opacity,
+            placement: imageLayer!.placement,
+            scale: imageLayer!.scale,
+            tileWidth: placed.tileWidth,
+            imageSize: [imageLayer!.width, imageLayer!.height] as [number, number],
+          },
+        },
+      ],
+    };
     expect(maxDelta(withImage, expected)).toBeLessThanOrEqual(1e-4);
   });
 
@@ -365,15 +595,49 @@ describe("phase 3 Darwin sticker parity", () => {
       smoothness: 0.4,
       edge: { kind: "torn", depth: 5, length: 14, jaggedness: 0.3 },
     });
-    // The fixture records the part offset and tear, not the circle centers or
-    // diameters. The Darwin centerline is the silhouette; this checks the torn
-    // contour built from it.
-    const centerlines = expected.centerlines.map((line) => ({
-      points: line.points.map(([x, y]) => ({ x, y })),
-      closed: line.closed,
-      source: line.points.map(([x, y]) => ({ x, y })),
-    }));
-    const commands = commandsForLines(centerlines, backing.width, backing, 11n);
-    expect(maxDelta({ centerlines, commands }, expected)).toBeLessThanOrEqual(1e-4);
+    const options = {
+      seed: 11n,
+      strokeWidth: 3,
+      roughness: 0,
+      bowing: 0,
+      maxRandomnessOffset: 2,
+      stickerBacking: backing,
+    };
+    const built = groupCommands(
+      (expected.parts ?? []).map((item) =>
+        part(circle(item.center[0], item.center[1], item.diameter), options, item.transform),
+      ),
+      backing,
+      11n,
+    );
+    const pre = expected.preSimplifyRings ?? [];
+    expect(built.centerlines.length).toBe(pre.length);
+    built.centerlines.forEach((line, index) => {
+      const ring = pre[index]!;
+      expect(ring.startIndex).toBe(0);
+      expect(line.source.length).toBe(ring.points.length);
+      line.source.forEach((pt, i) => {
+        expect(Math.abs(pt.x - ring.points[i]![0])).toBeLessThanOrEqual(1e-4);
+        expect(Math.abs(pt.y - ring.points[i]![1])).toBeLessThanOrEqual(1e-4);
+      });
+    });
+    const atFixture = simplifyTornRing(
+      built.centerlines[0]!.source,
+      expected.simplifyEpsilon ?? TORN_SIMPLIFY_EPSILON,
+    );
+    const atHalf = simplifyTornRing(built.centerlines[0]!.source, 0.9);
+    expect(atFixture.length).toBe(expected.centerlines[0]!.points.length);
+    expect(atHalf.length).not.toBe(atFixture.length);
+    const offset = offsetClosed(
+      built.centerlines[0]!.points,
+      expected.offsetBeforeTear?.[0]?.distance ?? 12,
+    );
+    const expectedOffset = expected.offsetBeforeTear?.[0]?.points ?? [];
+    expect(offset?.length).toBe(expectedOffset.length);
+    offset?.forEach((pt, i) => {
+      expect(Math.abs(pt.x - expectedOffset[i]![0])).toBeLessThanOrEqual(1e-4);
+      expect(Math.abs(pt.y - expectedOffset[i]![1])).toBeLessThanOrEqual(1e-4);
+    });
+    expect(maxDelta(built, expected)).toBeLessThanOrEqual(1e-4);
   });
 });
