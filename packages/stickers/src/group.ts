@@ -1,10 +1,12 @@
 import type { Shape, SketchDrawing } from "@sketchy-js/core";
 import type { Matrix2D, SketchOptions, StickerBacking } from "@sketchy-js/types";
 import {
+  clampStickerBacking,
   commandsForLines,
   stickerCenterlines,
   type Centerline,
   type StickerCommand,
+  type StickerReport,
 } from "./builder.js";
 import { channels } from "./builder.js";
 import { centroid, contains, dist, signedArea, type Pt } from "./geom.js";
@@ -65,9 +67,16 @@ export function groupSilhouette(
           : line.points;
       rings.push({ points: hull, shape: shapeId, isHole: hole });
     });
+    if (stroke > 0.4) {
+      for (const line of placed) {
+        if (line.closed || line.points.length < 2) continue;
+        rings.push({ points: openRibbon(line.points, stroke), shape: shapeId, isHole: false });
+      }
+    }
     shapeId += 1;
   }
-  const combined = combineSilhouettes(rings);
+  // Swift's silhouette walk emits later rings first. A single ring is unchanged.
+  const combined = combineSilhouettes(rings).reverse();
   const torn = typeof backing.edge === "object" && backing.edge.kind === "torn";
   return combined.map((ring) => {
     const points = torn ? simplify(ring.points, 1.8) : ring.points;
@@ -81,9 +90,14 @@ export function groupCommands(
   backing: StickerBacking,
   seed: bigint | undefined,
   groupTransform: Matrix2D = IDENTITY,
+  report?: StickerReport,
 ): { centerlines: Centerline[]; commands: StickerCommand[] } {
-  const centerlines = groupSilhouette(parts, backing, groupTransform);
-  return { centerlines, commands: commandsForLines(centerlines, backing.width, backing, seed) };
+  const clamped = clampStickerBacking(backing);
+  const centerlines = groupSilhouette(parts, clamped, groupTransform);
+  return {
+    centerlines,
+    commands: commandsForLines(centerlines, clamped.width, clamped, seed, report),
+  };
 }
 
 function contributes(options: SketchOptions): boolean {
@@ -115,6 +129,41 @@ export function multiply(t1: Matrix2D, t2: Matrix2D): Matrix2D {
     b2 * c1 + d2 * d1,
     a2 * e1 + c2 * f1 + e2,
     b2 * e1 + d2 * f1 + f2,
+  ];
+}
+
+/** Round-capped stroke hull. Width stays in points; the group transform is already in the points. */
+function openRibbon(points: readonly Pt[], width: number): Pt[] {
+  const half = width / 2;
+  const left: Pt[] = [];
+  const right: Pt[] = [];
+  for (let index = 0; index < points.length; index++) {
+    const prev = points[Math.max(0, index - 1)]!;
+    const next = points[Math.min(points.length - 1, index + 1)]!;
+    const len = Math.hypot(next.x - prev.x, next.y - prev.y) || 1;
+    const nx = (-(next.y - prev.y) / len) * half;
+    const ny = ((next.x - prev.x) / len) * half;
+    const point = points[index]!;
+    left.push({ x: point.x + nx, y: point.y + ny });
+    right.push({ x: point.x - nx, y: point.y - ny });
+  }
+  const start = points[0]!;
+  const after = points[1]!;
+  const startLen = Math.hypot(after.x - start.x, after.y - start.y) || 1;
+  const end = points[points.length - 1]!;
+  const before = points[points.length - 2]!;
+  const endLen = Math.hypot(end.x - before.x, end.y - before.y) || 1;
+  return [
+    {
+      x: start.x - ((after.x - start.x) / startLen) * half,
+      y: start.y - ((after.y - start.y) / startLen) * half,
+    },
+    ...right,
+    {
+      x: end.x + ((end.x - before.x) / endLen) * half,
+      y: end.y + ((end.y - before.y) / endLen) * half,
+    },
+    ...left.reverse(),
   ];
 }
 

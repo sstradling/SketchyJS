@@ -152,7 +152,6 @@ export interface StickerBacking {
   edge: StickerEdge;
   color: Color;
   texture?: StickerTexture;
-  image?: StickerImage;
   shadow?: StickerShadow;
 }
 

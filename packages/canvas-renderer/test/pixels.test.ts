@@ -236,6 +236,30 @@ describe("SVG and Canvas pixels", () => {
     }
   });
 
+  it("honors a miter limit of 1 on a sharp corner", () => {
+    const angle: Path = [
+      { op: "M", x: 12, y: 46 },
+      { op: "L", x: 40, y: 8 },
+      { op: "L", x: 68, y: 48 },
+    ];
+    expectClose(
+      sceneOf([
+        drawing([
+          layer({
+            role: "stroke",
+            paths: [angle],
+            paint: { kind: "solid", color: "#1a1a1a" },
+            strokeWidth: 10,
+            cap: "butt",
+            join: "miter",
+            miterLimit: 1,
+          }),
+        ]),
+      ]),
+      PIXEL_LIMITS.geometric,
+    );
+  });
+
   it("matches a quadratic curve", () => {
     const quad: Path = [
       { op: "M", x: 8, y: 46 },

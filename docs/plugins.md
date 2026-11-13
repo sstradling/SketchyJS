@@ -357,7 +357,7 @@ Notes by kind:
 - **Fill (what the current host does).** The host builds exactly one ring per region (the Swift generators fill one polygon), always with `fillRule: "nonzero"`, and sets `region.shape` for ellipse and arc regions. It converts `area` parts to Sketchy `fillPath` operation sets and `strokes` parts to `fillSketch` sets. The `clip`, `paint`, and `fillRule` fields on parts are part of the contract but are **not read** by the host yet; clipping to the region is done by the generators that need it. Non-finite parts and parts past `ctx.maxOps` are dropped with `fill-non-finite` and `fill-max-ops` diagnostics.
 - **Fill (contract).** Return `{ kind: "area" }` for geometry you fill (dots, washes) and `{ kind: "strokes" }` for centerlines. For `strokes` the host applies the shape's configured stroke treatment, including a crayon or watercolor fill brush. That is how a hachure fill gets crayon texture without knowing crayon exists. `clip: "region"` (the default) asks the host to clip to the fill region, which handles concave shapes and holes. Padding and offset are already applied to `region` before the call, matching the plan's "offset after padding" rule.
 - **Texture.** Output is always clipped to the sheet, holes included, by the host, so a texture plugin never needs the sheet outline. Textures are vector marks (fibers, speckles, cracks, weave). They are drawn after any `StickerImage` and never affect the sheet shadow.
-- **Edge.** The input rings are the offset contour with `corner[i]` marking real corners that `.smooth` preserves. Return replacement rings. The host validates closure, finiteness, ring winding, and self-intersection; an invalid result falls back to the built-in `smooth` edge with an `edge-invalid` diagnostic, so a bad torn-edge seed never produces a broken sticker. `margin` is `width + strokeWidth / 2`, the offset already applied.
+- **Edge.** The input rings are the offset contour with `corner[i]` marking real corners that `.smooth` preserves. Return replacement rings. The host checks that each ring is closed, finite, and has area. A torn polyline that crosses itself is rejected. An invalid result is replaced by the built-in `smooth` edge and reported as `edge-invalid`, so a bad torn edge does not leave a broken sticker. `margin` is `width + strokeWidth / 2`, the offset already applied. Each call gets a fresh plugin context. There is no shared random stream.
 
 ### 4.6 Plugin objects and `define*`
 
@@ -595,7 +595,7 @@ Two independent version numbers:
 
 Rule: **every shipped brush, fill, texture, and edge is created by `defineX` and reaches the host through `use()` or a direct reference.** Crayon and watercolor are still dispatched by id in `scene/src/build.ts`. That is temporary until a general `defineBrush` host runs whatever brush is registered.
 
-Status: the fill rows through `scribble`, plus the crayon brush and the watercolor brush and fill, are implemented (`api: "1.0"`). Texture and sticker-edge rows are still planned. Area fills may set `clipPath` when the clip is the generated outline rather than the input region; watercolor fill does this.
+Status: the fill rows through `scribble`, plus the crayon brush, the watercolor brush and fill, the paper texture, and the smooth, fully smooth, and torn edges, are implemented (`api: "1.0"`). Area fills may set `clipPath` when the clip is the generated outline rather than the input region; watercolor fill does this.
 
 | Today's Sketchy feature | Plugin | Package and subpath |
 | --- | --- | --- |
@@ -604,8 +604,9 @@ Status: the fill rows through `scribble`, plus the crayon brush and the watercol
 | Watercolor fill | `defineFill` id `watercolor` | `@sketchy-js/brushes/watercolor` (shares `wash.ts` with the brush) |
 | Marker (variable width) | `defineBrush` id `marker` | `@sketchy-js/brushes/marker` |
 | solid, hachure, zigzag, crossHatch, dots, sunBurst, starBurst, dashed, zigzagLine, scribble | one `defineFill` each | `@sketchy-js/fills/<name>` |
-| `StickerTexture.paper` | `defineTexture` id `paper` | `@sketchy-js/stickers/paper` |
-| `.smooth`, `.fullySmooth`, `.torn` | `defineStickerEdge` ids `smooth`, `fullySmooth`, `torn` | `@sketchy-js/stickers/edges/*` |
+| `StickerTexture.paper` | `defineTexture` id `paper` | `@sketchy-js/stickers` (`paper`) |
+| `.smooth`, `.fullySmooth`, `.torn` | `defineStickerEdge` ids `smooth`, `fullySmooth`, `torn` | `@sketchy-js/stickers` (`smoothEdge`, `fullySmoothEdge`, `tornEdge`) |
+| image-masked texture | not a plugin; placement and decode | `@sketchy-js/stickers/image` |
 
 Uniform strokes drawn natively by SVG or Canvas, thickness and opacity profiles, joins, caps, and the sticker silhouette union are host features, not plugins. They are renderer-sensitive or need global geometry.
 

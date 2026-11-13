@@ -1,12 +1,15 @@
 import { generateDrawing, type Shape } from "@sketchy-js/core";
 import { resolveSketchOptions } from "@sketchy-js/core/options";
 import {
+  asSeed,
+  clampStickerBacking,
   groupCommands,
   multiply,
   stickerCommands,
   stickerLayers,
   type GroupPart,
 } from "@sketchy-js/stickers";
+import { appendStickerImage, type StickerBackingWithImage } from "@sketchy-js/stickers/image";
 import type {
   Drawing,
   DrawLayer,
@@ -94,9 +97,10 @@ export class SketchGroup {
     );
     const resolver = parts[0]?.view.registry();
     if (!resolver) return { version: 1, size, nodes: [] };
-    if (!this.backing || !(this.backing.width > 0)) {
+    const backing = this.backing ? clampStickerBacking(this.backing) : undefined;
+    if (!backing || !(backing.width > 0)) {
       const nodes = parts.flatMap((part) =>
-        inkNodes(part, multiply(part.transform, this.transform), resolver, size, true),
+        partNodes(part, multiply(part.transform, this.transform), resolver, size, true),
       );
       return { version: 1, size, nodes };
     }
@@ -118,16 +122,20 @@ export class SketchGroup {
     // Path parts already received `placement` inside `groupCommands` via the
     // centerline transform. Their ink stays in authored coordinates plus placement,
     // applied here because assembleDrawing was told not to fit.
-    const sheet = groupCommands(inputs, this.backing, this.seed ?? asSeed(inputs[0]?.options.seed));
+    const seed = this.seed ?? asSeed(inputs[0]?.options.seed);
+    const sheet = groupCommands(inputs, backing, seed);
+    const sheetPaths = sheet.commands
+      .filter((command) => command.style === "fill")
+      .map((command) => command.path);
     const sheetNode: SceneNode = {
       type: "drawing",
       drawing: {
         shape: "path",
         outline: [],
-        layers: stickerLayers(
-          sheet.commands,
-          this.backing,
-          this.seed ?? asSeed(inputs[0]?.options.seed),
+        layers: appendStickerImage(
+          stickerLayers(sheet.commands, backing, seed),
+          backing,
+          sheetPaths,
         ),
       },
     };
@@ -158,7 +166,14 @@ export function buildStickerScene(
     const drawing = generateOne(resolver, item.shape, options, item.fill);
     if (!drawing) return node;
     const built = stickerCommands(drawing, item.shape, backing);
-    const sheetLayers = stickerLayers(built.commands, backing, asSeed(options.seed));
+    const sheetPaths = built.commands
+      .filter((command) => command.style === "fill")
+      .map((command) => command.path);
+    const sheetLayers = appendStickerImage(
+      stickerLayers(built.commands, backing, asSeed(options.seed)),
+      backing,
+      sheetPaths,
+    );
     const layers: readonly DrawLayer[] =
       item.shape.kind === "path"
         ? bake(
@@ -177,7 +192,12 @@ function generateOne(resolver: FillResolver, shape: Shape, options: SketchOption
   return generateDrawing(shape, options, createFillStage({ fill: resolved, options, report() {} }));
 }
 
-function inkNodes(
+/**
+ * Ink for one part. Path shapes keep `matrix` instead of being fitted to the
+ * canvas. A child sheet is offset after that transform, so its margin stays in
+ * unscaled points.
+ */
+function partNodes(
   part: SketchPart,
   matrix: Matrix2D,
   resolver: FillResolver,
@@ -185,27 +205,43 @@ function inkNodes(
   ownSheet: boolean,
 ): SceneNode[] {
   return part.view.contents().flatMap((item) => {
-    const scene = buildStickerScene(
-      resolver,
-      ownSheet ? [item] : [{ ...item, options: withoutBacking(item.options) }],
-      size,
+    const options = resolveSketchOptions(withoutBacking(item.options));
+    const drawing = generateOne(resolver, item.shape, options, item.fill);
+    if (!drawing) return [];
+    const fitted = assembleDrawing(drawing, size, false);
+    const ink: SceneNode = { type: "drawing", drawing: bake(fitted, matrix) };
+    const raw = item.options.stickerBacking as StickerBackingWithImage | undefined;
+    if (!ownSheet || !raw) return [ink];
+    const backing = clampStickerBacking(raw);
+    if (!(backing.width > 0)) return [ink];
+    const seed = asSeed(options.seed);
+    const sheet = groupCommands(
+      [{ shape: item.shape, options, drawing, transform: matrix }],
+      backing,
+      seed,
     );
-    return scene.nodes.map((node) => {
-      if (node.type !== "drawing") return node;
-      const fit = item.shape.kind === "path" ? IDENTITY : matrix;
-      return { type: "drawing" as const, drawing: bake(node.drawing, fit) };
-    });
+    const sheetPaths = sheet.commands
+      .filter((command) => command.style === "fill")
+      .map((command) => command.path);
+    const sheetNode: SceneNode = {
+      type: "drawing",
+      drawing: {
+        shape: "path",
+        outline: [],
+        layers: appendStickerImage(
+          stickerLayers(sheet.commands, backing, seed),
+          { ...backing, ...(raw.image ? { image: raw.image } : {}) },
+          sheetPaths,
+        ),
+      },
+    };
+    return [sheetNode, ink];
   });
 }
 
 function withoutBacking(options: Partial<SketchOptions>): Partial<SketchOptions> {
   const { stickerBacking: _backing, ...rest } = options;
   return rest;
-}
-
-function asSeed(seed: bigint | number | undefined): bigint | undefined {
-  if (seed === undefined) return undefined;
-  return typeof seed === "bigint" ? seed : BigInt(Math.trunc(seed));
 }
 
 function bake(drawing: Drawing, matrix: Matrix2D): Drawing {

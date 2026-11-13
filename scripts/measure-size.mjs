@@ -66,11 +66,16 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
   {
     name: "stickers entry (sheet, edges, paper, group union)",
     code: `export { stickerCommands, stickerLayers, paper, smoothEdge, groupCommands } from "@sketchy-js/stickers";`,
-    ceiling: 20,
+    ceiling: 18,
   },
   {
     name: "stickers/image (experimental placement)",
     code: `export { resolveImagePlacement } from "@sketchy-js/stickers/image";`,
+  },
+  {
+    name: "sticker scene (scene/stickers + sheets + image)",
+    code: `export { SketchGroup, buildStickerScene } from "@sketchy-js/scene/stickers";`,
+    ceiling: 65,
   },
   {
     name: "stickers/clipper adapter",
@@ -93,6 +98,7 @@ const alias = {
   "@sketchy-js/brushes": dist("brushes"),
   "@sketchy-js/brushes/crayon": dist("brushes", "crayon.js"),
   "@sketchy-js/animate": dist("animate"),
+  "@sketchy-js/scene/stickers": dist("scene", "stickers.js"),
   "@sketchy-js/stickers": dist("stickers"),
   "@sketchy-js/stickers/image": dist("stickers", "image.js"),
   "@sketchy-js/stickers/clipper": dist("stickers", "clipper.js"),

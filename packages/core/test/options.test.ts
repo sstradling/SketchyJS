@@ -79,10 +79,12 @@ describe("swiftClamp", () => {
 });
 
 describe("StickerImage fit scale", () => {
-  it("uses Swift's 0.05 minimum", () => {
-    expect(resolveFitScale(-1)).toBe(0.05);
-    expect(resolveFitScale(0)).toBe(0.05);
-    expect(resolveFitScale(0.04)).toBe(0.05);
+  it("matches Swift resolvedFitScale: non-positive means 1", () => {
+    expect(resolveFitScale(-1)).toBe(1);
+    expect(resolveFitScale(0)).toBe(1);
+    expect(resolveFitScale(Number.NaN)).toBe(1);
+    expect(resolveFitScale(Number.POSITIVE_INFINITY)).toBe(1);
+    expect(resolveFitScale(0.04)).toBe(0.04);
     expect(resolveFitScale(0.05)).toBe(0.05);
     expect(resolveFitScale(2)).toBe(2);
   });
@@ -94,9 +96,6 @@ describe("clamp rules against Swift clamp tables", () => {
     for (const table of tables) {
       const key = rename?.[table.param] ?? table.param;
       it(`${fixtureGroup}.${table.param}`, () => {
-        // The exporter records the initializer's historical fallback (1); the painter's
-        // resolved fit scale uses its documented 0.05 floor and is covered below.
-        if (fixtureGroup === "stickerImage" && table.param === "resolvedFitScale") return;
         const derived = DERIVED_PARAMS[`${fixtureGroup}.${table.param}`];
         const rule = (OPTION_GROUPS[group] as Record<string, OptionRule>)[key];
         for (const row of table.rows) {

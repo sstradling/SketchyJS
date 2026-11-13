@@ -8,6 +8,8 @@ SketchyJS package versions match the Swift Sketchy library.
 - Git tags are **`v`-prefixed** (`v1.5.0`). Do not tag feature branches.
 - The plugin API version (currently **1.0**) is a different number. It describes `defineBrush` / `defineFill` / `defineTexture` / `defineStickerEdge` and does not follow the package version.
 
-Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.5.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy.
+Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.5.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy. The Phase 1 and Phase 2 changeset files that declared those minor bumps are not in the tree. The release PR sets `1.5.0` explicitly.
+
+`.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, and `animate`. `react`, `web-components`, and `contrib` are outside that group.
 
 `v1.4.2` appears in [plan.md](plan.md) only as the old Sketchy pin this plan was first written against. It is not a SketchyJS version.

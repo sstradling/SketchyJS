@@ -89,7 +89,7 @@ function shadowed(
         dy: formatNumber(shadow.y, 3),
         stdDeviation: formatNumber(shadow.radius / 2, 3),
         "flood-color": paint.value,
-        "flood-opacity": formatNumber(paint.opacity, 3),
+        "flood-opacity": "1",
       }),
     ]),
   );
@@ -103,42 +103,68 @@ function shadowed(
   });
 }
 
-/** Image masked by the sheet. `href` is a data URL; nothing is fetched. */
+/** Image masked by the sheet. Data URLs are embedded. Same-origin URLs need the option. */
 function stickerImage(
   layer: DrawLayer,
   options: ResolvedSvgOptions,
-  _d: string,
+  defs: Defs,
+  d: string,
   clipAttrs: Record<string, string>,
 ): SvgElement {
   const image = layer.stickerImage;
-  if (!image || !image.href.startsWith("data:image/")) {
+  const href = image ? svgImageHref(image.href, options.allowSameOriginImages) : "";
+  if (!image || !href) {
     throw new Error("sticker image source must be a data:image URL; network URLs are not loaded");
   }
   const rect = image.drawRect;
-  const images: SvgElement[] = [];
+  const opacity = image.opacity >= 1 ? undefined : formatNumber(image.opacity, 3);
   if (image.placement === "tile") {
     const box = controlBox(layer.paths);
-    for (let y = box.y, row = 0; y < box.y + box.height && row < 900; y += rect.height, row++) {
-      for (let x = box.x, col = 0; x < box.x + box.width && col < 900; x += rect.width, col++) {
-        images.push(
-          imageEl(image.href, x, y, rect.width, rect.height, image.opacity, options.precision),
-        );
-      }
-    }
-  } else {
-    images.push(
-      imageEl(
-        image.href,
-        rect.x,
-        rect.y,
-        rect.width,
-        rect.height,
-        image.opacity,
-        options.precision,
+    const id = `${options.idPrefix}-image-${defs.elements.length}`;
+    defs.elements.push(
+      el(
+        "pattern",
+        {
+          id,
+          patternUnits: "userSpaceOnUse",
+          x: formatNumber(box.x, options.precision),
+          y: formatNumber(box.y, options.precision),
+          width: formatNumber(rect.width, options.precision),
+          height: formatNumber(rect.height, options.precision),
+        },
+        [imageEl(href, 0, 0, rect.width, rect.height, 1, options.precision)],
       ),
     );
+    return el("path", {
+      d,
+      fill: `url(#${id})`,
+      opacity,
+      "fill-rule": "evenodd",
+      ...clipAttrs,
+    });
   }
-  return el("g", { ...clipAttrs }, images);
+  return el("g", { opacity, ...clipAttrs }, [
+    imageEl(href, rect.x, rect.y, rect.width, rect.height, 1, options.precision),
+  ]);
+}
+
+function svgImageHref(href: string, allowSameOrigin: boolean): string {
+  if (href.startsWith("data:image/")) return href;
+  if (href.startsWith("blob:") || href.startsWith("file:")) {
+    throw new Error(
+      "sticker image source must be a data:image URL; blob and file URLs are not loaded",
+    );
+  }
+  if (
+    allowSameOrigin &&
+    (href.startsWith("/") ||
+      href.startsWith("./") ||
+      href.startsWith("../") ||
+      /^https?:\/\//.test(href))
+  ) {
+    return href;
+  }
+  throw new Error("sticker image source must be a data:image URL; network URLs are not loaded");
 }
 
 function imageEl(
@@ -201,7 +227,7 @@ function renderLayer(layer: DrawLayer, options: ResolvedSvgOptions, defs: Defs):
   const clip = layer.clip ? defs.attribute(layer.clip) : undefined;
   const clipAttrs = clip ? { [clip[0]]: clip[1] } : {};
 
-  if (layer.stickerImage) return stickerImage(layer, options, d, clipAttrs);
+  if (layer.stickerImage) return stickerImage(layer, options, defs, d, clipAttrs);
   if (layer.shadow) return shadowed(layer, options, defs, d, paint, opacity, clipAttrs);
   if (layer.strokeWidth !== undefined) {
     const cap = layer.cap ?? "round";

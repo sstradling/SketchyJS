@@ -3,6 +3,7 @@ import { Rng } from "@sketchy-js/core";
 import {
   assertDeterministic,
   assertInputImmutable,
+  assertInterleavingStable,
   assertWithinBudget,
   type EdgeInput,
   type PluginContext,
@@ -10,6 +11,7 @@ import {
 import { fullySmoothEdge } from "../src/edges/fully-smooth.js";
 import { smoothEdge } from "../src/edges/smooth.js";
 import { tornEdge } from "../src/edges/torn.js";
+import { paper } from "../src/paper.js";
 
 const ring = (side: number): EdgeInput => ({
   margin: 8,
@@ -54,5 +56,37 @@ describe("sticker edges", () => {
     );
     assertWithinBudget(torn, 200_000);
     expect(torn[0]?.path.length).toBeGreaterThan(0);
+    assertInterleavingStable(
+      () => smoothEdge.generate(input, {}, ctx),
+      () =>
+        tornEdge.generate(
+          ring(24),
+          { depth: 3, length: 8, jaggedness: 0.2, seedHi: 4, seedLo: 5 },
+          ctx,
+        ),
+    );
+    const texture = {
+      sheet: {
+        paths: [
+          [
+            { op: "M" as const, x: 0, y: 0 },
+            { op: "L" as const, x: 40, y: 0 },
+            { op: "L" as const, x: 40, y: 40 },
+            { op: "Z" as const },
+          ],
+        ],
+        fillRule: "evenodd" as const,
+        bounds: { x: 0, y: 0, width: 40, height: 40 },
+        margin: 8,
+      },
+      paperColor: [1, 1, 1, 1] as const,
+    };
+    assertDeterministic(() =>
+      paper.generate(texture, { amount: 0.5, scale: 10, seedHi: 1, seedLo: 2 }, ctx),
+    );
+    assertInputImmutable(
+      (value) => paper.generate(value, { amount: 0.4, scale: 8, seedHi: 3, seedLo: 4 }, ctx),
+      texture,
+    );
   });
 });

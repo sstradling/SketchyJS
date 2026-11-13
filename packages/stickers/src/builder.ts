@@ -1,6 +1,20 @@
-import { Rng, type Shape, type SketchDrawing } from "@sketchy-js/core";
-import type { EdgeRing, PluginContext } from "@sketchy-js/plugin";
-import type { Color, Matrix2D, Path, StickerBacking, StickerEdge } from "@sketchy-js/types";
+import type { Shape, SketchDrawing } from "@sketchy-js/core";
+import type { EdgeRing } from "@sketchy-js/plugin";
+import type {
+  Color,
+  Matrix2D,
+  Path,
+  StickerBacking,
+  StickerEdge,
+  StickerTexture,
+} from "@sketchy-js/types";
+import {
+  applyRule,
+  STICKER_BACKING,
+  STICKER_SHADOW,
+  STICKER_TEAR,
+  STICKER_TEXTURE,
+} from "@sketchy-js/core/options";
 import { contourPath, controlBounds, isCorner } from "./contour.js";
 import {
   dropDuplicatePasses,
@@ -10,7 +24,8 @@ import {
   type Centerline,
 } from "./flatten.js";
 import { guideRings } from "./guide.js";
-import { contains, centroid, resample, signedArea, type Pt } from "./geom.js";
+import { centroid, contains, resample, segmentsIntersect, signedArea, type Pt } from "./geom.js";
+import { freshPluginContext } from "./plugin-context.js";
 import { offsetClosed } from "./offset.js";
 import { chop } from "./chop.js";
 import { aim, continuousOutline } from "./smooth.js";
@@ -55,12 +70,85 @@ export interface StickerBuild {
   commands: StickerCommand[];
 }
 
-const edgeContext = {
-  rng: new Rng(1n),
-  quality: "final" as const,
-  maxOps: 200_000,
-  warn() {},
-} as unknown as PluginContext;
+/** A message from sheet construction. `edge-invalid` means a plugin was replaced by smooth. */
+export interface StickerDiagnostic {
+  code: string;
+  message: string;
+}
+
+/** Optional sink for {@link StickerDiagnostic}. Groups and single stickers share it. */
+export type StickerReport = (diagnostic: StickerDiagnostic) => void;
+
+/** Non-finite sticker numbers are a caller error. Negatives clamp like the Swift initializers. */
+export class StickerOptionsError extends Error {
+  readonly code = "sticker-options" as const;
+  constructor(message: string) {
+    super(message);
+    this.name = "StickerOptionsError";
+  }
+}
+
+function finite(value: number, name: string): number {
+  if (typeof value !== "number") throw new StickerOptionsError(`${name} must be a number`);
+  if (!Number.isFinite(value)) throw new StickerOptionsError(`${name} must be finite`);
+  return value;
+}
+
+/** The same clamps a single sticker and a group sheet apply before any geometry. */
+export function clampStickerBacking(backing: StickerBacking): StickerBacking {
+  const width = applyRule(finite(backing.width, "sticker width"), STICKER_BACKING.width);
+  const smoothness = applyRule(
+    finite(backing.smoothness, "sticker smoothness"),
+    STICKER_BACKING.smoothness,
+  );
+  let edge = backing.edge;
+  if (typeof edge === "object" && edge.kind === "fullySmooth") {
+    edge = {
+      kind: "fullySmooth",
+      radius: applyRule(
+        finite(edge.radius, "fully smooth radius"),
+        STICKER_BACKING.fullySmoothRadius,
+      ),
+    };
+  } else if (typeof edge === "object" && edge.kind === "torn") {
+    edge = {
+      kind: "torn",
+      depth: applyRule(finite(edge.depth, "tear depth"), STICKER_TEAR.depth),
+      length: applyRule(finite(edge.length, "tear length"), STICKER_TEAR.length),
+      jaggedness: applyRule(finite(edge.jaggedness, "tear jaggedness"), STICKER_TEAR.jaggedness),
+    };
+  }
+  const shadow = backing.shadow
+    ? {
+        ...backing.shadow,
+        opacity: applyRule(
+          finite(backing.shadow.opacity, "shadow opacity"),
+          STICKER_SHADOW.opacity,
+        ),
+        radius: applyRule(finite(backing.shadow.radius, "shadow radius"), STICKER_SHADOW.radius),
+        x: finite(backing.shadow.x, "shadow x"),
+        y: finite(backing.shadow.y, "shadow y"),
+      }
+    : undefined;
+  const texture = clampTexture(backing.texture);
+  return {
+    ...backing,
+    width,
+    smoothness,
+    edge,
+    ...(shadow ? { shadow } : {}),
+    ...(texture ? { texture } : {}),
+  };
+}
+
+function clampTexture(texture: StickerTexture | undefined): StickerTexture | undefined {
+  if (!texture) return undefined;
+  return {
+    ...texture,
+    amount: applyRule(finite(texture.amount, "texture amount"), STICKER_TEXTURE.amount),
+    scale: applyRule(finite(texture.scale, "texture scale"), STICKER_TEXTURE.scale),
+  };
+}
 
 /**
  * Smoothed outline centerlines. The backing width does not move these points.
@@ -87,6 +175,18 @@ export function stickerCenterlines(
   const amplitude =
     Math.max(0, drawing.options.maxRandomnessOffset) * Math.max(drawing.options.roughness, 0) * 1.5;
   return unique.map((piece) => {
+    // A roughness of 0 still bows a continuous open line. Swift's ribbon follows
+    // the input segment, so the centerline is that segment resampled.
+    if (!piece.closed && !(drawing.options.roughness > 0)) {
+      const guide = guides.find((ring) => !ring.closed && ring.points.length >= 2);
+      if (guide) {
+        return {
+          points: resample(guide.points, false, 2.5),
+          closed: false,
+          source: guide.points,
+        };
+      }
+    }
     const aimed = aim(piece.points, piece.closed, guides, backing.smoothness, amplitude);
     return {
       points: resample(aimed, piece.closed, 2.5),
@@ -105,21 +205,24 @@ export function stickerCommands(
   shape: Shape,
   backing: StickerBacking,
   transform?: Matrix2D,
+  report?: StickerReport,
 ): StickerBuild {
-  const centerlines = stickerCenterlines(drawing, shape, backing, transform);
+  const clamped = clampStickerBacking(backing);
+  const centerlines = stickerCenterlines(drawing, shape, clamped, transform);
   if (centerlines.length === 0) return { centerlines, commands: [] };
   const strokeWidth =
     shape.kind === "path"
       ? (drawing.options.svgStrokeWidth ?? drawing.options.strokeWidth)
       : drawing.options.strokeWidth;
-  const outward = backing.width + Math.max(0, strokeWidth) / 2;
+  const outward = clamped.width + Math.max(0, strokeWidth) / 2;
   if (!(outward > 0)) return { centerlines, commands: [] };
   const commands = commandsFor(
     centerlines,
     outward,
-    backing,
+    clamped,
     asSeed(drawing.options.seed),
     strokeWidth,
+    report,
   );
   return { centerlines, commands };
 }
@@ -133,15 +236,18 @@ export function commandsForLines(
   outward: number,
   backing: StickerBacking,
   seed: bigint | undefined,
+  report?: StickerReport,
 ): StickerCommand[] {
+  const clamped = clampStickerBacking(backing);
   if (!(outward > 0) || lines.length === 0) return [];
   return closedCommands(
     lines.filter((line) => line.points.length >= 3),
     outward,
-    backing,
+    clamped,
     seed,
-    channels(backing.color),
-    sheetShadow(backing),
+    channels(clamped.color),
+    sheetShadow(clamped),
+    report,
   );
 }
 
@@ -151,6 +257,7 @@ function commandsFor(
   backing: StickerBacking,
   seed: bigint | undefined,
   strokeWidth: number,
+  report?: StickerReport,
 ): StickerCommand[] {
   const paper = channels(backing.color);
   const shadow = sheetShadow(backing);
@@ -158,7 +265,7 @@ function commandsFor(
   const closed = lines.filter((line) => line.closed);
   const open = lines.filter((line) => !line.closed);
   if (closed.length > 0)
-    commands.push(...closedCommands(closed, outward, backing, seed, paper, shadow));
+    commands.push(...closedCommands(closed, outward, backing, seed, paper, shadow, report));
   const ribbon = Math.max(0, strokeWidth) + backing.width * 2;
   if (ribbon > 0) {
     open.forEach((line, index) => {
@@ -185,7 +292,6 @@ function commandsFor(
           lineWidth: ribbon,
           join: torn ? "bevel" : "round",
           miterLimit: 4,
-          fillRule: "winding",
           shadow,
         }),
       );
@@ -228,6 +334,7 @@ function closedCommands(
   seed: bigint | undefined,
   paper: StickerCommand["color"],
   shadow: StickerCommand["sheetShadow"],
+  report?: StickerReport,
 ): StickerCommand[] {
   const rings = lines.filter((line) => line.points.length >= 3);
   if (rings.length === 0) return [];
@@ -240,9 +347,15 @@ function closedCommands(
     const out = fullySmoothEdge.generate(
       input,
       { radius: Math.max(0, backing.edge.radius) },
-      edgeContext,
+      freshPluginContext(),
     );
-    return [command(concat(out.map((ring) => ring.path)), "fill", paper, { shadow })];
+    const paths = acceptEdge(
+      "fullySmooth",
+      out.map((ring) => ring.path),
+      () => smoothEdge.generate(input, {}, freshPluginContext()).map((ring) => ring.path),
+      report,
+    );
+    return [command(concat(paths), "fill", paper, { shadow })];
   }
   const torn = isTorn(backing.edge);
   const tear = tearSettings(backing, seed);
@@ -279,7 +392,7 @@ function closedCommands(
               jaggedness: tear.jaggedness,
               ...halves(wrap(tear.seed + BigInt(index))),
             },
-            edgeContext,
+            freshPluginContext(),
           );
           return one[0]!.path;
         })
@@ -295,10 +408,25 @@ function closedCommands(
               smoothness: backing.smoothness,
             },
             {},
-            edgeContext,
+            freshPluginContext(),
           )
           .map((ring) => ring.path);
-    return [command(concat(paths), "fill", paper, { shadow })];
+    const smoothInput = {
+      rings: offsets.map((points, index) => ({
+        points,
+        corner: points.map((_, i) => isCorner(points, i, true)),
+        hole: nestingDepth(index, rings) % 2 === 1,
+      })),
+      margin: outward,
+      smoothness: backing.smoothness,
+    };
+    const accepted = acceptEdge(
+      torn ? "torn" : "smooth",
+      paths,
+      () => smoothEdge.generate(smoothInput, {}, freshPluginContext()).map((ring) => ring.path),
+      report,
+    );
+    return [command(concat(accepted), "fill", paper, { shadow })];
   }
   const curved = !torn;
   const path = concat(rings.map((line) => contourPath(line.points, true, curved, false)));
@@ -307,6 +435,66 @@ function closedCommands(
     command(path, "fill", paper, { shadow }),
     command(path, "stroke", paper, { lineWidth: dilation, miterLimit: 1, shadow }),
   ];
+}
+
+/**
+ * Keeps a plugin ring when it is closed, finite, and has area. A torn polyline
+ * that crosses itself is replaced by the smooth edge and reported as `edge-invalid`.
+ */
+function acceptEdge(
+  label: string,
+  paths: readonly Path[],
+  fallback: () => Path[],
+  report?: StickerReport,
+): Path[] {
+  const reason = invalidEdge(paths);
+  if (!reason) return paths.slice();
+  report?.({
+    code: "edge-invalid",
+    message: `${label} edge ${reason}; using the smooth edge`,
+  });
+  return fallback();
+}
+
+function invalidEdge(paths: readonly Path[]): string | undefined {
+  if (paths.length === 0) return "returned no rings";
+  for (const path of paths) {
+    if (path.length === 0) return "returned an empty ring";
+    let closed = false;
+    let moved = false;
+    let area = 0;
+    let prev: Pt | undefined;
+    const anchors: Pt[] = [];
+    let linesOnly = true;
+    for (const op of path) {
+      if (op.op === "Z") {
+        closed = true;
+        continue;
+      }
+      const nums =
+        op.op === "C"
+          ? [op.c1x, op.c1y, op.c2x, op.c2y, op.x, op.y]
+          : op.op === "Q"
+            ? [op.cx, op.cy, op.x, op.y]
+            : [op.x, op.y];
+      if (nums.some((n) => !Number.isFinite(n))) return "returned a non-finite coordinate";
+      if (op.op !== "M" && op.op !== "L") linesOnly = false;
+      if (op.op === "M") {
+        prev = { x: op.x, y: op.y };
+        anchors.push(prev);
+        moved = true;
+        continue;
+      }
+      if (!prev) return "did not start with a move";
+      area += prev.x * op.y - op.x * prev.y;
+      prev = { x: op.x, y: op.y };
+      anchors.push(prev);
+    }
+    if (!moved || !closed) return "did not close the ring";
+    if (!(Math.abs(area) > 1e-4)) return "returned a ring with no area";
+    if (linesOnly && segmentsIntersect(anchors)) return "self-intersects";
+  }
+  return undefined;
 }
 
 function ringOf(line: Centerline, hole: boolean): EdgeRing & { source: Pt[] } {
@@ -399,7 +587,7 @@ export function channels(color: Color): { r: number; g: number; b: number; a: nu
   return { r: channel(0), g: channel(2), b: channel(4), a: h.length >= 8 ? channel(6) : 1 };
 }
 
-function asSeed(seed: bigint | number | undefined): bigint | undefined {
+export function asSeed(seed: bigint | number | undefined): bigint | undefined {
   if (seed === undefined) return undefined;
   return typeof seed === "bigint" ? seed : BigInt(Math.trunc(seed));
 }

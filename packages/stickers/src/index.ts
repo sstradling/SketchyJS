@@ -1,4 +1,13 @@
-export { stickerCenterlines, stickerCommands, commandsForLines, channels } from "./builder.js";
+export {
+  stickerCenterlines,
+  stickerCommands,
+  commandsForLines,
+  channels,
+  clampStickerBacking,
+  StickerOptionsError,
+  asSeed,
+} from "./builder.js";
+export type { StickerDiagnostic, StickerReport } from "./builder.js";
 export { stickerLayers } from "./layers.js";
 export { paper, paperSeed, paperWidths, seedHalves } from "./paper.js";
 export type { Centerline, StickerBuild, StickerCommand } from "./builder.js";

@@ -2,7 +2,20 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
+  "fixed": [
+    [
+      "@sketchy-js/types",
+      "@sketchy-js/plugin",
+      "@sketchy-js/core",
+      "@sketchy-js/fills",
+      "@sketchy-js/brushes",
+      "@sketchy-js/stickers",
+      "@sketchy-js/scene",
+      "@sketchy-js/svg-renderer",
+      "@sketchy-js/canvas-renderer",
+      "@sketchy-js/animate"
+    ]
+  ],
   "linked": [],
   "access": "public",
   "baseBranch": "master",

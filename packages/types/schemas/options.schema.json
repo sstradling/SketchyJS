@@ -857,9 +857,6 @@
         "texture": {
           "$ref": "#/definitions/StickerTexture"
         },
-        "image": {
-          "$ref": "#/definitions/StickerImage"
-        },
         "shadow": {
           "$ref": "#/definitions/StickerShadow"
         }
@@ -945,42 +942,6 @@
         "scale"
       ],
       "additionalProperties": false
-    },
-    "StickerImage": {
-      "type": "object",
-      "properties": {
-        "source": {},
-        "placement": {
-          "$ref": "#/definitions/StickerImagePlacement"
-        },
-        "scale": {
-          "type": "number",
-          "default": 0,
-          "minimum": 0
-        },
-        "opacity": {
-          "type": "number",
-          "default": 1,
-          "minimum": 0,
-          "maximum": 1
-        }
-      },
-      "required": [
-        "source",
-        "placement",
-        "scale",
-        "opacity"
-      ],
-      "additionalProperties": false,
-      "description": "Image-masked sticker texture (Sketchy v1.5.0). `source` is an opaque, already-decoded handle."
-    },
-    "StickerImagePlacement": {
-      "type": "string",
-      "enum": [
-        "tile",
-        "stretch",
-        "fill"
-      ]
     },
     "StickerShadow": {
       "type": "object",

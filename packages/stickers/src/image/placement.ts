@@ -1,4 +1,5 @@
 import type { StickerImagePlacement } from "@sketchy-js/types";
+import { StickerImageError } from "./error.js";
 
 /**
  * Most repeats drawn for one sheet. A smaller tile is coarsened until the
@@ -106,26 +107,33 @@ function drawRect(
   };
 }
 
-/** Thrown when a sticker image source is not one this build will paint. */
-export class StickerImageError extends Error {
-  readonly code: "sticker-image-source";
-  constructor(message: string) {
-    super(message);
-    this.name = "StickerImageError";
-    this.code = "sticker-image-source";
-  }
-}
-
 /**
- * Conservative source check. A data URL is already decoded by the caller.
- * `http:`, `https:`, `blob:`, and `file:` are rejected. Nothing is fetched.
+ * Data URLs are embedded. `blob:` and `file:` are never loaded.
+ * Other URLs are accepted only when the caller sets the same-origin option.
  */
-export function assertDataImage(source: string): string {
+export function assertDataImage(source: string, allowSameOrigin = false): string {
   const href = source.trim();
-  if (!href.startsWith("data:image/")) {
+  if (href.startsWith("data:image/")) return href;
+  if (href.startsWith("blob:") || href.startsWith("file:")) {
     throw new StickerImageError(
-      "sticker image source must be a data:image URL supplied by the caller; network and blob URLs are not loaded",
+      "sticker-image-source",
+      "sticker image source must be a data:image URL; blob and file URLs are not loaded",
     );
   }
-  return href;
+  if (allowSameOrigin && isSameOriginCandidate(href)) return href;
+  throw new StickerImageError(
+    "sticker-image-source",
+    "sticker image source must be a data:image URL supplied by the caller; network URLs are not loaded",
+  );
+}
+
+function isSameOriginCandidate(href: string): boolean {
+  if (href.startsWith("blob:") || href.startsWith("file:") || href.startsWith("data:"))
+    return false;
+  return (
+    href.startsWith("/") ||
+    href.startsWith("./") ||
+    href.startsWith("../") ||
+    /^https?:\/\//.test(href)
+  );
 }

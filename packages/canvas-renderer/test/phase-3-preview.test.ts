@@ -3,6 +3,7 @@ import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { Resvg } from "@resvg/resvg-js";
 import { describe, expect, it } from "vitest";
 import { polygon, rectangle, path as svgPath } from "@sketchy-js/core";
+import type { StickerBackingWithImage } from "@sketchy-js/stickers/image";
 import type { Scene, StickerBacking } from "@sketchy-js/types";
 import type { RoughView as SheetView } from "@sketchy-js/scene";
 import { RoughView } from "@sketchy-js/scene/basic";
@@ -16,7 +17,9 @@ const cream: StickerBacking["color"] = [0.98, 0.95, 0.88, 1];
 const ink = "#1c1915";
 const wash = "#1d4e89";
 
-function sheet(partial: Partial<StickerBacking> & Pick<StickerBacking, "edge">): StickerBacking {
+function sheet(
+  partial: Partial<StickerBackingWithImage> & Pick<StickerBacking, "edge">,
+): StickerBackingWithImage {
   return { width: 14, smoothness: 1, color: cream, ...partial };
 }
 
@@ -45,6 +48,7 @@ function checkerDataUrl(): string {
 async function renderPair(
   scene: Scene,
   background: string,
+  delta = 24,
 ): Promise<{ fraction: number; png: Buffer }> {
   const svg = renderToSvgString(scene, { background });
   const width = scene.size.width;
@@ -73,10 +77,10 @@ async function renderPair(
   for (let i = 0; i < count; i++) {
     const o = i * 4;
     const differs =
-      Math.abs((src[o] ?? 0) - (pixels[o] ?? 0)) > 24 ||
-      Math.abs((src[o + 1] ?? 0) - (pixels[o + 1] ?? 0)) > 24 ||
-      Math.abs((src[o + 2] ?? 0) - (pixels[o + 2] ?? 0)) > 24 ||
-      Math.abs((src[o + 3] ?? 0) - (pixels[o + 3] ?? 0)) > 24;
+      Math.abs((src[o] ?? 0) - (pixels[o] ?? 0)) > delta ||
+      Math.abs((src[o + 1] ?? 0) - (pixels[o + 1] ?? 0)) > delta ||
+      Math.abs((src[o + 2] ?? 0) - (pixels[o + 2] ?? 0)) > delta ||
+      Math.abs((src[o + 3] ?? 0) - (pixels[o + 3] ?? 0)) > delta;
     if (differs) bad++;
   }
   return { fraction: bad / count, png: canvas.toBuffer("image/png") };
@@ -101,7 +105,7 @@ describe("phase 3 previews", () => {
       { x: 70, y: 116 },
       { x: 150, y: 110 },
     ]);
-    const views: { name: string; scene: Scene; limit: number }[] = [
+    const views: { name: string; scene: Scene; limit: number; delta?: number }[] = [
       {
         name: "single",
         limit: 0.02,
@@ -224,7 +228,10 @@ describe("phase 3 previews", () => {
       },
       {
         name: "texture-mask",
-        limit: 0.05,
+        // One SVG <pattern> resamples the checker. Edges sit just over delta 24
+        // and under delta 48. A missing image moves the sheet by far more than that.
+        limit: 0.005,
+        delta: 48,
         scene: sceneOf(
           new RoughView()
             .with({
@@ -249,10 +256,10 @@ describe("phase 3 previews", () => {
       },
     ];
     for (const view of views) {
-      const { fraction, png } = await renderPair(view.scene, background);
+      const { fraction, png } = await renderPair(view.scene, background, view.delta ?? 24);
       const file = new URL(`${view.name}.png`, dir);
-      writeFileSync(file, png);
-      expect(statSync(file).size).toBeLessThan(10 * 1024 * 1024);
+      if (process.env.UPDATE_EXAMPLES === "1") writeFileSync(file, png);
+      expect(statSync(file).size, view.name).toBeLessThan(10 * 1024 * 1024);
       expect(fraction, view.name).toBeLessThanOrEqual(view.limit);
     }
   });

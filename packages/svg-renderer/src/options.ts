@@ -8,6 +8,11 @@ export interface SvgRenderOptions {
   background?: Color;
   /** Prefix for generated `clipPath` and `mask` ids; use distinct prefixes when inlining several scenes. Default `sk`. */
   idPrefix?: string;
+  /**
+   * When set, a same-origin sticker image URL is written into the SVG.
+   * The default embeds `data:image` URLs only. `blob:` and `file:` are never written.
+   */
+  allowSameOriginImages?: boolean;
 }
 
 /** Options with defaults applied. */
@@ -15,6 +20,7 @@ export interface ResolvedSvgOptions {
   precision: number;
   background: Color | undefined;
   idPrefix: string;
+  allowSameOriginImages: boolean;
 }
 
 /** Applies defaults to renderer options. */
@@ -23,5 +29,10 @@ export function resolveSvgOptions(options: SvgRenderOptions = {}): ResolvedSvgOp
   if (!Number.isInteger(precision) || precision < 0 || precision > 12) {
     throw new RangeError(`precision must be an integer from 0 to 12, got ${precision}`);
   }
-  return { precision, background: options.background, idPrefix: options.idPrefix ?? "sk" };
+  return {
+    precision,
+    background: options.background,
+    idPrefix: options.idPrefix ?? "sk",
+    allowSameOriginImages: options.allowSameOriginImages ?? false,
+  };
 }

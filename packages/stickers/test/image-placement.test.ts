@@ -1,11 +1,7 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import {
-  TILE_BUDGET,
-  assertDataImage,
-  resolveImagePlacement,
-  StickerImageError,
-} from "../src/image/placement.js";
+import { StickerImageError, isStickerImageError } from "../src/image/error.js";
+import { TILE_BUDGET, assertDataImage, resolveImagePlacement } from "../src/image/placement.js";
 
 const fixture = JSON.parse(
   readFileSync(
@@ -58,5 +54,25 @@ describe("resolveImagePlacement", () => {
     expect(() => assertDataImage("https://example.com/a.png")).toThrow(StickerImageError);
     expect(() => assertDataImage("blob:https://example.com/id")).toThrow(/not loaded/);
     expect(() => assertDataImage("")).toThrow(StickerImageError);
+    expect(assertDataImage("/weave.png", true)).toBe("/weave.png");
+  });
+
+  it("shares one StickerImageError class across entries", async () => {
+    const fromIndex = await import("../src/image/index.js");
+    const fromError = await import("../src/image/error.js");
+    const error = new fromIndex.StickerImageError("sticker-image-source", "no");
+    expect(error instanceof fromError.StickerImageError).toBe(true);
+    expect(error instanceof StickerImageError).toBe(true);
+    const tainted = Object.assign(new Error("tainted"), { code: "sticker-image-taint" });
+    expect(isStickerImageError(tainted)).toBe(true);
+    expect(isStickerImageError(new Error("other"))).toBe(false);
+  });
+
+  it("keeps the image class out of the main entry", () => {
+    const index = new URL("../dist/index.js", import.meta.url);
+    const image = new URL("../dist/image.js", import.meta.url);
+    expect(existsSync(index), "build the package before this test").toBe(true);
+    expect(readFileSync(index, "utf8")).not.toContain("StickerImageError");
+    expect(readFileSync(image, "utf8")).toContain("StickerImageError");
   });
 });

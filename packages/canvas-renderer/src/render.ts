@@ -352,7 +352,9 @@ function renderLayer(layer: DrawLayer, context: Canvas2D, options: CanvasRenderO
     }
     if (layer.shadow) {
       const bytes = colorBytes(layer.paint.kind === "solid" ? layer.paint.color : "#000000");
-      context.shadowColor = `rgba(${bytes.r} ${bytes.g} ${bytes.b} / ${bytes.a})`;
+      // Opacity is already on the paint. Putting it in the shadow color as well
+      // would apply it twice.
+      context.shadowColor = `rgb(${bytes.r} ${bytes.g} ${bytes.b})`;
       context.shadowBlur = layer.shadow.radius;
       context.shadowOffsetX = layer.shadow.x;
       context.shadowOffsetY = layer.shadow.y;
@@ -366,6 +368,34 @@ function renderLayer(layer: DrawLayer, context: Canvas2D, options: CanvasRenderO
  * Masks a caller-decoded image to the sheet. Holes use the even-odd clip.
  * The image is not given a shadow. A missing decode throws rather than skipping.
  */
+function imageError(code: "sticker-image-source" | "sticker-image-taint", message: string): Error {
+  const error = new Error(message);
+  error.name = "StickerImageError";
+  return Object.assign(error, { code });
+}
+
+function assertCanvasUntainted(source: unknown): void {
+  if (!source || typeof source !== "object") return;
+  const canvas = source as {
+    width?: number;
+    height?: number;
+    getContext?: (
+      kind: string,
+    ) => { getImageData?: (x: number, y: number, w: number, h: number) => unknown } | null;
+  };
+  if (typeof canvas.getContext !== "function" || !(canvas.width && canvas.height)) return;
+  const context = canvas.getContext("2d");
+  if (!context?.getImageData) return;
+  try {
+    context.getImageData(0, 0, 1, 1);
+  } catch {
+    throw imageError(
+      "sticker-image-taint",
+      "sticker image canvas is tainted and its pixels cannot be read",
+    );
+  }
+}
+
 function paintStickerImage(
   layer: DrawLayer,
   context: Canvas2D,
@@ -375,10 +405,12 @@ function paintStickerImage(
   if (!image) return;
   const source = options.images?.[image.href];
   if (!source || !context.drawImage) {
-    throw new Error(
+    throw imageError(
+      "sticker-image-source",
       "sticker image source must be a decoded image passed in render options; network URLs are not loaded",
     );
   }
+  assertCanvasUntainted(source);
   trace(context, layer.clip?.paths ?? layer.paths);
   context.clip("evenodd");
   context.globalAlpha = image.opacity;
