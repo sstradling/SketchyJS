@@ -32,6 +32,8 @@
     "@arethetypeswrong/cli": "^0.18.5",
     "@changesets/cli": "^3.0.3",
     "@eslint/js": "^10.0.1",
+    "@napi-rs/canvas": "^1.1.1",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.6.6",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",

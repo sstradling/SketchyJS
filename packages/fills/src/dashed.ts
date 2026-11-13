@@ -69,7 +69,7 @@ function dashedLines(
 export const dashed = /*#__PURE__*/ defineFill({
   id: "dashed",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Dashed",
   description: "Hachure lines broken into evenly spaced dashes.",
   options: dashOptions,

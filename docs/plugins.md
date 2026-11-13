@@ -1,6 +1,6 @@
 # SketchyJS plugin architecture
 
-> **Status: design, with the contract, the builders, and a fill-only host implemented.** What exists today is listed in [Implementation status](#implementation-status). Everything else in this document, including brush, texture, and edge hosting, the ESLint preset, `@sketchy-js/testkit`, and the compat layer, is the target design and is marked *planned* where it matters. The contract in section 4 describes **plugin API 1.1**, which is what `packages/plugin/src` ships; the 1.1 additions are marked `(API 1.1)`. Whether 1.1 stays a minor release or is folded into 1.0 before the first publication is undecided (see [docs/phase-1.md](phase-1.md)). Other TypeScript sketches in sections 8 and 9 (crayon, charcoal, and the simplified hachure) are illustrations, not shipped code.
+> **Status: the contract, the builders, fill hosting, and the crayon brush are implemented.** What exists today is listed in [Implementation status](#implementation-status). Texture and edge hosting, the ESLint preset, `@sketchy-js/testkit`, and the compat layer are still the target design and are marked *planned* where it matters. The published plugin API is **1.0**. The fields that an earlier draft called API 1.1 (`FillRegion.shape`, `GeometryKit.rough`, `FillBase.strokeWidth`, `PluginMeta.paints`, and `FillBase.pattern`) are part of 1.0; nothing has been published, so the version was not bumped. `BrushInput.seed` is also part of 1.0.
 
 SketchyJS has four extension points: **brushes**, **fills**, **textures**, and **sticker edges**. Each is a plugin: a plain, frozen object holding metadata, an option schema, and one pure function. Everything the library ships in those categories (crayon, watercolor, hachure, paper grain, torn edges, ...) is implemented through the same public contract. A contributor adds a look by writing one file, and it renders in SVG and Canvas without touching a renderer.
 
@@ -12,13 +12,13 @@ Verified against the code on this branch (`packages/plugin`, `packages/fills`, `
 
 | Area | State |
 | --- | --- |
-| Contract types for all four kinds, option schema builders (`s`), `PLUGIN_API_VERSION = { major: 1, minor: 1 }` | Implemented (`@sketchy-js/plugin`) |
+| Contract types for all four kinds, option schema builders (`s`), `PLUGIN_API_VERSION = { major: 1, minor: 0 }` | Implemented (`@sketchy-js/plugin`). This is the version that will be published |
 | `defineBrush`, `defineFill`, `defineTexture`, `defineStickerEdge` (brand, deep freeze, `with()`, development-only shape and default validation) | Implemented |
-| `@sketchy-js/plugin/schema`: `resolveOptions`, `validateSchema`, `validateDefinition`, `toJsonSchema`, `hashOptions`, `checkPluginApi`/`assertPluginApi`, `PluginOptionError`, `PluginApiError` | Implemented. `checkPluginApi` is **not** called by the registry yet, so an incompatible `api` is not rejected at `use()` |
+| `@sketchy-js/plugin/schema`: `resolveOptions`, `validateSchema`, `validateDefinition`, `toJsonSchema`, `hashOptions`, `checkPluginApi`/`assertPluginApi`, `PluginOptionError`, `PluginApiError` | Implemented. The registry calls `assertPluginApi` at `use()` and when a plugin object is resolved, so a major mismatch or a newer minor is rejected |
 | Conformance helpers in `@sketchy-js/plugin`: `withRandomGuard`, `assertDeterministic`, `assertInputImmutable`, `assertInterleavingStable`, `assertWithinBudget`, `countOps` | Implemented; see [section 3](#3-the-purity-contract-and-how-it-is-enforced) for exactly what each checks |
 | `createSketchy()` registry (immutable `use`, `replace`, `alias`, `has`, `list`, `resolve`, `view()`), `PluginRegistrationError`, `PluginNotRegisteredError` | Implemented for all kinds as data, in `@sketchy-js/scene` |
 | Fill hosting: `ctx.rng` (shared or forked), `ctx.geom` including `ctx.geom.rough`, `ctx.warn` to scene diagnostics, part conversion, non-finite and op-budget handling | Implemented (`scene/src/fill-stage.ts`). Nine built-in fills ship in `@sketchy-js/fills` as `defineFill` plugins |
-| Brush, texture, and edge hosting; `PluginBudgetError`; `meta.plugins` for brushes, textures, edges | Planned. The scene records `{ id, version, api }` for the fill plugin in use only |
+| Brush hosting for `crayon` | Implemented. The scene calls a registered `crayon` brush and replaces stroke layers with its wax passes. Texture and edge hosting, and `PluginBudgetError`, are still planned |
 | `@sketchy-js/testkit` (`describePlugin`, `runX` helpers, `defineDemo`), `pnpm new`, `pnpm docs:plugins`, ESLint preset `plugin`, `@sketchy-js/contrib`, `@sketchy-js/scene/compat` | Planned |
 
 ## Contents
@@ -151,7 +151,7 @@ export type Path = readonly PathOp[];
 ### 4.2 Versioning constants
 
 ```ts
-export const PLUGIN_API_VERSION = { major: 1, minor: 1 } as const;
+export const PLUGIN_API_VERSION = { major: 1, minor: 0 } as const;
 export type PluginApi = `${number}.${number}`;
 export type PluginKind = "brush" | "fill" | "texture" | "edge";
 ```
@@ -238,15 +238,16 @@ export interface Rng {
 export interface FlatSubpath { readonly points: readonly Point[]; readonly closed: boolean; readonly length: number }
 export interface Sample { readonly point: Point; readonly tangent: Point; readonly normal: Point; readonly s: number }
 export interface Segment { readonly a: Point; readonly b: Point }
-/** Analytic description of an elliptical region (API 1.1). */
+/** Analytic description of an elliptical region. */
 export type FillShape =
   | { readonly kind: "ellipse"; readonly cx: number; readonly cy: number; readonly rx: number; readonly ry: number }
   | { readonly kind: "arc"; readonly cx: number; readonly cy: number; readonly rx: number; readonly ry: number;
-      readonly start: number; readonly stop: number };
+      readonly start: number; readonly stop: number }
+  | { readonly kind: "path" };
 
 /**
- * Seeded rough-drawing helpers bound to the current shape's options and shared outline stream
- * (API 1.1). They reproduce Sketchy's `RoughMath` draw order so Swift-parity fills can match
+ * Seeded rough-drawing helpers bound to the current shape's options and shared outline stream.
+ * They reproduce Sketchy's `RoughMath` draw order so Swift-parity fills can match
  * the reference fixtures operation for operation.
  */
 export interface RoughKit {
@@ -270,7 +271,7 @@ export interface GeometryKit {
   polygon(points: readonly Point[], closed?: boolean): Path;
   bounds(path: Path): Rect;
   clipSegments(region: FillRegion, segments: readonly Segment[]): readonly Segment[];
-  /** Seeded rough-drawing helpers bound to the current shape (API 1.1). */
+  /** Seeded rough-drawing helpers bound to the current shape. */
   readonly rough: RoughKit;
 }
 export interface PluginContext {
@@ -286,7 +287,7 @@ Semantics:
 
 - **`ctx.rng`** is a seeded stream. For `stream: "isolated"` plugins the fill host passes `fork("fill:<id>")` of the drawing's stream; for `stream: "shared"` plugins it passes the drawing's main outline stream itself (all nine built-in fills). Other kinds are not hosted yet. `fork(label)` is a pure function of the parent stream's identity and the label: it consumes nothing from the parent, and the same label always returns the same stream. A plugin can therefore give each pass, grit, flakes, and wobble their own labeled streams (`drag:0:2`) and later reorder code or add a pass without changing the other streams' output. Reusing a label gives an identical stream, so include indices in labels.
 - **`ctx.geom`** is the only geometry the plugin may use. It is pure and versioned with the API. `flatten` uses an adaptive tolerance (default tied to `ctx.quality`). `resample` places samples at equal arclength spacing, always including both ends, and returns `[]` for a zero-length subpath.
-- **`ctx.geom.rough`** (API 1.1) draws with the shape's own roughness settings and consumes the shared stream in Sketchy's order. It is meant for `stream: "shared"` fills; an isolated plugin should not mix it with its own `ctx.rng` draws and expect Swift parity.
+- **`ctx.geom.rough`** draws with the shape's own roughness settings and consumes the shared stream in Sketchy's order. It is meant for `stream: "shared"` fills; an isolated plugin should not mix it with its own `ctx.rng` draws and expect Swift parity.
 - **`ctx.quality`** is `"draft"` while dragging or animating and `"final"` otherwise. The current host always passes `"final"`. Plugins may lower detail in draft mode, but the output must remain deterministic per `(seed, quality)`.
 - **`ctx.warn`** records a non-fatal diagnostic (`code` is a stable kebab-case string). Diagnostics appear on the built `Scene` and in the playground. Use it instead of `console.log`.
 
@@ -308,7 +309,7 @@ export interface FillRegion {
   readonly path: Path;
   readonly bounds: Rect;
   readonly fillRule: FillRule;
-  /** Present when the region is an ellipse or an arc sector (API 1.1). `rings` still holds a polygon of it. */
+  /** Present when the region is an ellipse or an arc sector. `rings` still holds a polygon of it. */
   readonly shape?: FillShape;
 }
 export interface FillBase {
@@ -317,12 +318,12 @@ export interface FillBase {
   readonly angle: number;
   readonly color: Color;
   readonly opacity: number;
-  /** The shape's outline width in px, for fills that keep a minimum gap (API 1.1). */
+  /** The shape's outline width in px, for fills that keep a minimum gap. */
   readonly strokeWidth?: number;
 }
 export interface FillInput { readonly region: FillRegion; readonly fill: FillBase }
 export type FillPart =
-  | { readonly kind: "area"; readonly paths: readonly Path[]; readonly fillRule?: FillRule; readonly paint?: PaintRef; readonly clip?: "region" | "none" }
+  | { readonly kind: "area"; readonly paths: readonly Path[]; readonly fillRule?: FillRule; readonly paint?: PaintRef; readonly clip?: "region" | "none"; readonly clipPath?: Path }
   | { readonly kind: "strokes"; readonly centerlines: readonly Path[]; readonly clip?: "region" | "none" };
 
 export interface Sheet { readonly paths: readonly Path[]; readonly fillRule: FillRule; readonly bounds: Rect; readonly margin: number }
@@ -373,7 +374,7 @@ export interface PluginMeta<S extends OptionSchema, Id extends string> {
   readonly stream?: "isolated" | "shared";
   readonly overflow?: number;
   /**
-   * Fill plugins only (API 1.1). `"area"` declares that the plugin paints its region as an area,
+   * Fill plugins only. `"area"` declares that the plugin paints its region as an area,
    * so the host can use an SVG path directly instead of running the plugin (Sketchy's solid
    * shortcut, which emits the path before consuming randomness).
    */
@@ -417,13 +418,13 @@ export declare function defineStickerEdge<const S extends OptionSchema, const Id
   def: Definition<S, Id, EdgeInput, readonly EdgeOutRing[]>): EdgePlugin<S, Id>;
 ```
 
-`defineX` does four things and nothing else: it attaches `kind` and the `"~sketchy"` brand, deep-freezes the definition, adds the `with()` helper, and (when `NODE_ENV` is not `"production"`) validates the definition shape and option defaults. It does not check the `api` string's value (`checkPluginApi` in `@sketchy-js/plugin/schema` does, but the registry does not call it yet) and does not validate `stream`, `paints`, or id namespaces. It has no side effects outside the returned object. The brand is a plain string property rather than a `Symbol`, so detection survives duplicate copies of `@sketchy-js/plugin` in a dependency tree without touching the global symbol registry.
+`defineX` does four things and nothing else: it attaches `kind` and the `"~sketchy"` brand, deep-freezes the definition, adds the `with()` helper, and (when `NODE_ENV` is not `"production"`) validates the definition shape and option defaults. It does not check the `api` string's value (`assertPluginApi` does, and the registry calls it) and does not validate `stream`, `paints`, or id namespaces. It has no side effects outside the returned object. The brand is a plain string property rather than a `Symbol`, so detection survives duplicate copies of `@sketchy-js/plugin` in a dependency tree without touching the global symbol registry.
 
 Optional metadata:
 
 - **`stochastic: false`** declares that the plugin never consumes randomness. The planned conformance suite will verify `ctx.rng` is never called and that different seeds produce identical output. It is not enforced by anything today.
 - **`overflow`** (px, default `4 * stroke.width + 64`) is how far output may extend beyond the input bounds. It is part of the contract; neither a conformance helper nor the host checks it today (planned).
-- **`paints`** (fills only, API 1.1) is `"area"` for a fill that paints its region directly (`solid`). The host then skips `generate` for SVG-path shapes and emits the path itself.
+- **`paints`** (fills only) is `"area"` for a fill that paints its region directly (`solid`, `watercolor`). For `solid`, the host skips `generate` on SVG-path shapes and emits the path itself. `watercolor` still runs, and paints the wash of that path (`FillShape` kind `"path"`). An area part may set `clipPath` to clip to a path the plugin generated, such as the jittered solid outline. That wins over `clip: "region"`.
 - **`stream: "shared"`** is explained in [section 8.3](#83-seeds-and-the-shared-stream-exception). `defineX` does not restrict it today; the namespace and lint restrictions in that section are planned.
 
 ### 4.7 The registry
@@ -562,7 +563,7 @@ Two independent version numbers:
 | Plugin API version | The host (`PLUGIN_API_VERSION`) | `major.minor` | The shape of the contracts in section 4 and the semantics of `ctx` |
 | Plugin version | The plugin author | semver in `version` | The plugin's own behavior and output |
 
-**Current state.** `PLUGIN_API_VERSION` is `{ major: 1, minor: 1 }`. API 1.1 added, all optional or additive: `FillRegion.shape` and the `FillShape` type, `GeometryKit.rough` and the `RoughKit` type, `FillBase.strokeWidth`, and `PluginMeta.paints`. The nine built-in fills declare `api: "1.1"` and use them. A plugin that uses none of them may still declare `"1.0"`. The registry does not yet compare a plugin's `api` with the host's (`checkPluginApi` exists but is not wired in), and there is no `@sketchy-js/scene/compat` layer. Whether to publish 1.1 as the first public version or to fold its additions into 1.0 is an open decision.
+**Current state.** `PLUGIN_API_VERSION` is `{ major: 1, minor: 0 }`. The published API is 1.0. It includes `FillRegion.shape` (ellipse, arc, and exact `path`), `GeometryKit.rough`, `FillBase.strokeWidth`, `FillBase.pattern`, `PluginMeta.paints`, `BrushInput.seed`, and area-fill `clipPath`. Built-in fills, scribble, crayon, and watercolor declare `api: "1.0"`. The registry rejects a plugin whose `api` is not compatible (`assertPluginApi`). There is no `@sketchy-js/scene/compat` layer yet.
 
 **Declaring and checking (target behavior).** A plugin declares `api: "1.0"`, the lowest API it needs. At `use()` or direct-use time the host checks:
 
@@ -592,9 +593,9 @@ Two independent version numbers:
 
 ## 8. Dogfooding: built-ins are plugins
 
-Rule: **every shipped brush, fill, texture, and edge is created by `defineX` and reaches the host through `use()` or a direct reference.** The host contains no `if (id === "crayon")` branch and no special path for built-in packages.
+Rule: **every shipped brush, fill, texture, and edge is created by `defineX` and reaches the host through `use()` or a direct reference.** Crayon and watercolor are still dispatched by id in `scene/src/build.ts`. That is temporary until a general `defineBrush` host runs whatever brush is registered.
 
-Status: only the fill rows `solid`, `hachure`, `zigzag`, `crossHatch`, `dots`, `sunBurst`, `starBurst`, `dashed`, and `zigzagLine` are implemented (`@sketchy-js/fills`, each as a `defineFill` plugin, version `0.1.0`, `api: "1.1"`). `scribble`, the watercolor fill, and every brush, texture, and edge row are planned. The `@sketchy-js/brushes` and `@sketchy-js/stickers` packages do not exist yet.
+Status: the fill rows through `scribble`, plus the crayon brush and the watercolor brush and fill, are implemented (`api: "1.0"`). Texture and sticker-edge rows are still planned. Area fills may set `clipPath` when the clip is the generated outline rather than the input region; watercolor fill does this.
 
 | Today's Sketchy feature | Plugin | Package and subpath |
 | --- | --- | --- |
@@ -692,7 +693,7 @@ export const hachure = /*#__PURE__*/ defineFill({
 });
 ```
 
-This is a simplified sketch written against API 1.0 types (it uses `rng.normal` and `clipSegments`, which the shipped fill does not). The shipped `packages/fills/src/hachure.ts` declares `api: "1.1"` and `stream: "shared"`, reads `region.shape` for ellipses and arcs, uses `fill.strokeWidth`, and draws every line through `ctx.geom.rough.line`, so roughness, bowing, and Swift's jitter consume `SplitMix64` in Swift's order ([section 8.3](#83-seeds-and-the-shared-stream-exception)). `hachure` returns centerlines, not painted marks. If the shape's fill brush is `crayon`, the host passes those centerlines through the crayon plugin ("thin fill lines still receive grit", as in Sketchy). Neither plugin knows about the other.
+This is a simplified sketch written against API 1.0 types (it uses `rng.normal` and `clipSegments`, which the shipped fill does not). The shipped `packages/fills/src/hachure.ts` declares `api: "1.0"` and `stream: "shared"`, reads `region.shape` for ellipses and arcs, uses `fill.strokeWidth`, and draws every line through `ctx.geom.rough.line`, so roughness, bowing, and Swift's jitter consume `SplitMix64` in Swift's order ([section 8.3](#83-seeds-and-the-shared-stream-exception)). `hachure` returns centerlines, not painted marks. If the shape's fill brush is `crayon`, the host passes those centerlines through the crayon plugin ("thin fill lines still receive grit", as in Sketchy). Neither plugin knows about the other.
 
 ### 8.3 Seeds and the shared stream exception
 

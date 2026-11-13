@@ -17,7 +17,7 @@ function resolveOffset(option: number, gap: number, strokeWidth: number): number
 export const zigzagLine = /*#__PURE__*/ defineFill({
   id: "zigzagLine",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Zigzag line",
   description: "Hachure lines that zigzag between the shape's edges.",
   options: {

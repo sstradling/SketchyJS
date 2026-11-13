@@ -16,6 +16,7 @@ const styles: FillStyle[] = [
   "zigzagLine",
   "sunBurst",
   "starBurst",
+  "scribble",
 ];
 
 const rect = (x: number, y: number, w: number, h: number): Pt[] => [
@@ -111,11 +112,11 @@ describe.each(styles)("built-in %s fill conformance", (style) => {
 });
 
 describe("fill plugin metadata", () => {
-  it.each(styles)("%s is registered as a shared-stream fill using plugin api 1.1", (style) => {
+  it.each(styles)("%s is registered as a shared-stream fill using plugin api 1.0", (style) => {
     const { plugin } = basicSketchy.resolveSpec("fill", { kind: style });
     expect(plugin.kind).toBe("fill");
     expect(plugin.id).toBe(style);
-    expect(plugin.api).toBe("1.1");
+    expect(plugin.api).toBe("1.0");
     expect(plugin.stream).toBe("shared");
     expect(plugin.paints === "area").toBe(style === "solid");
   });

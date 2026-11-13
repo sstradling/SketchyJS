@@ -351,22 +351,24 @@ import { renderToSvgString } from "@sketchy-js/svg-renderer";
 
 and receive core + fills/brushes only if used + stickers + SVG renderer, not Canvas, React, Web Components, worker code, or WebGL. Document that all renderer packages are peers chosen by the application, not automatic fallbacks.
 
-### Rough bundle-size targets (gzip; estimates, not promises)
+### Bundle-size ceilings (gzip)
 
-| Import surface | Target gzip size | Notes |
+The numbers below are ceilings, not target bands. A build that is under its ceiling passes. The basic SVG scene (`scene/basic` plus the SVG renderer) fails only above 42 KB gzip. Crayon and watercolor are subpath imports so they are not part of that ceiling.
+
+| Import surface | Gzip ceiling | Notes |
 | --- | ---: | --- |
-| `@sketchy-js/types` | < 2 KB | Mostly declarations/helpers |
-| `@sketchy-js/core` basic primitives + parser | 12–18 KB | Includes SVG arc parser/converter |
-| `@sketchy-js/fills` | 7–12 KB | Excludes watercolor brush implementation |
-| `@sketchy-js/brushes` | 12–20 KB | Crayon/watercolor can be subpath imports |
-| `@sketchy-js/stickers` procedural paper | 10–18 KB plus clipping backend | Polygon boolean implementation is the uncertainty |
-| SVG renderer | 5–9 KB | Excludes DOM framework binding |
-| Canvas renderer | 6–12 KB | Excludes worker wrapper |
-| Basic SVG scene (`scene/basic` + core/fills + SVG) | 28–42 KB | Typical app entry |
-| Sticker SVG scene | 42–65 KB plus clipping backend | Depends on boolean/offset choice |
-| React binding incremental cost | 2–5 KB | React itself is a peer dependency |
+| `@sketchy-js/types` | 2 KB | Mostly declarations/helpers |
+| `@sketchy-js/core` basic primitives + parser | 18 KB | Includes SVG arc parser/converter. Stroke outlines live here and count toward this ceiling |
+| `@sketchy-js/fills` | 12 KB | Includes scribble. Excludes the watercolor brush |
+| `@sketchy-js/brushes` | 20 KB | Crayon and watercolor stay on subpath imports |
+| `@sketchy-js/stickers` procedural paper | 18 KB plus clipping backend | Polygon boolean implementation is the uncertainty |
+| SVG renderer | 9 KB | Excludes DOM framework binding |
+| Canvas renderer | 12 KB | Excludes worker wrapper |
+| Basic SVG scene (`scene/basic` + core/fills + SVG) | 42 KB | Typical app entry. This is the ceiling that CI enforces for that import |
+| Sticker SVG scene | 65 KB plus clipping backend | Depends on boolean/offset choice |
+| React binding incremental cost | 5 KB | React itself is a peer dependency |
 
-Enforce these through a size-limit CI job with warning and hard ceilings after the first measured release. The stated values are estimates because the chosen robust polygon boolean backend materially affects sticker size.
+`pnpm size` fails when an entry exceeds its ceiling.
 
 ## 4. Tooling, testing, docs, CI, and releases
 
@@ -377,7 +379,7 @@ Enforce these through a size-limit CI job with warning and hard ceilings after t
 - **Build:** `tsup`/esbuild for fast per-package ESM + `.d.ts` builds; use Rollup only if an SVG/IIFE bundle requires output-level control. Keep source unbundled for packages and use a separate bundle job for size tests.
 - **Formatting/linting:** Prettier, ESLint with type-aware rules, and `typescript-eslint`; avoid a build-time formatter that rewrites generated fixture data.
 - **Unit tests:** Vitest for pure core/geometry packages. Browser renderer integration tests run in Playwright Chromium, Firefox, and WebKit.
-- **Visual tests:** Playwright screenshots for SVG and Canvas on a pinned browser version, plus pixelmatch/SSIM thresholds and an HTML review report. Do not compare antialiased Swift PNGs directly at zero tolerance.
+- **Visual tests:** SVG and Canvas of the same scene are compared in `packages/canvas-renderer/test/pixels.test.ts`. A pixel counts as different when any RGBA channel differs by more than 24. At most 3% of pixels may differ. That limit covers antialiased edges for clips, inverse clips, mask groups, crayon, scribble, watercolor, nested transforms, and a 2× device-pixel scale. Do not compare antialiased Swift PNGs directly at zero tolerance.
 - **Docs/playground:** VitePress (or Astro Starlight if richer interactive examples are needed) with live SVG/Canvas toggle, downloadable SVG, serialized-scene inspector, and generated API reference from TypeDoc.
 
 ### Parity test design
@@ -437,6 +439,7 @@ Exit criterion: all primitive/SVG arc operation fixtures pass; SVG output demons
 - Implement adaptive Bézier centerline sampling, stroke-to-fill, tips, thickness profiles, width stops, caps, miter limits, and curved bevel.
 - Add variable opacity masks, crayon passes, watercolor strokes/fills, and corresponding Canvas/SVG compositing paths.
 - Add deterministic animation frame generation and an optional browser animation controller; precompute/cancel frames safely on resize.
+- Scribble fill ships in this phase (see the decisions below). The frame-sized builder (`rectangle()` filling a view) stays deferred.
 
 Exit criterion: SVG and Canvas geometry tests share the same scene fixtures, visual deltas are within agreed limits, and all brush/animation seed fixtures replay.
 

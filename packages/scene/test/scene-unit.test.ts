@@ -114,7 +114,7 @@ describe("SketchyRegistry", () => {
     defineFill({
       id,
       version: "1.0.0",
-      api: "1.1",
+      api: "1.0",
       title: id,
       description: id,
       options: { gap: s.number({ default: 3, min: 0.1, max: 50, description: "gap" }) },
@@ -166,7 +166,7 @@ describe("custom fill plugins through the scene builder", () => {
   const stripes = defineFill({
     id: "stripes",
     version: "2.0.0",
-    api: "1.1",
+    api: "1.0",
     title: "Stripes",
     description: "Horizontal stripes.",
     options: { rows: s.int({ default: 3, min: 1, max: 20, description: "Rows." }) },
@@ -192,7 +192,7 @@ describe("custom fill plugins through the scene builder", () => {
       .build(size);
     const layers = scene.nodes[0]!.type === "drawing" ? scene.nodes[0]!.drawing.layers : [];
     expect(layers.map((l) => l.role)).toEqual(["fill", "stroke"]);
-    expect(scene.plugins).toEqual([{ id: "stripes", version: "2.0.0", api: "1.1" }]);
+    expect(scene.plugins).toEqual([{ id: "stripes", version: "2.0.0", api: "1.0" }]);
   });
 
   it("uses a direct plugin object without registration", () => {
@@ -240,13 +240,15 @@ describe("scene building", () => {
     expect(widths[2]!).toBeGreaterThan(widths[1]!);
   });
 
-  it("reports unsupported scribble and watercolor fills once and still draws the outline", () => {
+  it("draws a scribble fill and still reports watercolor as unsupported", () => {
     const scene = sketch([rectangle(0, 0, 20, 20), rectangle(30, 30, 20, 20)], size, {
       seed: 1n,
       fillStyle: "scribble",
     });
-    expect(scene.diagnostics?.map((d) => d.code)).toEqual(["fill-style-unsupported"]);
-    expect(roles(scene)).toEqual(["stroke", "stroke"]);
+    expect(scene.diagnostics).toBeUndefined();
+    expect(roles(scene)).toEqual(["fill", "stroke", "fill", "stroke"]);
+    const watercolor = sketch(rectangle(0, 0, 20, 20), size, { seed: 1n, fillStyle: "watercolor" });
+    expect(watercolor.diagnostics?.map((d) => d.code)).toEqual(["fill-style-unsupported"]);
   });
 
   it("reports unsupported brush profiles and sticker backing", () => {

@@ -11,6 +11,7 @@ import type {
   Spec,
   UseOptions,
 } from "@sketchy-js/plugin";
+import { assertPluginApi } from "@sketchy-js/plugin/schema";
 import { PluginNotRegisteredError, PluginRegistrationError } from "./errors.js";
 import { resolvePluginOptions } from "./options-resolve.js";
 import { RoughView } from "./view.js";
@@ -78,6 +79,7 @@ export class SketchyRegistry<
     plugin: P,
     options: UseOptions = {},
   ): SketchyRegistry<MergeRegistry<R, EntryOf<P>>> {
+    assertPluginApi(plugin.id, plugin.api);
     const plugins = new Map(this.#plugins);
     const aliases = new Map(this.#aliases);
     const register = (id: string, target: Map<string, AnyPlugin>): void => {
@@ -141,6 +143,7 @@ export class SketchyRegistry<
   private finish(kind: PluginKind, plugin: AnyPlugin, explicit: object): ResolvedPlugin {
     if (plugin.kind !== kind)
       throw new TypeError(`${plugin.id} is a ${plugin.kind} plugin, not a ${kind}`);
+    assertPluginApi(plugin.id, plugin.api);
     const given = explicit as Readonly<Record<string, unknown>>;
     return { plugin, explicit: given, options: resolvePluginOptions(plugin, given) };
   }

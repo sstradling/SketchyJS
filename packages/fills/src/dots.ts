@@ -45,7 +45,7 @@ function dotsOnLines(
 export const dots = /*#__PURE__*/ defineFill({
   id: "dots",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Dots",
   description: "Hand-drawn dots on a regular grid.",
   options: {},

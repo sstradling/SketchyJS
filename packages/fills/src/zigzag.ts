@@ -10,7 +10,7 @@ import { renderLines } from "./internal/render.js";
 export const zigzag = /*#__PURE__*/ defineFill({
   id: "zigzag",
   version: "0.1.0",
-  api: "1.1",
+  api: "1.0",
   title: "Zigzag",
   description: "Hachure lines connected into one continuous zigzag.",
   options: {},

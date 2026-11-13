@@ -13,3 +13,19 @@ export {
   signedArea,
 } from "./fill/geometry.js";
 export type { EllipseRegion, Ring } from "./fill/geometry.js";
+export {
+  centerlines,
+  effectiveWidth,
+  nativePolylineOutline,
+  noiseSigned,
+  noiseUnit,
+  noiseUnitPeriodic,
+  seamBlend,
+  opacityAt,
+  opacityRibbon,
+  opacityVaries,
+  strokeToOutline,
+  thicknessVaries,
+  thicknessWidth,
+} from "./stroke/index.js";
+export type { RibbonPiece, StrokeOutlineStyle, StrokeSample } from "./stroke/index.js";

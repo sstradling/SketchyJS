@@ -1,6 +1,6 @@
 # Contributing a plugin
 
-> **Status: design.** The generator (`pnpm new`), the `@sketchy-js/testkit` suite (`describePlugin`), and `packages/contrib` described here do not exist yet; they are the target interface for contributors. What does exist is the plugin contract (API 1.1) and a set of conformance helpers in `@sketchy-js/plugin`; [section 3](#3-the-conformance-suite) says exactly which checks those cover. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
+> **Status: design.** The generator (`pnpm new`), the `@sketchy-js/testkit` suite (`describePlugin`), and `packages/contrib` described here do not exist yet; they are the target interface for contributors. What does exist is the plugin contract (API 1.0) and a set of conformance helpers in `@sketchy-js/plugin`; [section 3](#3-the-conformance-suite) says exactly which checks those cover. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
 
 This is a walkthrough from idea to merged pull request. For general repository rules (setup, commits, code style) see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -139,7 +139,7 @@ The suite below is the **target**. Today the repository has individual helper fu
 | Fresh module (`vi.resetModules()` and re-import) | Planned | |
 | Seed sensitivity and `stochastic: false` verification | Planned | Needs a call-counting RNG |
 | Option-order independence, dead-option detection | Planned | |
-| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/plugin/schema`, and `defineX` runs them outside production; `api` support is checked by `checkPluginApi` but not by the registry; examples, id pattern, and length limits are not checked |
+| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/plugin/schema`, and `defineX` runs them outside production. The registry calls `assertPluginApi` at `use()`. Examples, id pattern, and length limits are not checked |
 | Edge-case corpus per kind, all-min and all-max options, pairwise sampling | Planned | The nine built-in fills have a hand-written subset in `packages/scene/test/fills-conformance.test.ts` (degenerate and far-off regions, angles, huge and tiny gaps, determinism, metadata) |
 | Cross-platform snapshots, SVG vs Canvas visual parity | Planned | Built-in fills are compared with the Swift reference fixtures instead |
 

@@ -11,6 +11,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./crayon": {
+      "types": "./dist/crayon.d.ts",
+      "import": "./dist/crayon.js"
+    },
+    "./watercolor": {
+      "types": "./dist/watercolor.d.ts",
+      "import": "./dist/watercolor.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -21,7 +29,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy-js/plugin": "workspace:*"
+    "@sketchy-js/plugin": "workspace:*",
+    "@sketchy-js/core": "workspace:*"
   },
   "license": "MIT",
   "engines": {

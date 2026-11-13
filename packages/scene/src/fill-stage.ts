@@ -6,6 +6,7 @@ import {
   type RoughCtx,
   createGeometryKit,
   createRoughKit,
+  svgPathToOps,
 } from "@sketchy-js/core";
 import { computedHachureGap, effectiveFillWeight } from "@sketchy-js/core/options";
 import type {
@@ -62,6 +63,7 @@ function boundsOf(points: readonly Point[]): FillRegion["bounds"] {
 
 /** Converts a core region description to the plugin-facing `FillRegion`. */
 export function toFillRegion(spec: FillRegionSpec): FillRegion {
+  if (spec.kind === "svgPath") return svgPathRegion(spec.d);
   let points: Point[];
   let shape: FillRegion["shape"];
   if (spec.kind === "polygon") points = toPoints(spec.points);
@@ -92,6 +94,41 @@ export function toFillRegion(spec: FillRegionSpec): FillRegion {
   return shape ? { ...base, shape } : base;
 }
 
+/** An SVG path wash: the path text is the shape, with no solid-fill jitter. */
+function svgPathRegion(d: string): FillRegion {
+  const path = svgPathToOps(d);
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const op of path) {
+    if (op.op === "Z") continue;
+    const xs = op.op === "C" ? [op.c1x, op.c2x, op.x] : op.op === "Q" ? [op.cx, op.x] : [op.x];
+    const ys = op.op === "C" ? [op.c1y, op.c2y, op.y] : op.op === "Q" ? [op.cy, op.y] : [op.y];
+    for (const x of xs) {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+    }
+    for (const y of ys) {
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+  }
+  if (!Number.isFinite(minX)) {
+    minX = 0;
+    minY = 0;
+    maxX = 0;
+    maxY = 0;
+  }
+  return {
+    rings: [],
+    path,
+    bounds: { x: minX, y: minY, width: maxX - minX, height: maxY - minY },
+    fillRule: "nonzero",
+    shape: { kind: "path" },
+  };
+}
+
 const finitePath = (path: Path): boolean =>
   path.every((op) => Object.values(op).every((v) => typeof v === "string" || Number.isFinite(v)));
 
@@ -105,6 +142,7 @@ export function partsToSets(
   pluginId: string,
   maxOps: number,
   report: (d: Diagnostic) => void,
+  regionPath: Path = [],
 ): OperationSet[] {
   const sets: OperationSet[] = [];
   let total = 0;
@@ -128,7 +166,21 @@ export function partsToSets(
         });
         continue;
       }
-      sets.push({ type: part.kind === "area" ? "fillPath" : "fillSketch", ops: path });
+      const clip =
+        part.kind === "area" && part.clipPath
+          ? part.clipPath
+          : part.clip === "region"
+            ? regionPath
+            : undefined;
+      const opacity = part.kind === "area" ? part.paint?.alpha : undefined;
+      const fillRule = part.kind === "area" ? part.fillRule : undefined;
+      sets.push({
+        type: part.kind === "area" ? "fillPath" : "fillSketch",
+        ops: path,
+        ...(clip ? { clip } : {}),
+        ...(opacity !== undefined ? { opacity } : {}),
+        ...(fillRule ? { fillRule } : {}),
+      });
     }
   }
   return sets;
@@ -155,6 +207,7 @@ export function createFillStage(init: FillStageInit): FillStage {
   const maxOps = init.maxOps ?? DEFAULT_MAX_OPS;
   return {
     paintsArea: () => fill?.plugin.paints === "area",
+    expandsSvgPath: () => fill?.plugin.id === "watercolor",
     run(spec: FillRegionSpec, ctx: RoughCtx): readonly OperationSet[] {
       if (!fill) return [];
       const plugin: AnyPlugin = fill.plugin;
@@ -167,7 +220,7 @@ export function createFillStage(init: FillStageInit): FillStage {
         warn: (code, message) => report({ code, message, plugin: plugin.id }),
       };
       const input: FillInput = {
-        region: toFillRegion(spec),
+        region: spec.kind === "svgPath" ? svgPathRegion(spec.d) : toFillRegion(spec),
         fill: {
           weight: effectiveFillWeight(options.strokeWidth, options.fillWeight),
           gap: computedHachureGap(options.strokeWidth, options.fillWeight, options.fillSpacing),
@@ -175,6 +228,9 @@ export function createFillStage(init: FillStageInit): FillStage {
           color: options.fillColor,
           opacity: options.fillOpacity,
           strokeWidth: options.strokeWidth,
+          ...(options.scribbleTightnessPattern
+            ? { pattern: options.scribbleTightnessPattern }
+            : {}),
         },
       };
       const resolved = bridgeShapeOptions(
@@ -190,7 +246,13 @@ export function createFillStage(init: FillStageInit): FillStage {
         o: Record<string, unknown>,
         c: PluginContext,
       ) => readonly FillPart[];
-      return partsToSets(generate(input, resolved, pluginCtx), plugin.id, maxOps, report);
+      return partsToSets(
+        generate(input, resolved, pluginCtx),
+        plugin.id,
+        maxOps,
+        report,
+        input.region.path,
+      );
     },
   };
 }

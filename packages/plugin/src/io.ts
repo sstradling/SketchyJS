@@ -14,6 +14,8 @@ export interface BrushInput {
   readonly path: Path;
   readonly bounds: Rect;
   readonly stroke: StrokeBase;
+  /** Resolved brush seed. Crayon and watercolor use it instead of `ctx.rng`. */
+  readonly seed?: bigint;
 }
 
 export interface FillBase {
@@ -22,8 +24,10 @@ export interface FillBase {
   readonly angle: number;
   readonly color: Color;
   readonly opacity: number;
-  /** The shape's outline width in px, used by fills that keep a minimum gap (API 1.1). */
+  /** The shape's outline width in px, used by fills that keep a minimum gap. */
   readonly strokeWidth?: number;
+  /** Optional numeric pattern from the shape, used by scribble tightness bands. */
+  readonly pattern?: readonly number[];
 }
 
 export interface FillInput {
@@ -44,6 +48,11 @@ export type FillPart =
       readonly fillRule?: FillRule;
       readonly paint?: PaintRef;
       readonly clip?: "region" | "none";
+      /**
+       * Clip in the same space as `paths`. Watercolor clips to the jittered solid outline,
+       * which is not the input region. When set, it wins over `clip: "region"`.
+       */
+      readonly clipPath?: Path;
     }
   | {
       readonly kind: "strokes";

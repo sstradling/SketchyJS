@@ -110,6 +110,62 @@ function renderLayer(layer: DrawLayer, options: ResolvedSvgOptions, defs: Defs):
   });
 }
 
+/**
+ * One luminance mask for a variable-opacity stroke. Pieces are opaque gray, faintest first,
+ * so a later piece replaces an earlier one. The tint is applied once through the mask.
+ */
+function renderMaskGroup(
+  layers: readonly DrawLayer[],
+  options: ResolvedSvgOptions,
+  defs: Defs,
+): SvgElement {
+  const first = layers[0]!;
+  const paint = resolvePaint(first.paint, options);
+  const gray = layers.map((layer) => {
+    const amount = Math.round(Math.min(1, Math.max(0, layer.mask?.opacity ?? 1)) * 255);
+    const channel = amount.toString(16).padStart(2, "0");
+    const d = layer.paths.map((p) => pathData(p, options.precision)).join("");
+    return el("path", { d, fill: `#${channel}${channel}${channel}` });
+  });
+  const id = `${options.idPrefix}-opacity-${defs.elements.length}`;
+  defs.elements.push(
+    el("mask", { id, maskUnits: "userSpaceOnUse", "mask-type": "luminance" }, gray),
+  );
+  const clip = first.clip ? defs.attribute(first.clip) : undefined;
+  return el("rect", {
+    x: "0",
+    y: "0",
+    width: "100%",
+    height: "100%",
+    fill: paint.value,
+    "fill-opacity": opacityAttribute(paint.opacity, options.precision),
+    mask: `url(#${id})`,
+    ...(clip ? { [clip[0]]: clip[1] } : {}),
+  });
+}
+
+/** Groups consecutive layers that share an opacity-mask group, then paints the rest. */
+function renderLayers(
+  layers: readonly DrawLayer[],
+  options: ResolvedSvgOptions,
+  defs: Defs,
+): SvgElement[] {
+  const out: SvgElement[] = [];
+  for (let i = 0; i < layers.length; i++) {
+    const layer = layers[i]!;
+    const group = layer.mask?.group;
+    if (group === undefined) {
+      out.push(renderLayer(layer, options, defs));
+      continue;
+    }
+    let end = i + 1;
+    while (end < layers.length && layers[end]!.mask?.group === group) end++;
+    out.push(renderMaskGroup(layers.slice(i, end), options, defs));
+    i = end - 1;
+  }
+  return out;
+}
+
 function renderNode(node: SceneNode, options: ResolvedSvgOptions, defs: Defs): SvgElement {
   const transform = node.transform ? matrixAttribute(node.transform, options.precision) : undefined;
   if (node.type === "group") {
@@ -119,11 +175,7 @@ function renderNode(node: SceneNode, options: ResolvedSvgOptions, defs: Defs): S
       node.children.map((c) => renderNode(c, options, defs)),
     );
   }
-  return el(
-    "g",
-    { transform },
-    node.drawing.layers.map((l) => renderLayer(l, options, defs)),
-  );
+  return el("g", { transform }, renderLayers(node.drawing.layers, options, defs));
 }
 
 /**

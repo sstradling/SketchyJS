@@ -118,7 +118,7 @@ Sketchy configures a `RoughView` with one modifier per option and sizes shapes t
 
 ## Deviations from the plan and from Swift
 
-1. **Plugin API 1.0 to 1.1.** The Swift fills draw with the shape's own `RoughMath` helpers and random stream, so a plugin that only received polygons could not reproduce them. 1.1 adds `FillRegion.shape` (exact ellipse or arc), `GeometryKit.rough` (seeded line drawing bound to the shared stream), `FillBase.strokeWidth` and `PluginMeta.paints` (`"area"` for solid, which Sketchy emits before it consumes randomness). It is a minor, additive change; the four `define*` functions are unchanged. `docs/plugins.md` documents the contract as shipped (API 1.1); the version number is not renumbered pending decision 6.
+1. **Plugin API additions, published as 1.0.** The Swift fills draw with the shape's own `RoughMath` helpers and random stream, so a plugin that only received polygons could not reproduce them. The contract adds `FillRegion.shape` (exact ellipse, arc, or SVG path), `GeometryKit.rough` (seeded line drawing bound to the shared stream), `FillBase.strokeWidth`, and `PluginMeta.paints` (`"area"` for solid, which Sketchy emits before it consumes randomness). The four `define*` functions are unchanged. These fields are part of plugin API 1.0; nothing was published as 1.1.
 2. **Scene type additions.** `ClipDescriptor.inverse` (outside stroke alignment) and `DrawLayer.cap`, `join`, `miterLimit`. Both schemas regenerate (`packages/types/schemas/scene.schema.json`). They are optional fields.
 3. **Built-in fill ids are camelCase** (`sunBurst`, `crossHatch`, `zigzagLine`, `starBurst`) so the id equals the `FillStyle` name and registry lookup needs no mapping. The plugin id pattern accepts them.
 4. **Unseeded drawings are deterministic.** Swift picks a new random seed on a cache miss. Core uses seed 1 (`DEFAULT_STYLE_SEED`) so scene building has no hidden randomness. Decision needed (below).
@@ -143,11 +143,13 @@ Housekeeping:
 - **Float32 fidelity far from the origin.** Operation counts can legitimately change when a shape is translated far from the origin (the `Float` grid is 0.0625 px at 1e6), as in Swift. Region cases at 1e6 are checked for finiteness, not for count stability.
 - **Example sheets are golden files** that depend on V8's `Math.sin`/`cos` agreeing across Node 22 and 24 after rounding to `Float`. It has held locally; CI on both versions is the check.
 - **`basic` registers all nine fills.** Selective registries are small, but the default entry cannot shed unused fills.
-- **Scribble has no phase owner.** The plan lists it as a fill style but neither Phase 1 nor Phase 2 names it. `FillStyle` includes it, the renderer reports `fill-style-unsupported`, and a fixture (`fills/scribble.json`) exists.
-- **Reference images are not compared** because nothing rasterizes yet.
+- **Scribble landed in Phase 2** as a `defineFill` plugin. The note below is the Phase 1 state.
+- **Reference images were not compared in Phase 1.** Phase 2 compares SVG and Canvas rasters; the upstream PNGs stay the accepted copies.
 - **Operation-count budget.** A 0.1 px gap on a 60 px square is within the 200,000-operation cap; larger regions drop the part with a `fill-max-ops` diagnostic rather than failing.
 
 ## Decisions needed
+
+Resolved in Phase 2 (see [phase-2.md](phase-2.md)): unseeded drawings stay on seed 1; scribble is in Phase 2; Darwin stays the radial-fill oracle; the frame-sized builder stays deferred; 42 KB gzip is a ceiling; plugin API 1.1 is folded into 1.0 before the first publish.
 
 1. Should unseeded drawings stay deterministic (seed 1), or draw a random seed per build like Swift, with the seed recorded in the scene?
 2. Which phase owns scribble? Phase 2 (with watercolor and crayon, which share the renderer-side stroke code) is the lowest-risk choice.

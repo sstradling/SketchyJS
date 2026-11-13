@@ -123,16 +123,19 @@ function patternSet(
 export function pathFill(stage: FillStage, ctx: RoughCtx, d: string): readonly OperationSet[] {
   const o = ctx.o;
   const direct = stage.paintsArea(o.fillStyle);
+  const wash = stage.expandsSvgPath?.(o.fillStyle) === true;
   if (hasAdjustment(o)) {
     const contours = svgContours(d, o.fillPadding, o.fillOffset);
     const outer = contours?.[0];
     if (!contours || !outer) return [];
     const clipped = contoursToSvgPath(contours);
+    if (direct && wash) return stage.run({ kind: "svgPath", d: clipped }, ctx);
     if (direct) return [{ type: "path2DFill", ops: [], path: clipped }];
     const sets = stage.run({ kind: "polygon", points: outer }, ctx);
     if (sets.length === 0) return [];
     return [patternSet(mergedOps(sets), clipped, controlPointBounds(svgPathToOps(clipped)))];
   }
+  if (direct && wash) return stage.run({ kind: "svgPath", d }, ctx);
   if (direct) return [{ type: "path2DFill", ops: [], path: d }];
   const bounds = controlPointBounds(svgPathToOps(d));
   const minX = f(bounds.minX);
