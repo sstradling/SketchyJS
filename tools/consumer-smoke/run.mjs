@@ -116,19 +116,16 @@ const expectations = {
   "@sketchy-js/fills/zigzagLine": { symbols: ["zigzagLine"] },
   "@sketchy-js/fills/sunBurst": { symbols: ["sunBurst"] },
   "@sketchy-js/fills/starBurst": { symbols: ["starBurst"] },
+  "@sketchy-js/fills/scribble": { symbols: ["scribble"] },
   "@sketchy-js/scene": { symbols: ["createSketchy", "RoughView", "buildScene", "sketchScene"] },
   "@sketchy-js/scene/basic": { symbols: ["sketch", "RoughView", "basicSketchy"] },
   "@sketchy-js/svg-renderer": { symbols: ["renderToSvgString", "renderToSvgElement"] },
+  "@sketchy-js/canvas-renderer": { symbols: ["renderToCanvas"] },
+  "@sketchy-js/brushes": { symbols: ["crayon", "crayonPasses", "watercolorStrokePieces"] },
+  "@sketchy-js/brushes/crayon": { symbols: ["crayon"] },
+  "@sketchy-js/animate": { symbols: ["generateFrame", "precomputeFrames", "createAnimation"] },
 };
-const skeletons = [
-  "brushes",
-  "stickers",
-  "canvas-renderer",
-  "animate",
-  "react",
-  "web-components",
-  "contrib",
-];
+const skeletons = ["stickers", "react", "web-components", "contrib"];
 
 writeFileSync(
   join(consumer, "check.mjs"),
@@ -173,8 +170,12 @@ import { Rng, SplitMix64 } from "@sketchy-js/core";
 import { defaultSketchOptions } from "@sketchy-js/core/options";
 import { sketch, RoughView } from "@sketchy-js/scene/basic";
 import { hachure } from "@sketchy-js/fills/hachure";
+import { scribble } from "@sketchy-js/fills/scribble";
 import { rectangle } from "@sketchy-js/core";
 import { renderToSvgString } from "@sketchy-js/svg-renderer";
+import { renderToCanvas } from "@sketchy-js/canvas-renderer";
+import { generateFrame } from "@sketchy-js/animate";
+import { crayon } from "@sketchy-js/brushes/crayon";
 
 const options: SketchOptions = defaultSketchOptions();
 const op: PathOp = { op: "M", x: options.roughness, y: 0 };
@@ -187,7 +188,8 @@ const big: bigint = new SplitMix64(1n).nextU64();
 const built: Scene = sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 }, { seed: 1n, fillStyle: "hachure" });
 const viaView: Scene = new RoughView().with({ fillStyle: "dots" }).draw(rectangle(0, 0, 1, 1)).build({ width: 1, height: 1 });
 const markup: string = renderToSvgString(built);
-export { op, scene, brush, n, big, built, viaView, markup, hachure };
+const frame: Scene = generateFrame(built, { steps: 4, variance: 0.05, seed: 1n }, 0);
+export { op, scene, brush, n, big, built, viaView, markup, hachure, renderToCanvas, crayon, scribble, frame };
 `,
 );
 for (const resolution of [
