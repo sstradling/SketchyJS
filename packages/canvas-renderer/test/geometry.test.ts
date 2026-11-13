@@ -39,6 +39,7 @@ function recorder(): { context: Canvas2D; painted: { op: "fill" | "stroke"; ops:
     },
     clip() {},
     setTransform() {},
+    transform() {},
     fillRect() {},
     fillStyle: "",
     strokeStyle: "",
@@ -60,9 +61,11 @@ describe("canvas and SVG share a scene", () => {
     const pathCount = svg.match(/<path /g)?.length ?? 0;
     expect(painted.length).toBe(pathCount);
     expect(painted.every((p) => p.op === "stroke")).toBe(true);
-    const first = painted[0]?.ops[0];
-    expect(first?.op).toBe("M");
-    expect(svg).toContain("<path ");
+    const expected =
+      scene.nodes[0]?.type === "drawing"
+        ? scene.nodes[0].drawing.layers.flatMap((layer) => layer.paths)
+        : [];
+    expect(painted.map((p) => p.ops)).toEqual(expected);
   });
 
   it("fills a curved-bevel stroke in both renderers", () => {
@@ -88,7 +91,56 @@ describe("canvas and SVG share a scene", () => {
     expect(layer?.strokeWidth).toBeUndefined();
     const { context, painted } = recorder();
     renderToCanvas(scene, context);
+    const expected =
+      scene.nodes[0]?.type === "drawing"
+        ? scene.nodes[0].drawing.layers.flatMap((layer) => layer.paths)
+        : [];
+    expect(painted.map((p) => p.ops)).toEqual(expected);
     expect(painted.some((p) => p.op === "fill")).toBe(true);
     expect(renderToSvgString(scene)).toContain("fill=");
+  });
+
+  it("paints a fill-kind paint with the context fill style", () => {
+    const { context, painted } = recorder();
+    context.fillStyle = "#00aa00";
+    const seen: string[] = [];
+    const fill = context.fill.bind(context);
+    context.fill = () => {
+      seen.push(typeof context.fillStyle === "string" ? context.fillStyle : "");
+      fill();
+    };
+    renderToCanvas(
+      {
+        version: 1,
+        size: { width: 20, height: 20 },
+        nodes: [
+          {
+            type: "drawing",
+            drawing: {
+              shape: "rectangle",
+              outline: [],
+              layers: [
+                {
+                  role: "fill",
+                  paths: [
+                    [
+                      { op: "M", x: 1, y: 1 },
+                      { op: "L", x: 10, y: 1 },
+                      { op: "L", x: 10, y: 10 },
+                      { op: "Z" },
+                    ],
+                  ],
+                  fillRule: "nonzero",
+                  paint: { kind: "fill" },
+                },
+              ],
+            },
+          },
+        ],
+      },
+      context,
+    );
+    expect(painted).toHaveLength(1);
+    expect(seen).toEqual(["#00aa00"]);
   });
 });

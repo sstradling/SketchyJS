@@ -67,7 +67,7 @@ const wax = basicSketchy
         baseSoftness: 0.5,
         grit: 0.92,
         flakeSize: 1.45,
-        seed: 1n,
+        seed: 42n,
       },
     },
   })

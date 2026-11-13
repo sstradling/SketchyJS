@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { ellipse, rectangle } from "@sketchy-js/core";
+import { ellipse, path, rectangle } from "@sketchy-js/core";
 import { defaultSketchOptions } from "@sketchy-js/core/options";
 import { sketchScene } from "@sketchy-js/scene";
 import { basicSketchy } from "@sketchy-js/scene/basic";
@@ -136,5 +136,16 @@ describe("watercolor Darwin fixtures", () => {
         false,
       ),
     ).toBeLessThanOrEqual(1e-4);
+  });
+
+  it("washes an SVG path instead of painting one solid area", () => {
+    const scene = washScene(path("M 20 20 H 140 V 90 H 20 Z"), 200, 200);
+    const drawing = scene.nodes[0];
+    expect(drawing?.type).toBe("drawing");
+    if (drawing?.type !== "drawing") return;
+    const fills = drawing.drawing.layers.filter((layer) => layer.role === "fill");
+    expect(fills.length).toBeGreaterThan(10);
+    expect(fills.some((layer) => layer.paths[0]?.some((op) => op.op === "C"))).toBe(true);
+    expect(scene.diagnostics).toBeUndefined();
   });
 });

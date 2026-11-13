@@ -379,7 +379,7 @@ The numbers below are ceilings, not target bands. A build that is under its ceil
 - **Build:** `tsup`/esbuild for fast per-package ESM + `.d.ts` builds; use Rollup only if an SVG/IIFE bundle requires output-level control. Keep source unbundled for packages and use a separate bundle job for size tests.
 - **Formatting/linting:** Prettier, ESLint with type-aware rules, and `typescript-eslint`; avoid a build-time formatter that rewrites generated fixture data.
 - **Unit tests:** Vitest for pure core/geometry packages. Browser renderer integration tests run in Playwright Chromium, Firefox, and WebKit.
-- **Visual tests:** Playwright screenshots for SVG and Canvas on a pinned browser version, plus pixelmatch/SSIM thresholds and an HTML review report. Do not compare antialiased Swift PNGs directly at zero tolerance.
+- **Visual tests:** SVG and Canvas of the same scene are compared in `packages/canvas-renderer/test/pixels.test.ts`. A pixel counts as different when any RGBA channel differs by more than 24. At most 3% of pixels may differ. That limit covers antialiased edges for clips, inverse clips, mask groups, crayon, scribble, watercolor, nested transforms, and a 2× device-pixel scale. Do not compare antialiased Swift PNGs directly at zero tolerance.
 - **Docs/playground:** VitePress (or Astro Starlight if richer interactive examples are needed) with live SVG/Canvas toggle, downloadable SVG, serialized-scene inspector, and generated API reference from TypeDoc.
 
 ### Parity test design

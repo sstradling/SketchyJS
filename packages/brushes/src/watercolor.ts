@@ -95,9 +95,10 @@ export const watercolor = /*#__PURE__*/ defineBrush({
 
 /** The jittered outline `SolidFiller` would emit. Watercolor paints the wash of that shape. */
 function solidShape(input: FillInput, ctx: PluginContext): Path {
+  const shape = input.region.shape;
+  if (shape?.kind === "path") return input.region.path;
   const ring = input.region.rings[0];
   const polygon = ring ? ring.points : [];
-  const shape = input.region.shape;
   if (shape?.kind === "ellipse")
     return ctx.geom.rough.solidEllipse({ x: shape.cx, y: shape.cy }, shape.rx, shape.ry);
   return ctx.geom.rough.solidPolygon(polygon);

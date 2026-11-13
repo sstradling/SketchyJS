@@ -139,7 +139,7 @@ The suite below is the **target**. Today the repository has individual helper fu
 | Fresh module (`vi.resetModules()` and re-import) | Planned | |
 | Seed sensitivity and `stochastic: false` verification | Planned | Needs a call-counting RNG |
 | Option-order independence, dead-option detection | Planned | |
-| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/plugin/schema`, and `defineX` runs them outside production; `api` support is checked by `checkPluginApi` but not by the registry; examples, id pattern, and length limits are not checked |
+| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/plugin/schema`, and `defineX` runs them outside production. The registry calls `assertPluginApi` at `use()`. Examples, id pattern, and length limits are not checked |
 | Edge-case corpus per kind, all-min and all-max options, pairwise sampling | Planned | The nine built-in fills have a hand-written subset in `packages/scene/test/fills-conformance.test.ts` (degenerate and far-off regions, angles, huge and tiny gaps, determinism, metadata) |
 | Cross-platform snapshots, SVG vs Canvas visual parity | Planned | Built-in fills are compared with the Swift reference fixtures instead |
 

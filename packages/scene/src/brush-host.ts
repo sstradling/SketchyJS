@@ -3,12 +3,24 @@ import type { BrushInput, BrushLayer, PluginContext } from "@sketchy-js/plugin";
 import type { DrawLayer, Drawing, SketchOptions } from "@sketchy-js/types";
 import type { ResolvedPlugin } from "./registry.js";
 
-/** Grain seed: an explicit seed other than 1 wins; otherwise the drawing seed is used. */
+/** Watercolor's default seed of 1 yields to the drawing seed, matching `WatercolorStyle.defaultSeed`. */
 export function resolvedStyleSeed(
   styleSeed: bigint | number | undefined,
   drawingSeed: bigint | undefined,
 ): bigint {
   if (styleSeed === undefined || styleSeed === 1 || styleSeed === 1n) return drawingSeed ?? 1n;
+  return typeof styleSeed === "bigint" ? styleSeed : BigInt(styleSeed);
+}
+
+/**
+ * Crayon seed. An explicit `1` is seed 1. Only a missing seed uses the drawing seed.
+ * Swift treats the default `1` as "inherit"; callers who want that pass the drawing seed.
+ */
+export function literalStyleSeed(
+  styleSeed: bigint | number | undefined,
+  drawingSeed: bigint | undefined,
+): bigint {
+  if (styleSeed === undefined) return drawingSeed ?? 1n;
   return typeof styleSeed === "bigint" ? styleSeed : BigInt(styleSeed);
 }
 
@@ -35,7 +47,7 @@ export function applyCrayon(
   const crayon = options.brushProfile.crayon;
   if (!crayon) return drawing;
   const drawingSeed = options.seed === undefined ? undefined : BigInt(options.seed);
-  const seed = resolvedStyleSeed(crayon.seed, drawingSeed);
+  const seed = literalStyleSeed(crayon.seed, drawingSeed);
   const ctx = context(seed, options);
   // Plugin `generate` is a plain function property, not a method that uses `this`.
   // eslint-disable-next-line @typescript-eslint/unbound-method

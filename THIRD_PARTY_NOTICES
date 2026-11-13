@@ -15,4 +15,12 @@ Sketchy upstream reference corpus
 The upstream Sketchy license is included verbatim at:
 fixtures/swift-reference/v1.5.0/UPSTREAM-LICENSE
 
+@resvg/resvg-js
+--------------
+Copyright (c) the resvg authors
+
+Used only as a development dependency, to rasterize SVG in tests and preview
+scripts. It is licensed under the Mozilla Public License 2.0 (MPL-2.0):
+https://www.mozilla.org/MPL/2.0/
+
 The source and license for every dependency are pinned by pnpm-lock.yaml.

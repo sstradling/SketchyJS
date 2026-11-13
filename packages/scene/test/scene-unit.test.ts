@@ -114,7 +114,7 @@ describe("SketchyRegistry", () => {
     defineFill({
       id,
       version: "1.0.0",
-      api: "1.1",
+      api: "1.0",
       title: id,
       description: id,
       options: { gap: s.number({ default: 3, min: 0.1, max: 50, description: "gap" }) },
@@ -166,7 +166,7 @@ describe("custom fill plugins through the scene builder", () => {
   const stripes = defineFill({
     id: "stripes",
     version: "2.0.0",
-    api: "1.1",
+    api: "1.0",
     title: "Stripes",
     description: "Horizontal stripes.",
     options: { rows: s.int({ default: 3, min: 1, max: 20, description: "Rows." }) },
@@ -192,7 +192,7 @@ describe("custom fill plugins through the scene builder", () => {
       .build(size);
     const layers = scene.nodes[0]!.type === "drawing" ? scene.nodes[0]!.drawing.layers : [];
     expect(layers.map((l) => l.role)).toEqual(["fill", "stroke"]);
-    expect(scene.plugins).toEqual([{ id: "stripes", version: "2.0.0", api: "1.1" }]);
+    expect(scene.plugins).toEqual([{ id: "stripes", version: "2.0.0", api: "1.0" }]);
   });
 
   it("uses a direct plugin object without registration", () => {

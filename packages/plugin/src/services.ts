@@ -33,8 +33,9 @@ export interface Segment {
 }
 
 /**
- * Analytic description of an elliptical fill region (API 1.1). Fills that lay out differently
- * for an ellipse than for its polygon approximation (hachure chords, dots, radial rays) read it.
+ * Analytic description of a fill region. Fills that lay out differently for an ellipse than for
+ * its polygon approximation (hachure chords, dots, radial rays) read it. `kind: "path"` means
+ * `FillRegion.path` is the exact outline (an SVG path wash) and should not be redrawn.
  */
 export type FillShape =
   | {
@@ -52,7 +53,8 @@ export type FillShape =
       readonly ry: number;
       readonly start: number;
       readonly stop: number;
-    };
+    }
+  | { readonly kind: "path" };
 
 /** Region a fill covers, after padding and offset. */
 export interface FillRegion {
@@ -60,13 +62,13 @@ export interface FillRegion {
   readonly path: Path;
   readonly bounds: Rect;
   readonly fillRule: FillRule;
-  /** Present when the region is an ellipse or an arc sector (API 1.1). `rings` still holds a polygon of it. */
+  /** Present for an ellipse, an arc sector, or an exact SVG path. `rings` still holds a polygon when there is one. */
   readonly shape?: FillShape;
 }
 
 /**
  * Rough, seeded drawing helpers that consume the scene's main outline stream with Sketchy's
- * exact draw order (API 1.1). They exist so Swift-parity fills (`stream: "shared"`) can emit the
+ * exact draw order. They exist so Swift-parity fills (`stream: "shared"`) can emit the
  * same operations as Sketchy without owning the rough-line math.
  */
 export interface RoughKit {
@@ -91,7 +93,7 @@ export interface GeometryKit {
   polygon(points: readonly Point[], closed?: boolean): Path;
   bounds(path: Path): Rect;
   clipSegments(region: FillRegion, segments: readonly Segment[]): readonly Segment[];
-  /** Seeded rough-drawing helpers bound to the current shape's options and stream (API 1.1). */
+  /** Seeded rough-drawing helpers bound to the current shape's options and stream. */
   readonly rough: RoughKit;
 }
 

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import type { BrushCap, BrushJoin, Path, PathOp } from "@sketchy-js/types";
+import type { BrushCap, BrushJoin, Path } from "@sketchy-js/types";
 import { nativePolylineOutline } from "../src/stroke/native.js";
 import { strokeToOutline } from "../src/stroke/outline.js";
 
@@ -105,5 +105,3 @@ describe("native stroke outlines", () => {
     });
   }
 });
-
-void (0 as unknown as PathOp);

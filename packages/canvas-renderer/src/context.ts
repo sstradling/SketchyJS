@@ -14,7 +14,17 @@ export interface Canvas2D {
   fill(rule?: "nonzero" | "evenodd"): void;
   stroke(): void;
   clip(rule?: "nonzero" | "evenodd"): void;
+  /**
+   * Replaces the current transform. Mask blits use it inside `save`/`restore` to address
+   * backing-store pixels. Node transforms use `transform` so they compose.
+   */
   setTransform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+  /** Post-multiplies a matrix onto the current transform. */
+  transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
+  /** Current transform, including a device-pixel scale the caller set before rendering. */
+  getTransform?(): { a: number; b: number; c: number; d: number; e: number; f: number };
+  /** Used to keep an inverse clip's outside region. Absent on geometry recorders. */
+  globalCompositeOperation?: string;
   fillRect(x: number, y: number, w: number, h: number): void;
   fillStyle: string | CanvasGradientLike;
   strokeStyle: string | CanvasGradientLike;

@@ -55,6 +55,14 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
     name: "animate (frame generator)",
     code: `export { generateFrame, precomputeFrames } from "@sketchy-js/animate";`,
   },
+  {
+    name: "animate controller (createAnimation)",
+    code: `export { createAnimation } from "@sketchy-js/animate";`,
+  },
+  {
+    name: "brushes/crayon subpath",
+    code: `export { crayon } from "@sketchy-js/brushes/crayon";`,
+  },
 ];
 
 const alias = {
@@ -64,10 +72,12 @@ const alias = {
   "@sketchy-js/core": dist("core"),
   "@sketchy-js/fills/hachure": dist("fills", "hachure.js"),
   "@sketchy-js/fills": dist("fills"),
+  "@sketchy-js/plugin/schema": dist("plugin", "schema.js"),
   "@sketchy-js/plugin": dist("plugin"),
   "@sketchy-js/types": dist("types"),
   "@sketchy-js/canvas-renderer": dist("canvas-renderer"),
   "@sketchy-js/brushes": dist("brushes"),
+  "@sketchy-js/brushes/crayon": dist("brushes", "crayon.js"),
   "@sketchy-js/animate": dist("animate"),
 };
 

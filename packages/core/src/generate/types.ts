@@ -52,7 +52,8 @@ export type FillRegionSpec =
       readonly stop: number;
       /** `[center, arc samples...]`, the polygon every non-radial fill uses for an arc sector. */
       readonly points: readonly Pt[];
-    };
+    }
+  | { readonly kind: "svgPath"; readonly d: string };
 
 /**
  * The fill generator the host plugs into `generateDrawing`. The core owns padding, offset and
@@ -61,6 +62,11 @@ export type FillRegionSpec =
 export interface FillStage {
   /** True when `style` paints an area directly, so SVG paths skip the generator (Sketchy's solid shortcut). */
   paintsArea(style: string): boolean;
+  /**
+   * True when an area style still runs the plugin for an SVG path. Watercolor does: the generator
+   * keeps the path (no extra randomness) and the plugin paints the wash of that path.
+   */
+  expandsSvgPath?(style: string): boolean;
   /** Runs the fill for `region` on the shared stream and returns its operation sets. */
   run(region: FillRegionSpec, ctx: RoughCtx): readonly OperationSet[];
 }
