@@ -121,8 +121,11 @@ const expectations = {
   "@sketchy-js/scene/basic": { symbols: ["sketch", "RoughView", "basicSketchy"] },
   "@sketchy-js/svg-renderer": { symbols: ["renderToSvgString", "renderToSvgElement"] },
   "@sketchy-js/canvas-renderer": { symbols: ["renderToCanvas"] },
-  "@sketchy-js/brushes": { symbols: ["crayon", "crayonPasses", "watercolorStrokePieces"] },
+  "@sketchy-js/brushes": {
+    symbols: ["crayon", "crayonPasses", "watercolor", "watercolorFill", "watercolorStrokeCommands"],
+  },
   "@sketchy-js/brushes/crayon": { symbols: ["crayon"] },
+  "@sketchy-js/brushes/watercolor": { symbols: ["watercolor", "watercolorFill"] },
   "@sketchy-js/animate": { symbols: ["generateFrame", "precomputeFrames", "createAnimation"] },
 };
 const skeletons = ["stickers", "react", "web-components", "contrib"];

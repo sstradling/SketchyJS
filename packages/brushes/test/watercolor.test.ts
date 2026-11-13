@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { generateDrawing, line } from "@sketchy-js/core";
-import { defaultSketchOptions, resolveSketchOptions } from "@sketchy-js/core/options";
+import { resolveSketchOptions } from "@sketchy-js/core/options";
 import { createFillStage } from "@sketchy-js/scene";
 import { basicSketchy } from "@sketchy-js/scene/basic";
-import { watercolorStrokePieces } from "../src/watercolor-stroke.js";
+import { watercolorStrokeCommands } from "../src/watercolor-stroke.js";
 
 describe("watercolor stroke", () => {
   it("emits finite glaze pieces for an open line", () => {
@@ -15,11 +15,9 @@ describe("watercolor stroke", () => {
     });
     const drawing = generateDrawing(line(16, 150, 184, 60), options, stage);
     const outline = drawing!.sets[drawing!.sets.length - 1]!.ops;
-    const brush = defaultSketchOptions().brushProfile;
-    const pieces = watercolorStrokePieces(
+    const pieces = watercolorStrokeCommands(
       outline,
       12,
-      brush,
       {
         pigment: 0.72,
         wetness: 0.6,

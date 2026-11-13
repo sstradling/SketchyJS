@@ -48,7 +48,7 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
   },
   {
     name: "brushes entry (plan ceiling 20 KB)",
-    code: `export { crayon, watercolorStrokePieces } from "@sketchy-js/brushes";`,
+    code: `export { crayon, watercolor, watercolorFill } from "@sketchy-js/brushes";`,
     ceiling: 20,
   },
   {

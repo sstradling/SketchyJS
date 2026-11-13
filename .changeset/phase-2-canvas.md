@@ -10,4 +10,4 @@
 "@sketchy-js/animate": minor
 ---
 
-Phase 2: Canvas renderer, uniform and variable stroke outlines, curved bevel, scribble fill, crayon brush, opacity masks, and deterministic animation frames. Plugin API 1.0 is the version that will be published; the earlier 1.1 fields are part of it.
+Phase 2: Canvas renderer, uniform and variable stroke outlines, curved bevel, scribble fill, crayon and watercolor brushes, watercolor fill, opacity masks, and deterministic animation frames. Plugin API 1.0 is the version that will be published; the earlier 1.1 fields are part of it.

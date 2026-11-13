@@ -95,3 +95,63 @@ export function applyCrayon(
   }
   return { ...drawing, layers };
 }
+
+/**
+ * Replaces outline strokes with the watercolor plugin's glazes. Fill strokes stay ordinary
+ * strokes; the watercolor fill plugin paints the interior.
+ */
+export function applyWatercolor(
+  drawing: Drawing,
+  plugin: ResolvedPlugin,
+  options: SketchOptions,
+): Drawing {
+  const wash = options.brushProfile.watercolor;
+  if (!wash) return drawing;
+  const drawingSeed = options.seed === undefined ? undefined : BigInt(options.seed);
+  const seed = resolvedStyleSeed(wash.seed, drawingSeed);
+  const ctx = context(seed, options);
+  // Plugin `generate` is a plain function property, not a method that uses `this`.
+  // eslint-disable-next-line @typescript-eslint/unbound-method
+  const generate = plugin.plugin.generate as unknown as (
+    input: BrushInput,
+    resolved: Record<string, unknown>,
+    context: PluginContext,
+  ) => readonly BrushLayer[];
+  const layers: DrawLayer[] = [];
+  for (const layer of drawing.layers) {
+    if (layer.role !== "stroke" || layer.strokeWidth === undefined) {
+      layers.push(layer);
+      continue;
+    }
+    const color = layer.paint.kind === "solid" ? layer.paint.color : options.strokeColor;
+    for (const path of layer.paths) {
+      const produced = generate(
+        {
+          path,
+          bounds: { x: 0, y: 0, width: 0, height: 0 },
+          stroke: {
+            width: layer.strokeWidth,
+            color: options.strokeColor,
+            opacity: layer.paint.alpha ?? 1,
+            cap: "round",
+            join: "round",
+            miterLimit: options.strokeMiterLimit,
+          },
+          seed,
+        },
+        plugin.options,
+        ctx,
+      );
+      for (const piece of produced) {
+        layers.push({
+          role: "stroke",
+          paths: piece.paths,
+          fillRule: piece.fillRule ?? "nonzero",
+          paint: { kind: "solid", color, alpha: piece.paint.alpha ?? 1 },
+          ...(layer.clip ? { clip: layer.clip } : {}),
+        });
+      }
+    }
+  }
+  return { ...drawing, layers };
+}

@@ -129,10 +129,20 @@ export function partsToSets(
         });
         continue;
       }
+      const clip =
+        part.kind === "area" && part.clipPath
+          ? part.clipPath
+          : part.clip === "region"
+            ? regionPath
+            : undefined;
+      const opacity = part.kind === "area" ? part.paint?.alpha : undefined;
+      const fillRule = part.kind === "area" ? part.fillRule : undefined;
       sets.push({
         type: part.kind === "area" ? "fillPath" : "fillSketch",
         ops: path,
-        ...(part.clip === "region" ? { clip: regionPath } : {}),
+        ...(clip ? { clip } : {}),
+        ...(opacity !== undefined ? { opacity } : {}),
+        ...(fillRule ? { fillRule } : {}),
       });
     }
   }

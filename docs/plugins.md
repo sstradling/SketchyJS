@@ -594,7 +594,7 @@ Two independent version numbers:
 
 Rule: **every shipped brush, fill, texture, and edge is created by `defineX` and reaches the host through `use()` or a direct reference.** The host contains no `if (id === "crayon")` branch and no special path for built-in packages.
 
-Status: only the fill rows `solid`, `hachure`, `zigzag`, `crossHatch`, `dots`, `sunBurst`, `starBurst`, `dashed`, and `zigzagLine` are implemented (`@sketchy-js/fills`, each as a `defineFill` plugin, version `0.1.0`, `api: "1.1"`). `scribble`, the watercolor fill, and every brush, texture, and edge row are planned. The `@sketchy-js/brushes` and `@sketchy-js/stickers` packages do not exist yet.
+Status: the fill rows through `scribble`, plus the crayon brush and the watercolor brush and fill, are implemented (`api: "1.0"`). Texture and sticker-edge rows are still planned. Area fills may set `clipPath` when the clip is the generated outline rather than the input region; watercolor fill does this.
 
 | Today's Sketchy feature | Plugin | Package and subpath |
 | --- | --- | --- |

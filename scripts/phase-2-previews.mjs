@@ -6,6 +6,7 @@ import { basicSketchy, sketch } from "../packages/scene/dist/basic.js";
 import { renderToSvgString } from "../packages/svg-renderer/dist/index.js";
 import { renderToCanvas } from "../packages/canvas-renderer/dist/index.js";
 import { crayon } from "../packages/brushes/dist/crayon.js";
+import { watercolor, watercolorFill } from "../packages/brushes/dist/watercolor.js";
 import { generateFrame } from "../packages/animate/dist/index.js";
 
 const out = new URL("../docs/examples/phase-2/", import.meta.url);
@@ -80,6 +81,37 @@ const wax = basicSketchy
   )
   .build(size);
 
+const washProfile = {
+  tip: { roundness: 1, angle: 0, directionSensitive: false },
+  thicknessProfile: { kind: "uniform" },
+  cap: "round",
+  join: "round",
+  opacityProfile: { kind: "uniform" },
+  watercolor: {
+    pigment: 0.72,
+    wetness: 0.6,
+    edgeDarkening: 0.75,
+    layers: 3,
+    variation: 0.45,
+    bleed: 0.5,
+    seed: 1,
+  },
+};
+const wash = basicSketchy
+  .use(watercolor)
+  .use(watercolorFill)
+  .view()
+  .with({
+    seed: 42n,
+    strokeWidth: 12,
+    strokeColor: "#1e4d6b",
+    fillStyle: "watercolor",
+    fillColor: "#3d7ea6",
+    brushProfile: washProfile,
+  })
+  .draw(rectangle(28, 28, 164, 104))
+  .build(size);
+
 const base = sketch(rectangle(30, 36, 150, 90), size, {
   seed: 42n,
   strokeWidth: 3,
@@ -91,6 +123,7 @@ const scenes = [
   ["scribble", scribble],
   ["curved-bevel", bevel],
   ["crayon", wax],
+  ["watercolor", wash],
   ["animation-0", generateFrame(base, { steps: 4, variance: 0.05, seed: 42n }, 0)],
   ["animation-1", generateFrame(base, { steps: 4, variance: 0.05, seed: 42n }, 1)],
   ["animation-2", generateFrame(base, { steps: 4, variance: 0.05, seed: 42n }, 2)],

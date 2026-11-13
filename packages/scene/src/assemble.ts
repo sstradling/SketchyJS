@@ -123,8 +123,11 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size): Drawing {
         layers.push({
           role: "fill",
           paths: [transformPath(set.ops, matrix)],
-          fillRule: "nonzero",
-          paint: fillPaint,
+          fillRule: set.fillRule ?? "nonzero",
+          paint: { kind: "solid", color: o.fillColor, alpha: set.opacity ?? o.fillOpacity },
+          ...(set.clip
+            ? { clip: { paths: [transformPath(set.clip, matrix)], fillRule: "nonzero" as const } }
+            : {}),
         });
         break;
       case "path2DFill": {

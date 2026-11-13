@@ -1,4 +1,4 @@
-import type { Path, PathOp, ShapeKind, SketchOptions } from "@sketchy-js/types";
+import type { FillRule, Path, PathOp, ShapeKind, SketchOptions } from "@sketchy-js/types";
 import type { RoughCtx, Pt } from "../rough/context.js";
 
 /**
@@ -19,6 +19,10 @@ export interface OperationSet {
   readonly size?: { readonly width: number; readonly height: number };
   /** Clip applied to this set, in the same space as `ops` (scribble on a polygon or SVG path). */
   readonly clip?: Path;
+  /** Per-path opacity for a fill that paints several glazes. Falls back to the shape fill opacity. */
+  readonly opacity?: number;
+  /** Fill rule for this set. Omitted means nonzero. */
+  readonly fillRule?: FillRule;
 }
 
 /** Generated geometry for one shape before layer assembly (`Drawing`). */

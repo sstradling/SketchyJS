@@ -9,7 +9,7 @@ import type {
   SketchOptions,
 } from "@sketchy-js/types";
 import { assembleDrawing } from "./assemble.js";
-import { applyCrayon } from "./brush-host.js";
+import { applyCrayon, applyWatercolor, resolvedStyleSeed } from "./brush-host.js";
 import { PluginNotRegisteredError } from "./errors.js";
 import { createFillStage } from "./fill-stage.js";
 import type { ResolvedPlugin } from "./registry.js";
@@ -66,6 +66,25 @@ function resolveFill(
 ): ResolvedPlugin | undefined {
   if (item.fill !== undefined) return resolver.resolveSpec("fill", item.fill);
   try {
+    if (o.fillStyle === "watercolor") {
+      const wash = o.brushProfile.watercolor;
+      const drawingSeed = o.seed === undefined ? undefined : BigInt(o.seed);
+      const seed = resolvedStyleSeed(wash?.seed, drawingSeed);
+      return resolver.resolveSpec("fill", {
+        kind: "watercolor",
+        seed: Number(seed),
+        ...(wash
+          ? {
+              pigment: wash.pigment,
+              wetness: wash.wetness,
+              edgeDarkening: wash.edgeDarkening,
+              layers: wash.layers,
+              variation: wash.variation,
+              bleed: wash.bleed,
+            }
+          : {}),
+      });
+    }
     return resolver.resolveSpec("fill", { kind: o.fillStyle });
   } catch (error) {
     if (!(error instanceof PluginNotRegisteredError)) throw error;
@@ -109,12 +128,24 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
     const crayonPlugin = base.brushProfile.crayon
       ? lookupBrush(resolver, "crayon", base.brushProfile.crayon)
       : undefined;
-    if ((base.brushProfile.crayon && !crayonPlugin) || base.brushProfile.watercolor)
+    const watercolorPlugin = base.brushProfile.watercolor
+      ? lookupBrush(resolver, "watercolor", base.brushProfile.watercolor)
+      : undefined;
+    if (
+      (base.brushProfile.crayon && !crayonPlugin) ||
+      (base.brushProfile.watercolor && !watercolorPlugin)
+    )
       report({
         code: "brush-unsupported",
         message: base.brushProfile.watercolor
           ? "watercolor is not registered; a plain stroke was drawn"
           : "crayon is not registered; a plain stroke was drawn",
+      });
+    if (watercolorPlugin)
+      uses.set(watercolorPlugin.plugin.id, {
+        id: watercolorPlugin.plugin.id,
+        version: watercolorPlugin.plugin.version,
+        api: watercolorPlugin.plugin.api,
       });
     if (crayonPlugin)
       uses.set(crayonPlugin.plugin.id, {
@@ -147,7 +178,11 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
       const assembled = assembleDrawing(generated, size);
       nodes.push({
         type: "drawing",
-        drawing: crayonPlugin ? applyCrayon(assembled, crayonPlugin, options) : assembled,
+        drawing: watercolorPlugin
+          ? applyWatercolor(assembled, watercolorPlugin, options)
+          : crayonPlugin
+            ? applyCrayon(assembled, crayonPlugin, options)
+            : assembled,
       });
     }
   }
