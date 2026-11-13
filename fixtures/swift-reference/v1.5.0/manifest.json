@@ -556,7 +556,7 @@
       ]
     }
   ],
-  "treeSha256": "f03e589b293264df189db66e653fcc2a9108940f065390538614ac24c06013e1",
+  "treeSha256": "61c0be7f3b75f5af52638e43ce73894ab14c6c7f8f3e1e039d130c8a7d172fcd",
   "files": [
     {
       "path": "UPSTREAM-LICENSE",
@@ -1532,8 +1532,8 @@
     },
     {
       "path": "stickers/phase3.json",
-      "sha256": "eff1d1db7b102c58c8cae6002370e7e63f807155d88412dd44a0b0513453a2f6",
-      "bytes": 424249,
+      "sha256": "0e3e14f97de5e36ef79233224074c269f947245d28ed8f372623cf2cfdbdb6e8",
+      "bytes": 432284,
       "kind": "data",
       "fidelity": "native-framework",
       "platform": "darwin-x86_64",
