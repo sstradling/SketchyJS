@@ -4,7 +4,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { describe, expect, it } from "vitest";
 import { polygon, rectangle, path as svgPath } from "@sketchy-js/core";
 import type { Scene, StickerBacking } from "@sketchy-js/types";
-import { RoughView as SheetView } from "@sketchy-js/scene";
+import type { RoughView as SheetView } from "@sketchy-js/scene";
 import { RoughView } from "@sketchy-js/scene/basic";
 import { SketchGroup, SketchPart, buildStickerScene } from "@sketchy-js/scene/stickers";
 import { renderToSvgString } from "@sketchy-js/svg-renderer";
