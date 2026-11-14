@@ -63,11 +63,12 @@ const firstPath = (sets: readonly OperationSet[]): string | undefined =>
  * SVG-path drawings are scaled and centered into the canvas by one matrix computed from the
  * first set that carries path text. Stroke widths are not scaled.
  */
-export function assembleDrawing(drawing: SketchDrawing, size: Size): Drawing {
+export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = true): Drawing {
   const o = drawing.options;
   const isSvg = drawing.shape === "path";
   const svgText = isSvg ? firstPath(drawing.sets) : undefined;
-  const matrix: Matrix2D = svgText === undefined ? IDENTITY : computeSvgTransform(svgText, size);
+  const matrix: Matrix2D =
+    svgText === undefined || !fitSvg ? IDENTITY : computeSvgTransform(svgText, size);
   const clipShape =
     svgText === undefined ? undefined : transformPath(svgPathToOps(svgText), matrix);
 

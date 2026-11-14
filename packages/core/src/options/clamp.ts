@@ -35,9 +35,12 @@ export function resolveTileWidth(scale: number, imageWidth: number): number {
   return Math.max(4, scale > 0 ? scale : natural);
 }
 
-/** `StickerImage.resolvedFitScale`: Swift's floor for stretch and fill is 0.05. */
+/**
+ * `StickerImage.resolvedFitScale`. A non-positive or non-finite scale means 1
+ * ("fit the bounds"). The 0.05 floor is applied later, when the rect is drawn.
+ */
 export function resolveFitScale(scale: number): number {
-  return Math.max(scale, 0.05);
+  return scale > 0 && Number.isFinite(scale) ? scale : 1;
 }
 
 /** `Options.effectiveFillWeight`: `-1` means half the stroke width, at least 1. */

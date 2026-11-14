@@ -10,6 +10,9 @@
       "@sketchy-js/core/options": ["packages/core/src/options/index.ts"],
       "@sketchy-js/fills/*": ["packages/fills/src/*.ts"],
       "@sketchy-js/scene/basic": ["packages/scene/src/basic.ts"],
+      "@sketchy-js/scene/stickers": ["packages/scene/src/stickers.ts"],
+      "@sketchy-js/stickers/image": ["packages/stickers/src/image/index.ts"],
+      "@sketchy-js/stickers/clipper": ["packages/stickers/src/clipper/adapter.ts"],
       "@sketchy-js/plugin/schema": ["packages/plugin/src/schema/index.ts"]
     },
     "strict": true,

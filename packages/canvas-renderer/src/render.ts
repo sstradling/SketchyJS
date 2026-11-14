@@ -9,6 +9,7 @@ import type {
 } from "@sketchy-js/types";
 import type {
   Canvas2D,
+  CanvasImageSourceLike,
   CanvasRenderOptions,
   CanvasSurfaceFactory,
   ImageDataLike,
@@ -341,16 +342,147 @@ function paintInverse(
 function renderLayer(layer: DrawLayer, context: Canvas2D, options: CanvasRenderOptions): void {
   const paint = paintOf(layer.paint, options.background, context);
   context.save();
-  if (layer.clip?.inverse) {
+  if (layer.stickerImage) {
+    paintStickerImage(layer, context, options);
+  } else if (layer.clip?.inverse) {
     paintInverse(layer, context, options, paint);
   } else {
     if (layer.clip) {
       trace(context, layer.clip.paths);
       context.clip(layer.clip.fillRule === "evenodd" ? "evenodd" : "nonzero");
     }
+    if (layer.shadow) {
+      const bytes = colorBytes(layer.paint.kind === "solid" ? layer.paint.color : "#000000");
+      // Opacity is already on the paint. Putting it in the shadow color as well
+      // would apply it twice.
+      context.shadowColor = `rgb(${bytes.r} ${bytes.g} ${bytes.b})`;
+      context.shadowBlur = layer.shadow.radius;
+      context.shadowOffsetX = layer.shadow.x;
+      context.shadowOffsetY = layer.shadow.y;
+    }
     paintContent(layer, context, paint);
   }
   context.restore();
+}
+
+/**
+ * Masks a caller-decoded image to the sheet. Holes use the even-odd clip.
+ * The image is not given a shadow. A missing decode throws rather than skipping.
+ */
+function imageError(code: "sticker-image-source" | "sticker-image-taint", message: string): Error {
+  const error = new Error(message);
+  error.name = "StickerImageError";
+  return Object.assign(error, { code });
+}
+
+/** One taint readback per source. Later paints reuse the result. */
+const taintCache = new WeakMap<object, boolean>();
+
+function assertCanvasUntainted(source: unknown): void {
+  if (!source || typeof source !== "object") return;
+  const cached = taintCache.get(source);
+  if (cached === false) return;
+  if (cached === true) {
+    throw imageError(
+      "sticker-image-taint",
+      "sticker image canvas is tainted and its pixels cannot be read",
+    );
+  }
+  const canvas = source as {
+    width?: number;
+    height?: number;
+    getContext?: (
+      kind: string,
+    ) => { getImageData?: (x: number, y: number, w: number, h: number) => unknown } | null;
+  };
+  if (typeof canvas.getContext !== "function" || !(canvas.width && canvas.height)) return;
+  const context = canvas.getContext("2d");
+  if (!context?.getImageData) return;
+  try {
+    context.getImageData(0, 0, 1, 1);
+    taintCache.set(source, false);
+  } catch {
+    taintCache.set(source, true);
+    throw imageError(
+      "sticker-image-taint",
+      "sticker image canvas is tainted and its pixels cannot be read",
+    );
+  }
+}
+
+function isDrawable(source: unknown): source is CanvasImageSourceLike {
+  if (!source || typeof source !== "object") return false;
+  const record = source as { width?: unknown; height?: unknown };
+  return typeof record.width === "number" && typeof record.height === "number";
+}
+
+function paintStickerImage(
+  layer: DrawLayer,
+  context: Canvas2D,
+  options: CanvasRenderOptions,
+): void {
+  const image = layer.stickerImage;
+  if (!image) return;
+  const listed = image.href ? options.images?.[image.href] : undefined;
+  const carried = image.source;
+  const source = listed ?? (isDrawable(carried) ? carried : undefined);
+  if (!source || !context.drawImage) {
+    throw imageError(
+      "sticker-image-source",
+      "sticker image source must be a decoded image passed in render options; network URLs are not loaded",
+    );
+  }
+  assertCanvasUntainted(source);
+  trace(context, layer.clip?.paths ?? layer.paths);
+  context.clip("evenodd");
+  context.globalAlpha = image.opacity;
+  const rect = image.drawRect;
+  if (image.placement === "tile") {
+    const bounds = controlBox(layer.paths);
+    for (
+      let y = bounds.y, row = 0;
+      y < bounds.y + bounds.height && row < 900;
+      y += rect.height, row++
+    ) {
+      for (
+        let x = bounds.x, col = 0;
+        x < bounds.x + bounds.width && col < 900;
+        x += rect.width, col++
+      ) {
+        context.drawImage(source, x, y, rect.width, rect.height);
+      }
+    }
+    return;
+  }
+  context.drawImage(source, rect.x, rect.y, rect.width, rect.height);
+}
+
+function controlBox(paths: readonly Path[]): {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+} {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const path of paths) {
+    for (const op of path) {
+      if (op.op === "Z") continue;
+      const xs = op.op === "C" ? [op.c1x, op.c2x, op.x] : op.op === "Q" ? [op.cx, op.x] : [op.x];
+      const ys = op.op === "C" ? [op.c1y, op.c2y, op.y] : op.op === "Q" ? [op.cy, op.y] : [op.y];
+      for (const x of xs) {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+      }
+      for (const y of ys) {
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      }
+    }
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 }
 
 function renderLayers(

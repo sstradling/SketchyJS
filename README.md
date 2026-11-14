@@ -16,6 +16,8 @@ SketchyJS is a TypeScript port of [Sketchy](https://github.com/sstradling/Sketch
 | Doc | What it covers |
 | --- | --- |
 | [docs/plan.md](docs/plan.md) | Implementation plan: feature inventory, architecture, package split, testing, roadmap (targets Sketchy v1.5.0) |
+| [docs/versioning.md](docs/versioning.md) | Package versions track Sketchy. The first stable release is 1.5.0. Tags are `v`-prefixed |
+| [docs/phase-3.md](docs/phase-3.md) | Phase 3 status: stickers, groups, and the experimental image mask |
 | [docs/plugins.md](docs/plugins.md) | Plugin architecture: `defineBrush`, `defineFill`, `defineTexture`, `defineStickerEdge`, option schemas, registration, API versioning, a worked charcoal brush |
 | [docs/contributing-plugins.md](docs/contributing-plugins.md) | Plugin walkthrough: the `pnpm new` generator, conformance suite, `packages/contrib`, graduation criteria, PR checklist |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Setup, workflow, code standards |

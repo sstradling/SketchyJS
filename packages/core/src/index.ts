@@ -1,10 +1,11 @@
 export * from "./rng/index.js";
-export { f, FLOAT_MAX } from "./f32.js";
+export { f, FLOAT_MAX, PI, cosf, sinf } from "./f32.js";
 export * from "./shapes/index.js";
 export * from "./generate/index.js";
 export * from "./svg/index.js";
 export { createRoughKit, createGeometryKit, flattenPath } from "./kit/index.js";
 export type { Pt, RoughCtx } from "./rough/context.js";
+export { eggPolygonPoints, roundedRectanglePolygonPoints } from "./rough/legacy.js";
 export {
   fillEllipse,
   fillPolygon,

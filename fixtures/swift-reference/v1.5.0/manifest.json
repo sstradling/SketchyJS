@@ -18,7 +18,7 @@
     "platform": "darwin-x86_64",
     "sdk": "iphonesimulator",
     "minimumOS": "17.0",
-    "note": "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline."
+    "note": "Native groups and darwin/ replays compile pinned Sketchy v1.5.0 against UIKit, CoreGraphics, CoreText and SwiftUI. Linux files stay the shim baseline. stickers/phase3.json adds torn chops, fibers, ribbons, holes, smoothness, and group sheets from that same commit; its provenance object records the Darwin arch, Xcode, and simulator."
   },
   "pending": [],
   "accepted": [
@@ -556,7 +556,7 @@
       ]
     }
   ],
-  "treeSha256": "3f024ad923ef68068c59f230899a379a9a159b59152109acdd11efcc41fa6c91",
+  "treeSha256": "2dbe9eb928f841c2a106bdc8344d4c3e2a82fa45292f38b9a251da3049474fda",
   "files": [
     {
       "path": "UPSTREAM-LICENSE",
@@ -1525,6 +1525,15 @@
       "path": "stickers/image-placement.json",
       "sha256": "3c25b88f063e21766600d641e5da4ce7af17bef96254a30719b8b9007376f111",
       "bytes": 348984,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "darwin-fixture-exporter"
+    },
+    {
+      "path": "stickers/phase3.json",
+      "sha256": "e0bba9de4f32cf26649a631decfce118fc660ad7b9179c249197edb33c5fd7d9",
+      "bytes": 483446,
       "kind": "data",
       "fidelity": "native-framework",
       "platform": "darwin-x86_64",

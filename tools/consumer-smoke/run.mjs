@@ -127,8 +127,16 @@ const expectations = {
   "@sketchy-js/brushes/crayon": { symbols: ["crayon"] },
   "@sketchy-js/brushes/watercolor": { symbols: ["watercolor", "watercolorFill"] },
   "@sketchy-js/animate": { symbols: ["generateFrame", "precomputeFrames", "createAnimation"] },
+  "@sketchy-js/stickers": {
+    symbols: ["stickerCommands", "stickerLayers", "paper", "smoothEdge", "builtinEdges"],
+  },
+  "@sketchy-js/stickers/image": {
+    symbols: ["resolveImagePlacement", "assertDataImage", "StickerImageError"],
+  },
+  "@sketchy-js/stickers/clipper": { symbols: ["clipperBackend", "CLIPPER_SCALE"] },
+  "@sketchy-js/scene/stickers": { symbols: ["SketchGroup", "SketchPart", "buildStickerScene"] },
 };
-const skeletons = ["stickers", "react", "web-components", "contrib"];
+const skeletons = ["react", "web-components", "contrib"];
 
 writeFileSync(
   join(consumer, "check.mjs"),

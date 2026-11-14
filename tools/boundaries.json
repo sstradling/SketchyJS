@@ -19,7 +19,7 @@
       "peerOnly": []
     },
     "stickers": {
-      "dependencies": ["plugin"],
+      "dependencies": ["plugin", "core", "types"],
       "peerOnly": []
     },
     "scene": {

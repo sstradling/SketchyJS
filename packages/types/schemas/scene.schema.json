@@ -317,6 +317,89 @@
           "type": "number",
           "description": "Miter limit used with the `miter` join."
         },
+        "shadow": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "radius": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "x",
+            "y",
+            "radius"
+          ],
+          "additionalProperties": false,
+          "description": "Drop shadow painted with this layer, in scene pixels. Used by `sheet-shadow`. The offset and blur are not multiplied by a node transform."
+        },
+        "stickerImage": {
+          "type": "object",
+          "properties": {
+            "href": {
+              "type": "string"
+            },
+            "placement": {
+              "$ref": "#/definitions/StickerImagePlacement"
+            },
+            "scale": {
+              "type": "number"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number"
+            },
+            "height": {
+              "type": "number"
+            },
+            "drawRect": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number"
+                },
+                "y": {
+                  "type": "number"
+                },
+                "width": {
+                  "type": "number"
+                },
+                "height": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "width",
+                "height"
+              ],
+              "additionalProperties": false,
+              "description": "One copy's rectangle. Tiles repeat this size from the sheet bounds."
+            },
+            "source": {
+              "description": "Live canvas or bitmap the caller passed. `renderToCanvas` draws this when `images` has no entry for `href`. It is not JSON-safe or structured-clone-safe, and it is not part of a serialized scene. Serializable scenes should keep the pixels in `href` and pass the decoded object through `images`."
+            }
+          },
+          "required": [
+            "href",
+            "placement",
+            "scale",
+            "opacity",
+            "width",
+            "height",
+            "drawRect"
+          ],
+          "additionalProperties": false,
+          "description": "Experimental image mask. `href` is a caller-supplied `data:image` URL. Renderers do not fetch it. See `docs/phase-3.md`."
+        },
         "clip": {
           "$ref": "#/definitions/ClipDescriptor"
         },
@@ -503,6 +586,14 @@
           ],
           "additionalProperties": false
         }
+      ]
+    },
+    "StickerImagePlacement": {
+      "type": "string",
+      "enum": [
+        "tile",
+        "stretch",
+        "fill"
       ]
     },
     "ClipDescriptor": {

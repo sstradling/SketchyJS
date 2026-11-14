@@ -1,6 +1,6 @@
 import type { Color } from "./color.js";
 import type { Matrix2D, Rect, Size } from "./geometry.js";
-import type { BrushCap, BrushJoin } from "./options.js";
+import type { BrushCap, BrushJoin, StickerImagePlacement } from "./options.js";
 import type { FillRule, Path } from "./path.js";
 
 /** What a layer paints with. `stroke`, `fill` and `paper` refer to the owning shape's colors. */
@@ -43,6 +43,32 @@ export interface DrawLayer {
   join?: BrushJoin;
   /** Miter limit used with the `miter` join. */
   miterLimit?: number;
+  /**
+   * Drop shadow painted with this layer, in scene pixels. Used by `sheet-shadow`.
+   * The offset and blur are not multiplied by a node transform.
+   */
+  shadow?: { x: number; y: number; radius: number };
+  /**
+   * Experimental image mask. `href` is a caller-supplied `data:image` URL.
+   * Renderers do not fetch it. See `docs/phase-3.md`.
+   */
+  stickerImage?: {
+    href: string;
+    placement: StickerImagePlacement;
+    scale: number;
+    opacity: number;
+    width: number;
+    height: number;
+    /** One copy's rectangle. Tiles repeat this size from the sheet bounds. */
+    drawRect: { x: number; y: number; width: number; height: number };
+    /**
+     * Live canvas or bitmap the caller passed. `renderToCanvas` draws this when
+     * `images` has no entry for `href`. It is not JSON-safe or structured-clone-safe,
+     * and it is not part of a serialized scene. Serializable scenes should keep
+     * the pixels in `href` and pass the decoded object through `images`.
+     */
+    source?: unknown;
+  };
   clip?: ClipDescriptor;
   /**
    * When set, this layer is one piece of a luminance mask. Pieces that share `group`
