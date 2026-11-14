@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { combineSilhouettes, type SilhouetteRing } from "../src/union.js";
+import { combineSilhouettes, quantizeToInt, type SilhouetteRing } from "../src/union.js";
 
 function square(
   x: number,
@@ -59,6 +59,7 @@ describe("silhouette union", () => {
   });
 
   it("does not bridge a shared corner", () => {
+    // Reversing the sharpest-right-turn walk merges these two squares into one ring.
     const combined = combineSilhouettes([square(0, 0, 50, 50, 0), square(50, 50, 50, 50, 1)]);
     expect(combined.filter((ring) => !ring.isHole)).toHaveLength(2);
     expect(covers({ x: 10, y: 10 }, combined)).toBe(true);
@@ -87,5 +88,12 @@ describe("silhouette union", () => {
     ]);
     expect(filled.every((ring) => !ring.isHole)).toBe(true);
     expect(covers({ x: 60, y: 60 }, filled)).toBe(true);
+  });
+
+  it("quantizes on Swift's half-away-from-zero rule", () => {
+    expect(quantizeToInt(1.5, 1)).toBe(2);
+    expect(quantizeToInt(-1.5, 1)).toBe(-2);
+    expect(quantizeToInt(-0.1, 0.2)).toBe(-1);
+    expect(quantizeToInt(0.1, 0.2)).toBe(1);
   });
 });

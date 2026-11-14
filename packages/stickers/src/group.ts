@@ -79,7 +79,7 @@ export function groupSilhouette(
   const combined = combineSilhouettes(rings).reverse();
   const torn = typeof backing.edge === "object" && backing.edge.kind === "torn";
   return combined.map((ring) => {
-    const source = torn ? startAtMaxX(ring.points) : ring.points;
+    const source = torn ? startTornRing(ring.points) : ring.points;
     const points = torn ? simplifyTornRing(source, TORN_SIMPLIFY_EPSILON) : source;
     return { points, closed: true, source };
   });
@@ -172,13 +172,22 @@ function apply(point: Pt, [a, b, c, d, e, f]: Matrix2D): Pt {
   return { x: a * point.x + c * point.y + e, y: b * point.x + d * point.y + f };
 }
 
-/** Starts a ring at its maximum-x vertex, matching the group-torn union order. */
-function startAtMaxX(points: Pt[]): Pt[] {
+/**
+ * Starts a torn ring at its minimum point: smallest x, then smallest y.
+ *
+ * Swift starts wherever `popLast()` lands on the first key of `Array(unused.keys)`.
+ * That is Dictionary hash order. It is stable only when `SWIFT_DETERMINISTIC_HASHING=1`,
+ * and production Swift apps do not set that flag, so Swift's own start vertex varies
+ * from run to run. The tear walks from the start vertex, so the chop can differ from
+ * one Swift run even when the outline is the same cycle. This rotation is SketchyJS's
+ * rule. It is not a copy of the hash order.
+ */
+function startTornRing(points: Pt[]): Pt[] {
   let at = 0;
   for (let index = 1; index < points.length; index++) {
     const point = points[index]!;
     const best = points[at]!;
-    if (point.x > best.x || (point.x === best.x && point.y > best.y)) at = index;
+    if (point.x < best.x || (point.x === best.x && point.y < best.y)) at = index;
   }
   if (at === 0) return points.slice();
   return points.slice(at).concat(points.slice(0, at));

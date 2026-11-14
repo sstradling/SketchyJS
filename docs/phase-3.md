@@ -84,11 +84,11 @@ Structural match first (same rings, same operation kinds), then coordinates with
 | `group` | Rectangle seed 42 union circle seed 7 offset by (10, 0), shared width 12 | same cycle within 1e-4 after rotating the start vertex |
 | `image-placement` (6 rows) | `resolveImagePlacement` for tile, stretch, fill, including the 900-repeat cap | within 1e-6 |
 
-The group contour is one closed cycle. Swift chains it from a `Dictionary`, and that iteration order chooses the start vertex. The points match to about 1e-12 once the cycle is rotated. The test rotates, then rebuilds the sheet commands, then applies the 1e-4 check. The painted shape does not depend on which vertex is first.
+The group contour is one closed cycle. Swift chains it from a `Dictionary`, and that iteration order chooses the start vertex. For a smooth sheet the points match to about 1e-12 once the cycle is rotated. The test rotates, then rebuilds the sheet commands, then applies the 1e-4 check. A torn sheet is different: the tear walks from the start vertex, so that vertex changes the chop. See the torn-group section below.
 
 `image-placement.json` also carries a `maskedCommand` (the smooth rectangle sheet plus image metadata). The sheet geometry is the `smooth` case. This PR does not re-compare those embedded commands as a second copy.
 
-`stickers/phase3.json` is a later Darwin export from the same Sketchy commit. It does not replace `contours.json`. Every case is in the geometric parity test: structure first, then 1e-4 px. Group rings are rotated to Swift's start vertex, then the sheet is rebuilt.
+`stickers/phase3.json` is a later Darwin export from the same Sketchy commit. It does not replace `contours.json`. Every case is in the geometric parity test: structure first, then 1e-4 px. Smooth group rings are rotated onto the fixture's start vertex, then the sheet is rebuilt. Torn groups are checked as cycles, and their command stages are checked from the fixture ring's own start.
 
 | Case | What it is | Result |
 | --- | --- | --- |
@@ -103,9 +103,20 @@ The group contour is one closed cycle. Swift chains it from a `Dictionary`, and 
 | `group-overlapping` | Two 100 pt squares that overlap. One exterior ring, so the overlap stays filled | within 1e-4 |
 | `group-corner-sharing` | Two 50 pt squares that share a corner. Two rings, even-odd, matching Swift | within 1e-4 |
 | `image-hole` | Fully smooth holed sheet, plus a tile command at 24 pt | within 1e-4 |
-| `group-torn` | Circles at (70, 70), diameters 70 and 56, second moved by (36, 8). Epsilon 1.8 | within 1e-4 |
+| `group-torn` | Two overlapping circles. Epsilon 1.8 | within 1e-4, up to rotation |
+| `group-torn-2` | Rectangle and circle, kept apart, two rings | within 1e-4, up to rotation |
+| `group-torn-3` | Three overlapping circles | within 1e-4, up to rotation |
+| `group-torn-4` | Rounded rectangle rotated 22°, then the group translated by (16, −8) | within 1e-4, up to rotation |
 
-`group-torn` is two circles centered at (70, 70), diameters 70 and 56, the second translated by (36, 8). The parity test builds that group. The pre-simplify union is 111 points and, for this one sample, starts at the maximum-x vertex (`startIndex` 0 in the file means the array is stored from that vertex, not that every torn group starts there). Douglas–Peucker at epsilon 1.8 produces the 21-point centerline, and `offsetClosed` at distance 12 matches `offsetBeforeTear`. Epsilon 0.9 does not reproduce that centerline. More torn groups are still needed before treating maximum-x as Swift's rule.
+Torn-group outlines match Swift exactly given the same start vertex. The start vertex itself is a Swift hash-order artifact, so SketchyJS picks its own, and the tear pattern for a torn group can differ from a given Swift run for that reason alone.
+
+`SilhouetteUnion.chain` buckets each boundary edge by its start, quantized to a 0.2 pt grid with `Int((x / 0.2).rounded())` (half away from zero) and the same for y. The next edge is the sharpest right turn, with the filled side on the left. The port does both of those. Reversing the turn bridges two squares that only share a corner, and that test fails.
+
+The vertex the walk starts on is not geometric. Swift takes `popLast()` for the first key of `Array(unused.keys)`, which is `Dictionary` hash order. `SWIFT_DETERMINISTIC_HASHING=1` makes one export stable. Production Swift apps do not set that flag, so Swift's own start vertex varies from run to run. When several edges share a key, the last one appended wins. SketchyJS does not copy that hash order. After the walk, a torn ring rotates so index 0 is the vertex with the smallest x, then the smallest y.
+
+`startIndex` 0 in the fixture means the array is stored from the vertex that export emitted. It is not a rule that every torn group starts at a particular point.
+
+The parity check has two parts. The port's union ring or rings equal Swift's `preSimplifyRings` up to cyclic rotation and ring order, at 1e-4. Feeding Swift's own ring, with its start, through the port's simplify, offset, tear, and command stages reproduces `centerlines`, `offsetBeforeTear`, and `commands` at 1e-4, for all four torn groups. Epsilon 0.9 does not reproduce the centerline of `group-torn`, `group-torn-3`, or `group-torn-4`. `group-torn-2` drops only points farther than 1.8, so 0.9 leaves both of its rings unchanged.
 
 Overlapping squares are unioned in the silhouette, before the backing offset, so the shared region is one ring and stays filled. Corner-sharing squares stay two rings. Their offset margins overlap, and the exported fill rule is even-odd, so that lens is open in Swift's path as well. The port matches that path. It does not merge those offset rings into one contour.
 
@@ -139,6 +150,7 @@ Seth's decisions, as implemented:
 
 - Package versions are `0.0.0`. The Phase 1 and Phase 2 changesets that would have published `0.1.0` are gone. The publishable packages are one Changesets `fixed` group. The release PR sets `1.5.0` explicitly.
 - Plugin API examples in `docs/plugins.md` use `version: "1.0.0"` for a **plugin**, not for the package. That is the plugin API line and stays.
+- A torn group's tear can differ from a given Swift export. Swift's start vertex is `Dictionary` hash order and varies unless deterministic hashing is on. SketchyJS starts at the minimum point. Given that same start vertex, the outline matches.
 - Ink on a compound SVG path is still nonzero, so a blue fill covers a hole even when the paper punches it. The holes preview uses a clear fill so the hole shows. The image clip is even-odd, so a hole through the image stays empty.
 - One smooth corner on a ring used to collapse the sheet (Swift's `slice` returns that single point). The port walks the long way around. Fixtures have several corners and still match.
 - No browser timing for `clipper2-ts`. `clipper2-wasm` is not wired (the ADR leaves it optional).
@@ -147,7 +159,7 @@ Seth's decisions, as implemented:
 
 ## Tests
 
-`pnpm test`: **724** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
+`pnpm test`: **728** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
 
 ## Bundle size
 

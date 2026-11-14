@@ -75,7 +75,7 @@ function boundaryEdges(shapes: Map<number, SilhouetteRing[]>): Edge[] {
 }
 
 function dedupe(edges: readonly Edge[]): Edge[] {
-  const quantize = (value: number): number => Math.round(value / 0.25);
+  const quantize = (value: number): number => quantizeToInt(value, 0.25);
   const seen = new Set<string>();
   return edges.filter((edge) => {
     const key = `${quantize(edge.start.x)},${quantize(edge.start.y)},${quantize(edge.end.x)},${quantize(edge.end.y)}`;
@@ -149,8 +149,23 @@ interface Loop {
   isHole: boolean;
 }
 
+/**
+ * Swift `Int((value / step).rounded())`: round half away from zero, then truncate.
+ * `Math.round` breaks the tie toward +∞, so a negative half lands in the other bucket.
+ */
+export function quantizeToInt(value: number, step: number): number {
+  const scaled = value / step;
+  const rounded = Math.sign(scaled) * Math.round(Math.abs(scaled));
+  return rounded === 0 ? 0 : rounded;
+}
+
 function chain(edges: readonly Edge[]): Loop[] {
-  const keyOf = (point: Pt): string => `${Math.round(point.x / 0.2)},${Math.round(point.y / 0.2)}`;
+  // 0.2 pt buckets, same as `SilhouetteUnion.chain`. Key order here is sorted so the
+  // walk is stable. Swift walks `Array(unused.keys)`, which is Dictionary hash order,
+  // and that order is what picks the start vertex. Torn groups rotate to their own
+  // start after this walk; they do not copy the hash order.
+  const keyOf = (point: Pt): string =>
+    `${quantizeToInt(point.x, 0.2)},${quantizeToInt(point.y, 0.2)}`;
   const unused = new Map<string, Edge[]>();
   for (const edge of edges) {
     const key = keyOf(edge.start);
@@ -183,6 +198,8 @@ function chain(edges: readonly Edge[]): Loop[] {
             incoming.x * outgoing.y - incoming.y * outgoing.x,
             incoming.x * outgoing.x + incoming.y * outgoing.y,
           );
+          // Interior stays on the left. The next edge is the sharpest right turn:
+          // the smallest angle in [0, 2π). A larger angle is a left turn.
           const score = turn >= 0 ? turn : turn + 2 * Math.PI;
           if (score < bestTurn) {
             bestTurn = score;

@@ -1,6 +1,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { circle, generateDrawing, line, path, rectangle, type Shape } from "@sketchy-js/core";
+import {
+  circle,
+  generateDrawing,
+  line,
+  path,
+  rectangle,
+  roundedRectangle,
+  type Shape,
+} from "@sketchy-js/core";
 import { resolveSketchOptions } from "@sketchy-js/core/options";
 import { appendStickerImage, resolveImagePlacement } from "@sketchy-js/stickers/image";
 import {
@@ -37,8 +45,10 @@ const phase3 = JSON.parse(
     }[];
     parts?: {
       shape: string;
-      center: [number, number];
-      diameter: number;
+      center?: [number, number];
+      diameter?: number;
+      rect?: [number, number, number, number];
+      cornerRadius?: number;
       transform: [number, number, number, number, number, number];
       strokeWidth: number;
       roughness: number;
@@ -53,6 +63,11 @@ const phase3 = JSON.parse(
       imageScale?: number;
       imageSize?: [number, number];
       placement?: "tile" | "stretch" | "fill";
+      width?: number;
+      seed?: string;
+      tearDepth?: number;
+      tearLength?: number;
+      tearJaggedness?: number;
     };
     commands: {
       style: string;
@@ -588,56 +603,148 @@ describe("phase 3 Darwin sticker parity", () => {
     expect(maxDelta(withImage, expected)).toBeLessThanOrEqual(1e-4);
   });
 
-  it("group-torn", () => {
-    const expected = byId.get("group-torn")!;
+  it.each(["group-torn", "group-torn-2", "group-torn-3", "group-torn-4"])("%s", (id) => {
+    const expected = byId.get(id)!;
+    const input = expected.input!;
     const backing = sheet({
-      width: 12,
-      smoothness: 0.4,
-      edge: { kind: "torn", depth: 5, length: 14, jaggedness: 0.3 },
+      width: input.width!,
+      smoothness: expected.storedSmoothness,
+      edge: {
+        kind: "torn",
+        depth: input.tearDepth!,
+        length: input.tearLength!,
+        jaggedness: input.tearJaggedness!,
+      },
     });
-    const options = {
-      seed: 11n,
-      strokeWidth: 3,
-      roughness: 0,
-      bowing: 0,
-      maxRandomnessOffset: 2,
-      stickerBacking: backing,
-    };
     const built = groupCommands(
       (expected.parts ?? []).map((item) =>
-        part(circle(item.center[0], item.center[1], item.diameter), options, item.transform),
+        part(
+          tornShape(item),
+          {
+            seed: BigInt(item.seed),
+            strokeWidth: item.strokeWidth,
+            roughness: item.roughness,
+            bowing: item.bowing,
+            maxRandomnessOffset: item.maxRandomnessOffset,
+            stickerBacking: backing,
+          },
+          item.transform,
+        ),
       ),
       backing,
-      11n,
+      BigInt(input.seed!),
+      expected.groupTransform,
     );
     const pre = expected.preSimplifyRings ?? [];
     expect(built.centerlines.length).toBe(pre.length);
-    built.centerlines.forEach((line, index) => {
-      const ring = pre[index]!;
-      expect(ring.startIndex).toBe(0);
-      expect(line.source.length).toBe(ring.points.length);
-      line.source.forEach((pt, i) => {
-        expect(Math.abs(pt.x - ring.points[i]![0])).toBeLessThanOrEqual(1e-4);
-        expect(Math.abs(pt.y - ring.points[i]![1])).toBeLessThanOrEqual(1e-4);
+    // The port's union equals Swift's ring up to rotation and component order.
+    // The start vertex itself is not Swift's: each torn ring starts at min x, then min y.
+    expect(
+      cyclicRingDelta(
+        built.centerlines.map((line) => line.source),
+        pre,
+      ),
+    ).toBeLessThanOrEqual(1e-4);
+    for (const line of built.centerlines) {
+      const first = line.source[0]!;
+      for (const point of line.source) {
+        const earlier = point.x < first.x || (point.x === first.x && point.y < first.y);
+        expect(earlier).toBe(false);
+      }
+    }
+    // Swift's own ring, with Swift's start, through simplify, offset, tear, and commands.
+    const fromSwift = pre.map((ring) => {
+      const source = ring.points.map(([x, y]) => ({ x, y }));
+      const points = simplifyTornRing(source, TORN_SIMPLIFY_EPSILON);
+      return { points, closed: true, source };
+    });
+    expect(fromSwift.length).toBe(expected.centerlines.length);
+    fromSwift.forEach((line, index) => {
+      const center = expected.centerlines[index]!;
+      expect(line.points.length).toBe(center.points.length);
+      line.points.forEach((point, i) => {
+        expect(Math.abs(point.x - center.points[i]![0])).toBeLessThanOrEqual(1e-4);
+        expect(Math.abs(point.y - center.points[i]![1])).toBeLessThanOrEqual(1e-4);
+      });
+      const offset = offsetClosed(line.points, expected.offsetBeforeTear![index]!.distance);
+      const expectedOffset = expected.offsetBeforeTear![index]!.points;
+      expect(offset?.length).toBe(expectedOffset.length);
+      offset?.forEach((point, i) => {
+        expect(Math.abs(point.x - expectedOffset[i]![0])).toBeLessThanOrEqual(1e-4);
+        expect(Math.abs(point.y - expectedOffset[i]![1])).toBeLessThanOrEqual(1e-4);
       });
     });
-    const atFixture = simplifyTornRing(
-      built.centerlines[0]!.source,
-      expected.simplifyEpsilon ?? TORN_SIMPLIFY_EPSILON,
-    );
-    const atHalf = simplifyTornRing(built.centerlines[0]!.source, 0.9);
-    expect(atFixture.length).toBe(expected.centerlines[0]!.points.length);
-    expect(atHalf.length).not.toBe(atFixture.length);
-    const offset = offsetClosed(
-      built.centerlines[0]!.points,
-      expected.offsetBeforeTear?.[0]?.distance ?? 12,
-    );
-    const expectedOffset = expected.offsetBeforeTear?.[0]?.points ?? [];
-    expect(offset?.length).toBe(expectedOffset.length);
-    offset?.forEach((pt, i) => {
-      expect(Math.abs(pt.x - expectedOffset[i]![0])).toBeLessThanOrEqual(1e-4);
-      expect(Math.abs(pt.y - expectedOffset[i]![1])).toBeLessThanOrEqual(1e-4);
+    // Epsilon 0.9 must not reproduce a centerline that 1.8 actually thins.
+    // group-torn-2 drops only points farther than 1.8, so 0.9 leaves both rings unchanged.
+    const coarserMisses = pre.some((ring, index) => {
+      const raw = ring.points.map(([x, y]) => ({ x, y }));
+      const atCoarser = simplifyTornRing(raw, 0.9);
+      const center = expected.centerlines[index]!;
+      if (atCoarser.length !== center.points.length) return true;
+      return atCoarser.some(
+        (point, pointIndex) =>
+          Math.abs(point.x - center.points[pointIndex]![0]) > 1e-4 ||
+          Math.abs(point.y - center.points[pointIndex]![1]) > 1e-4,
+      );
     });
-    expect(maxDelta(built, expected)).toBeLessThanOrEqual(1e-4);
+    expect(coarserMisses).toBe(id !== "group-torn-2");
+    expect(
+      maxDelta(
+        {
+          centerlines: fromSwift,
+          commands: commandsForLines(fromSwift, backing.width, backing, BigInt(input.seed!)),
+        },
+        expected,
+      ),
+    ).toBeLessThanOrEqual(1e-4);
   });
 });
+
+function tornShape(item: NonNullable<(typeof phase3.cases)[number]["parts"]>[number]): Shape {
+  if (item.shape === "circle") return circle(item.center![0], item.center![1], item.diameter!);
+  const [x, y, width, height] = item.rect!;
+  if (item.shape === "roundedRectangle") {
+    return roundedRectangle(x, y, width, height, item.cornerRadius!);
+  }
+  return rectangle(x, y, width, height);
+}
+
+/** Worst point error of the best rotation, then the best pairing of rings. */
+function cyclicRingDelta(
+  actual: { x: number; y: number }[][],
+  expected: { points: [number, number][] }[],
+): number {
+  if (actual.length !== expected.length) return Infinity;
+  let best = Infinity;
+  const used = Array<boolean>(actual.length).fill(false);
+  const visit = (index: number, worst: number) => {
+    if (worst >= best) return;
+    if (index === expected.length) {
+      best = worst;
+      return;
+    }
+    for (let ring = 0; ring < actual.length; ring++) {
+      if (used[ring]) continue;
+      used[ring] = true;
+      visit(index + 1, Math.max(worst, rotationDelta(actual[ring]!, expected[index]!.points)));
+      used[ring] = false;
+    }
+  };
+  visit(0, 0);
+  return best;
+}
+
+function rotationDelta(actual: { x: number; y: number }[], expected: [number, number][]): number {
+  if (actual.length !== expected.length) return Infinity;
+  let best = Infinity;
+  for (let shift = 0; shift < expected.length; shift++) {
+    let worst = 0;
+    for (let i = 0; i < actual.length; i++) {
+      const point = expected[(i + shift) % expected.length]!;
+      worst = Math.max(worst, Math.abs(actual[i]!.x - point[0]), Math.abs(actual[i]!.y - point[1]));
+      if (worst >= best) break;
+    }
+    if (worst < best) best = worst;
+  }
+  return best;
+}
