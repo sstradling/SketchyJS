@@ -19,9 +19,27 @@ The build target is `$(uname -m)-apple-ios17.0-simulator`. The committed fixture
 
 The provenance strings passed into the binary are the ones recorded in the committed file. They are labels. The geometry comes from the pinned Sketchy sources and the simulator frameworks.
 
+## Where the union ring starts
+
+`SilhouetteUnion.chain` is what chooses the first vertex. It does not search for the maximum x.
+
+Boundary edges are stored in a dictionary whose key quantizes each edge's start to a 0.2 point grid:
+
+```swift
+Key(x: Int((point.x / 0.2).rounded()), y: Int((point.y / 0.2).rounded()))
+```
+
+`Array(unused.keys)` is then walked in `Dictionary` iteration order. With `SWIFT_DETERMINISTIC_HASHING=1` that order is stable, because `Hasher` uses a fixed seed, and it is the hash-table order of those integer keys. It is not sorted by x or y. The ring begins at `start` of the edge `popLast()` returns for the first key that still has edges. `popLast` matters when several edges share one quantized start: the last edge appended is the one the walk leaves on. Append order follows `boundaryEdges`, which iterates `Dictionary(grouping: rings, by: \.shape).values` (shape-id hash order) and then each ring's own vertices.
+
+`group-torn-2` keeps the rectangle and the circle apart. In v1.5.0, those two outlines overlapped and `combine` returned no loop when they had different shape ids, so that layout has no ring to measure. Separate components still start by the same key order, and the order of the keys also chooses which component is first.
+
+After that first edge, the rest of the loop is geometric. At each vertex the next edge is the sharpest right turn, since the filled side is on the left. The dictionary is only used again to find the bucket of the current end point. The repeated closing vertex is dropped, so `preSimplifyRings[].points[0]` (`startIndex` 0) is the vertex the walk started on. Simplify keeps that vertex first, which is why the centerline starts there too.
+
+A second dictionary, `Dictionary(grouping:by: \.shape)`, does not pick the start key. It can change which duplicate edge survives into a bucket, and therefore which edge `popLast` selects.
+
 ## `group-torn` reconstruction fields
 
-The other cases are unchanged. `group-torn` adds:
+`group-torn`, `group-torn-2`, `group-torn-3`, and `group-torn-4` add:
 
 | Field | Source |
 | --- | --- |

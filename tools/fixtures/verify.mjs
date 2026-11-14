@@ -17,6 +17,9 @@ const phase3CaseIds = [
   "image-hole",
   "group-overlapping",
   "group-corner-sharing",
+  "group-torn-2",
+  "group-torn-3",
+  "group-torn-4",
 ];
 
 /**
@@ -61,6 +64,23 @@ function verifyPhase3(dir) {
   const clamped = cases.find((item) => item.id === "smoothness-1.5");
   if (clamped && clamped.storedSmoothness !== 1) {
     problems.push("smoothness-1.5 must record StickerBacking's clamp to 1");
+  }
+  for (const id of ["group-torn", "group-torn-2", "group-torn-3", "group-torn-4"]) {
+    const item = cases.find((entry) => entry.id === id);
+    if (!item) continue;
+    for (const key of ["parts", "groupTransform", "preSimplifyRings", "simplifyEpsilon", "offsetBeforeTear"]) {
+      if (item[key] == null) problems.push(`${id} is missing ${key}`);
+    }
+    if (item.simplifyEpsilon !== 1.8) problems.push(`${id} simplifyEpsilon is not 1.8`);
+    if (!Array.isArray(item.parts) || item.parts.length === 0) problems.push(`${id} has no parts`);
+    for (const ring of item.preSimplifyRings ?? []) {
+      if (ring.startIndex !== 0 || !Array.isArray(ring.points) || ring.points.length < 3) {
+        problems.push(`${id} preSimplify ring is missing its Swift start vertex`);
+      }
+    }
+    if (!Array.isArray(item.offsetBeforeTear) || item.offsetBeforeTear.length === 0) {
+      problems.push(`${id} has no offsetBeforeTear ring`);
+    }
   }
   return problems;
 }

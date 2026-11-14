@@ -231,7 +231,7 @@ private func groupCase(_ id: String, _ group: SketchGroup, canvas: CGSize, input
         "centerlines": linesJSON(lines),
         "commands": .array(commands.map(commandJSON)),
     ]
-    if id == "group-torn" {
+    if id.hasPrefix("group-torn") {
         row.merge(tornReconstruction(group: group, backing: backing, lines: lines)) { _, new in new }
     }
     return .object(row)
@@ -570,6 +570,100 @@ private func exportPhase3(weaveData: Data?, provenance: Provenance) -> J {
             "canvas": numbers([200, 200]),
         ])
     ))
+    cases.append(groupCase(
+        "group-torn-2",
+        SketchGroup {
+            ink(seed: 17, stroke: 4).draw(Rectangle(x: 36, y: 48, width: 100, height: 64))
+            SketchPart(ink(seed: 19, stroke: 4).draw(Circle(x: 210, y: 80, diameter: 64)))
+        }
+        .stickerBacking(
+            width: 12,
+            smoothness: 1,
+            edge: .torn(StickerTear(depth: 6, length: 12, jaggedness: 0.15)),
+            color: UIColor.white
+        )
+        .seed(17),
+        canvas: CGSize(width: 300, height: 200),
+        input: .obj([
+            "kind": .string("group-torn"),
+            "seed": .u64(17),
+            "strokeWidth": .double(4),
+            "roughness": .double(0),
+            "width": .double(12),
+            "smoothness": .double(1),
+            "edge": .string("torn"),
+            "tearDepth": .double(6),
+            "tearLength": .double(12),
+            "tearJaggedness": .double(0.15),
+            "canvas": numbers([300, 200]),
+        ])
+    ))
+    cases.append(groupCase(
+        "group-torn-3",
+        SketchGroup {
+            ink(seed: 23, stroke: 3).draw(Circle(x: 78, y: 86, diameter: 74))
+            ink(seed: 29, stroke: 3).draw(Circle(x: 124, y: 86, diameter: 74))
+            ink(seed: 31, stroke: 3).draw(Circle(x: 102, y: 124, diameter: 70))
+        }
+        .stickerBacking(
+            width: 14,
+            smoothness: 0.25,
+            edge: .torn(StickerTear(depth: 9, length: 18, jaggedness: 0.8)),
+            color: UIColor.white
+        )
+        .seed(23),
+        canvas: CGSize(width: 280, height: 260),
+        input: .obj([
+            "kind": .string("group-torn"),
+            "seed": .u64(23),
+            "strokeWidth": .double(3),
+            "roughness": .double(0),
+            "width": .double(14),
+            "smoothness": .double(0.25),
+            "edge": .string("torn"),
+            "tearDepth": .double(9),
+            "tearLength": .double(18),
+            "tearJaggedness": .double(0.8),
+            "canvas": numbers([280, 260]),
+        ])
+    ))
+    let roundPivot = CGPoint(x: 110, y: 80)
+    cases.append(groupCase(
+        "group-torn-4",
+        SketchGroup {
+            SketchPart(
+                ink(seed: 41, stroke: 3).draw(
+                    RoundedRectangle(x: 50, y: 44, width: 120, height: 72, cornerRadius: 18)
+                )
+            )
+            .sketchRotation(.degrees(22), around: roundPivot)
+        }
+        .stickerBacking(
+            width: 11,
+            smoothness: 0.7,
+            edge: .torn(StickerTear(depth: 4, length: 10, jaggedness: 0)),
+            color: UIColor.white
+        )
+        .seed(41)
+        .sketchTransform(CGAffineTransform(translationX: 16, y: -8)),
+        canvas: CGSize(width: 300, height: 240),
+        input: .obj([
+            "kind": .string("group-torn"),
+            "seed": .u64(41),
+            "strokeWidth": .double(3),
+            "roughness": .double(0),
+            "width": .double(11),
+            "smoothness": .double(0.7),
+            "edge": .string("torn"),
+            "tearDepth": .double(4),
+            "tearLength": .double(10),
+            "tearJaggedness": .double(0),
+            "rotationDegrees": .double(22),
+            "rotationAnchor": numbers([110, 80]),
+            "groupTranslation": numbers([16, -8]),
+            "canvas": numbers([300, 240]),
+        ])
+    ))
 
     return .obj([
         "provenance": provenance.json(),
@@ -624,22 +718,45 @@ private func tornReconstruction(
     ]
 }
 
+private func ink(seed: UInt64, stroke: Float) -> RoughView {
+    RoughView()
+        .roughness(0)
+        .bowing(0)
+        .maxRandomnessOffset(0)
+        .strokeWidth(stroke)
+        .stroke(UIColor.black)
+        .fill(UIColor.black)
+        .seed(seed)
+}
+
 private func partJSON(_ part: SketchPart) -> J {
     let options = part.content.options
-    guard part.content.drawables.count == 1, let circle = part.content.drawables[0] as? Circle else {
-        FileHandle.standardError.write(Data("group-torn part is not a single circle\n".utf8))
+    guard part.content.drawables.count == 1 else {
+        FileHandle.standardError.write(Data("group-torn part does not have one drawable\n".utf8))
         exit(1)
     }
-    var row: [String: J] = [
-        "shape": .string("circle"),
-        "center": numbers([Double(circle.x), Double(circle.y)]),
-        "diameter": .double(Double(circle.diameter)),
-        "transform": matrixJSON(part.transform),
-        "strokeWidth": .double(Double(options.strokeWidth)),
-        "roughness": .double(Double(options.roughness)),
-        "bowing": .double(Double(options.bowing)),
-        "maxRandomnessOffset": .double(Double(options.maxRandomnessOffset)),
-    ]
+    let drawable = part.content.drawables[0]
+    var row: [String: J] = [:]
+    if let circle = drawable as? Circle {
+        row["shape"] = .string("circle")
+        row["center"] = numbers([Double(circle.x), Double(circle.y)])
+        row["diameter"] = .double(Double(circle.diameter))
+    } else if let rectangle = drawable as? Rectangle {
+        row["shape"] = .string("rectangle")
+        row["rect"] = numbers([Double(rectangle.x), Double(rectangle.y), Double(rectangle.width), Double(rectangle.height)])
+    } else if let rounded = drawable as? RoundedRectangle {
+        row["shape"] = .string("roundedRectangle")
+        row["rect"] = numbers([Double(rounded.x), Double(rounded.y), Double(rounded.width), Double(rounded.height)])
+        row["cornerRadius"] = .double(Double(rounded.cornerRadius))
+    } else {
+        FileHandle.standardError.write(Data("group-torn part shape \(drawable.method) is not recorded\n".utf8))
+        exit(1)
+    }
+    row["transform"] = matrixJSON(part.transform)
+    row["strokeWidth"] = .double(Double(options.strokeWidth))
+    row["roughness"] = .double(Double(options.roughness))
+    row["bowing"] = .double(Double(options.bowing))
+    row["maxRandomnessOffset"] = .double(Double(options.maxRandomnessOffset))
     if let seed = options.seed {
         row["seed"] = .u64(seed)
     }
