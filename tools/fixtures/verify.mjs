@@ -69,7 +69,7 @@ function verifyPhase3(dir) {
     const item = cases.find((entry) => entry.id === id);
     if (!item) continue;
     for (const key of ["parts", "groupTransform", "preSimplifyRings", "simplifyEpsilon", "offsetBeforeTear"]) {
-      if (item[key] == null) problems.push(`${id} is missing ${key}`);
+      if (item[key] === undefined || item[key] === null) problems.push(`${id} is missing ${key}`);
     }
     if (item.simplifyEpsilon !== 1.8) problems.push(`${id} simplifyEpsilon is not 1.8`);
     if (!Array.isArray(item.parts) || item.parts.length === 0) problems.push(`${id} has no parts`);
