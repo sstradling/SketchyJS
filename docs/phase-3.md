@@ -126,8 +126,8 @@ Overlapping squares are unioned in the silhouette, before the backing offset, so
 
 Seth's decisions, as implemented:
 
-- A bare `ImageBitmap`, `HTMLImageElement`, `HTMLCanvasElement`, `OffscreenCanvas`, or `VideoFrame` is a source. Its size comes from the object. The decoded object is kept on the layer, so `renderToCanvas` can draw it without an `images` entry. The `images` map still wins when it has the href.
-- Encoding uses `toDataURL` when the source has it, then a document canvas, then `OffscreenCanvas` when there is no document. The PNG data URL is cached on the source. Node, with neither canvas, throws `sticker-image-source`.
+- A bare `ImageBitmap`, `HTMLImageElement`, `HTMLCanvasElement`, `OffscreenCanvas`, or `VideoFrame` is a source. Its size comes from the object. The decoded object is kept on the layer as `DrawLayer.stickerImage.source`, so `renderToCanvas` can draw it without an `images` entry. That field is a live canvas or bitmap. It is not JSON-safe or structured-clone-safe. A scene that will be serialized should use `href` plus the `images` map. The `images` map still wins when it has the href.
+- Encoding uses `toDataURL` when the source has it, then a document canvas. The PNG data URL is cached on the source. `OffscreenCanvas` has no `toDataURL`, so it is not used to encode. In a worker or in Node, a bare `ImageBitmap` needs a pre-encoded data URL (`href` with width and height). An async encode path is a later phase. Without a document canvas, encoding throws `sticker-image-source`.
 - A bare `data:` string or href is refused unless it carries explicit width and height. There is no 1×1 default. `{ href, width, height }` and `renderToCanvas`'s `images` map still work.
 - SVG export embeds `data:image` URLs. A same-origin URL is written only when `allowSameOriginImages` is set. `blob:` and `file:` throw `sticker-image-source`, and `isStickerImageError` accepts that SVG error.
 - A tainted canvas throws `StickerImageError` with code `sticker-image-taint` from both `prepareImages` and `renderToCanvas`. The probe is cached per source.
@@ -151,6 +151,7 @@ Seth's decisions, as implemented:
 - Package versions are `0.0.0`. The Phase 1 and Phase 2 changesets that would have published `0.1.0` are gone. The publishable packages are one Changesets `fixed` group. The release PR sets `1.5.0` explicitly.
 - Plugin API examples in `docs/plugins.md` use `version: "1.0.0"` for a **plugin**, not for the package. That is the plugin API line and stays.
 - A torn group's tear can differ from a given Swift export. Swift's start vertex is `Dictionary` hash order and varies unless deterministic hashing is on. SketchyJS starts at the minimum point. Given that same start vertex, the outline matches.
+- A worker or Node has no synchronous PNG encode for a bare bitmap. `OffscreenCanvas` has no `toDataURL`. Pass a data URL with width and height, or wait for an async path.
 - Ink on a compound SVG path is still nonzero, so a blue fill covers a hole even when the paper punches it. The holes preview uses a clear fill so the hole shows. The image clip is even-odd, so a hole through the image stays empty.
 - One smooth corner on a ring used to collapse the sheet (Swift's `slice` returns that single point). The port walks the long way around. Fixtures have several corners and still match.
 - No browser timing for `clipper2-ts`. `clipper2-wasm` is not wired (the ADR leaves it optional).
@@ -159,7 +160,7 @@ Seth's decisions, as implemented:
 
 ## Tests
 
-`pnpm test`: **728** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
+`pnpm test`: **731** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
 
 ## Bundle size
 

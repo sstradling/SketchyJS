@@ -124,7 +124,7 @@ describe("resolveImagePlacement", () => {
       height: 4,
     });
     expect(() => resolveStickerImageSource({ width: 4, height: 4, close() {} })).toThrow(
-      /no document canvas and no OffscreenCanvas/,
+      /no document canvas is available/,
     );
   });
 
@@ -146,38 +146,34 @@ describe("resolveImagePlacement", () => {
     expect(calls).toBe(1);
   });
 
-  it("encodes an ImageBitmap with OffscreenCanvas when there is no document", () => {
+  it("does not encode an ImageBitmap from OffscreenCanvas", () => {
     const key = "OffscreenCanvas";
     const host = globalThis as Record<string, unknown>;
     const previous = host[key];
-    let drawn = 0;
+    let constructed = 0;
     class FakeOffscreen {
       width: number;
       height: number;
       constructor(width: number, height: number) {
+        constructed += 1;
         this.width = width;
         this.height = height;
       }
       getContext() {
-        return {
-          drawImage() {
-            drawn += 1;
-          },
-        };
+        return { drawImage() {} };
       }
-      toDataURL() {
-        return "data:image/png;base64,off";
+      convertToBlob() {
+        return Promise.resolve(new Blob());
       }
     }
     host[key] = FakeOffscreen;
     try {
       const bitmap = { width: 3, height: 5, close() {} };
-      expect(resolveStickerImageSource(bitmap)).toMatchObject({
-        href: "data:image/png;base64,off",
-        width: 3,
-        height: 5,
-      });
-      expect(drawn).toBe(1);
+      expect(() => resolveStickerImageSource(bitmap)).toThrow(/no document canvas is available/);
+      expect(constructed).toBe(0);
+      expect(
+        resolveStickerImageSource({ href: "data:image/png;base64,off", width: 3, height: 5 }),
+      ).toEqual({ href: "data:image/png;base64,off", width: 3, height: 5 });
     } finally {
       if (previous === undefined) delete host[key];
       else host[key] = previous;

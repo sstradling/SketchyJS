@@ -127,6 +127,29 @@ describe("SketchGroup", () => {
     expect(Math.max(...ys)).toBeGreaterThan(46);
   });
 
+  it("extends the sheet past both ends of an open stroke", () => {
+    const view = new RoughView()
+      .with({
+        seed: 1n,
+        strokeWidth: 8,
+        roughness: 0,
+        bowing: 0,
+        maxRandomnessOffset: 0,
+        fillColor: [0, 0, 0, 0],
+      })
+      .draw(line(20, 40, 120, 40));
+    const scene = new SketchGroup([view], { ...sheet, width: 6 }).build({
+      width: 200,
+      height: 120,
+    });
+    const paper = scene.nodes.flatMap(layersOf).find((layer) => layer.role === "sheet");
+    const xs = paper?.paths.flatMap((p) => p.flatMap((op) => (op.op === "Z" ? [] : [op.x]))) ?? [];
+    // Line runs 20..120. Each cap adds half the stroke (4) beyond the backing margin.
+    // Without the start cap the sheet stops at 14. Without the end cap it stops at 126.
+    expect(Math.min(...xs)).toBeLessThan(12);
+    expect(Math.max(...xs)).toBeGreaterThan(128);
+  });
+
   it("paints shadow, sheet, image, then fibers", () => {
     const href = "data:image/png;base64,aaaa";
     const backing = {

@@ -64,7 +64,12 @@ describe("sheet shadow opacity", () => {
     expect(pixel[0]).toBeGreaterThan(100);
   });
 
-  it("sets shadowBlur to 0 for a hard shadow", () => {
+  it("sets shadowBlur from a nonzero shadow radius", () => {
+    const drawn = scene();
+    const node = drawn.nodes[0];
+    if (node?.type === "drawing" && node.drawing.layers[0]?.shadow) {
+      node.drawing.layers[0].shadow = { x: 40, y: 0, radius: 8 };
+    }
     const recorded: number[] = [];
     const context = {
       canvas: { width: 80, height: 40 },
@@ -99,7 +104,7 @@ describe("sheet shadow opacity", () => {
       shadowOffsetX: 0,
       shadowOffsetY: 0,
     };
-    renderToCanvas(scene(), context, { background: "#ffffff" });
-    expect(recorded).toContain(0);
+    renderToCanvas(drawn, context, { background: "#ffffff" });
+    expect(recorded).toContain(8);
   });
 });

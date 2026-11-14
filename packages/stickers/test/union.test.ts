@@ -95,5 +95,37 @@ describe("silhouette union", () => {
     expect(quantizeToInt(-1.5, 1)).toBe(-2);
     expect(quantizeToInt(-0.1, 0.2)).toBe(-1);
     expect(quantizeToInt(0.1, 0.2)).toBe(1);
+    expect(quantizeToInt(-0.125, 0.25)).toBe(-1);
+  });
+
+  it("keeps a 0.1 pt chain tie in its own bucket", () => {
+    // x = -0.1 is the negative half of the 0.2 pt chain grid. Math.round puts it
+    // in the same bucket as 0 and drops this step.
+    const stepped = combineSilhouettes([
+      {
+        shape: 0,
+        isHole: false,
+        points: [
+          { x: -20, y: -10 },
+          { x: 20, y: -10 },
+          { x: 20, y: 10 },
+          { x: 0, y: 10 },
+          { x: 0, y: 9.8 },
+          { x: -0.1, y: 9.8 },
+          { x: -0.1, y: 10 },
+          { x: -20, y: 10 },
+        ],
+      },
+    ]);
+    expect(stepped).toHaveLength(1);
+    expect(stepped[0]!.points.some((point) => point.x === -0.1)).toBe(true);
+  });
+
+  it("keeps a 0.125 pt dedupe tie as its own edge", () => {
+    // x = -0.125 is the negative half of the 0.25 pt dedupe grid. Math.round
+    // treats that edge as a duplicate and the union disappears.
+    const shifted = combineSilhouettes([square(0, 0, 30, 20, 0), square(-0.125, 0, 30, 20, 1)]);
+    expect(shifted.filter((ring) => !ring.isHole)).toHaveLength(1);
+    expect(shifted.some((ring) => ring.points.some((point) => point.x === -0.125))).toBe(true);
   });
 });

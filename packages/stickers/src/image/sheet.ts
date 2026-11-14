@@ -65,21 +65,18 @@ function hostCanvas(width: number, height: number): HostCanvas | undefined {
   const host = globalThis as Record<string, unknown>;
   const document = host.document as { createElement?: (tag: string) => HostCanvas } | undefined;
   const fromDocument = document?.createElement?.("canvas");
-  if (fromDocument) {
-    fromDocument.width = width;
-    fromDocument.height = height;
-    return fromDocument;
-  }
-  const Offscreen = host.OffscreenCanvas as (new (w: number, h: number) => HostCanvas) | undefined;
-  if (typeof Offscreen === "function") return new Offscreen(width, height);
-  return undefined;
+  if (!fromDocument) return undefined;
+  fromDocument.width = width;
+  fromDocument.height = height;
+  return fromDocument;
 }
 
 /**
  * Draws a decoded image into a canvas and returns a PNG data URL.
- * A source with `toDataURL` is used directly. Otherwise this uses
- * `document.createElement("canvas")`, then `OffscreenCanvas` when there is
- * no document (workers). The URL is cached on the source object.
+ * A source with `toDataURL` is used directly. Otherwise this copies it onto
+ * a document canvas, which has `toDataURL`. `OffscreenCanvas` does not, so a
+ * worker or Node cannot encode a bare bitmap here. Pass `{ href, width, height }`
+ * instead. The URL is cached on the source object.
  */
 export function rasterDataUrl(source: object, width: number, height: number): string | undefined {
   const cached = encodedUrl.get(source);
@@ -154,7 +151,7 @@ export function resolveStickerImageSource(
   if (!href) {
     throw new StickerImageError(
       "sticker-image-source",
-      "cannot encode this sticker image: no document canvas and no OffscreenCanvas are available",
+      "cannot encode this sticker image: no document canvas is available; pass a data URL with width and height",
     );
   }
   return { href, width, height, source };
