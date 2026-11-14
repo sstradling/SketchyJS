@@ -9,6 +9,7 @@ import type {
 } from "@sketchy-js/types";
 import type {
   Canvas2D,
+  CanvasImageSourceLike,
   CanvasRenderOptions,
   CanvasSurfaceFactory,
   ImageDataLike,
@@ -409,6 +410,12 @@ function assertCanvasUntainted(source: unknown): void {
   }
 }
 
+function isDrawable(source: unknown): source is CanvasImageSourceLike {
+  if (!source || typeof source !== "object") return false;
+  const record = source as { width?: unknown; height?: unknown };
+  return typeof record.width === "number" && typeof record.height === "number";
+}
+
 function paintStickerImage(
   layer: DrawLayer,
   context: Canvas2D,
@@ -416,7 +423,9 @@ function paintStickerImage(
 ): void {
   const image = layer.stickerImage;
   if (!image) return;
-  const source = options.images?.[image.href];
+  const listed = image.href ? options.images?.[image.href] : undefined;
+  const carried = image.source;
+  const source = listed ?? (isDrawable(carried) ? carried : undefined);
   if (!source || !context.drawImage) {
     throw imageError(
       "sticker-image-source",

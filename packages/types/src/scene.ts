@@ -61,6 +61,11 @@ export interface DrawLayer {
     height: number;
     /** One copy's rectangle. Tiles repeat this size from the sheet bounds. */
     drawRect: { x: number; y: number; width: number; height: number };
+    /**
+     * The decoded image, when the caller passed one. `renderToCanvas` draws
+     * this if `images` has no entry for `href`. It is not part of the JSON scene.
+     */
+    source?: unknown;
   };
   clip?: ClipDescriptor;
   /**

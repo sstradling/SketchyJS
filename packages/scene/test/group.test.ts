@@ -164,6 +164,25 @@ describe("SketchGroup", () => {
     }
   });
 
+  it("places the shared sheet with the part transform before the group transform", () => {
+    const view = new RoughView()
+      .with({ seed: 1n, strokeWidth: 2, roughness: 0, bowing: 0, maxRandomnessOffset: 0 })
+      .draw(rectangle(0, 0, 10, 10));
+    const scene = new SketchGroup([new SketchPart(view).offset(10, 0)], sheet)
+      .transformBy([0, 1, -1, 0, 0, 0])
+      .build({ width: 80, height: 80 });
+    const ink = scene.nodes.flatMap(layersOf).find((layer) => layer.role === "stroke");
+    const points = ink?.paths.flatMap((p) =>
+      p.flatMap((op) => (op.op === "Z" ? [] : [[op.x, op.y] as const])),
+    );
+    expect(points?.some(([x, y]) => Math.abs(x + 10) < 1e-6 && Math.abs(y - 20) < 1e-6)).toBe(true);
+    const paper = scene.nodes.flatMap(layersOf).find((layer) => layer.role === "sheet");
+    const sheetPoints = paper?.paths.flatMap((p) =>
+      p.flatMap((op) => (op.op === "Z" ? [] : [[op.x, op.y] as const])),
+    );
+    expect(sheetPoints?.some(([x, y]) => x < -8 && y > 18)).toBe(true);
+  });
+
   it("applies a part transform before the group transform", () => {
     const view = new RoughView()
       .with({ seed: 1n, strokeWidth: 2, roughness: 0, bowing: 0, maxRandomnessOffset: 0 })

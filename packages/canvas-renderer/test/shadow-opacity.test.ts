@@ -63,4 +63,43 @@ describe("sheet shadow opacity", () => {
     expect(pixel[0]).toBeLessThan(160);
     expect(pixel[0]).toBeGreaterThan(100);
   });
+
+  it("sets shadowBlur to 0 for a hard shadow", () => {
+    const recorded: number[] = [];
+    const context = {
+      canvas: { width: 80, height: 40 },
+      save() {},
+      restore() {},
+      beginPath() {},
+      moveTo() {},
+      lineTo() {},
+      quadraticCurveTo() {},
+      bezierCurveTo() {},
+      closePath() {},
+      fill() {},
+      stroke() {},
+      clip() {},
+      setTransform() {},
+      transform() {},
+      fillRect() {},
+      fillStyle: "#000",
+      strokeStyle: "#000",
+      globalAlpha: 1,
+      lineWidth: 1,
+      lineCap: "butt" as const,
+      lineJoin: "miter" as const,
+      miterLimit: 10,
+      set shadowBlur(value: number) {
+        recorded.push(value);
+      },
+      get shadowBlur() {
+        return recorded.at(-1) ?? -1;
+      },
+      shadowColor: "",
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+    };
+    renderToCanvas(scene(), context, { background: "#ffffff" });
+    expect(recorded).toContain(0);
+  });
 });

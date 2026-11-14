@@ -118,14 +118,70 @@ describe("resolveImagePlacement", () => {
         return "data:image/png;base64,zz";
       },
     };
-    expect(resolveStickerImageSource(canvas)).toEqual({
+    expect(resolveStickerImageSource(canvas)).toMatchObject({
       href: "data:image/png;base64,zz",
       width: 8,
       height: 4,
     });
     expect(() => resolveStickerImageSource({ width: 4, height: 4, close() {} })).toThrow(
-      StickerImageError,
+      /no document canvas and no OffscreenCanvas/,
     );
+  });
+
+  it("reuses a cached PNG data URL for the same source", () => {
+    let calls = 0;
+    const canvas = {
+      width: 4,
+      height: 4,
+      getContext() {
+        return null;
+      },
+      toDataURL() {
+        calls += 1;
+        return "data:image/png;base64,zz";
+      },
+    };
+    expect(resolveStickerImageSource(canvas).href).toBe("data:image/png;base64,zz");
+    expect(resolveStickerImageSource(canvas).href).toBe("data:image/png;base64,zz");
+    expect(calls).toBe(1);
+  });
+
+  it("encodes an ImageBitmap with OffscreenCanvas when there is no document", () => {
+    const key = "OffscreenCanvas";
+    const host = globalThis as Record<string, unknown>;
+    const previous = host[key];
+    let drawn = 0;
+    class FakeOffscreen {
+      width: number;
+      height: number;
+      constructor(width: number, height: number) {
+        this.width = width;
+        this.height = height;
+      }
+      getContext() {
+        return {
+          drawImage() {
+            drawn += 1;
+          },
+        };
+      }
+      toDataURL() {
+        return "data:image/png;base64,off";
+      }
+    }
+    host[key] = FakeOffscreen;
+    try {
+      const bitmap = { width: 3, height: 5, close() {} };
+      expect(resolveStickerImageSource(bitmap)).toMatchObject({
+        href: "data:image/png;base64,off",
+        width: 3,
+        height: 5,
+      });
+      expect(drawn).toBe(1);
+    } finally {
+      if (previous === undefined) delete host[key];
+      else host[key] = previous;
+    }
   });
 
   it("tiles from the union of every ring", () => {

@@ -51,31 +51,53 @@ function dataUrlFrom(source: object): string | undefined {
   return typeof url === "string" && url.startsWith("data:image/") ? url : undefined;
 }
 
+type HostCanvas = {
+  width: number;
+  height: number;
+  getContext?: (kind: string) => { drawImage?: (...args: unknown[]) => void } | null;
+  toDataURL?: (type?: string) => string;
+};
+
+/** One PNG data URL per source object. Rebuilding a frame must not re-encode. */
+const encodedUrl = new WeakMap<object, string>();
+
+function hostCanvas(width: number, height: number): HostCanvas | undefined {
+  const host = globalThis as Record<string, unknown>;
+  const document = host.document as { createElement?: (tag: string) => HostCanvas } | undefined;
+  const fromDocument = document?.createElement?.("canvas");
+  if (fromDocument) {
+    fromDocument.width = width;
+    fromDocument.height = height;
+    return fromDocument;
+  }
+  const Offscreen = host.OffscreenCanvas as (new (w: number, h: number) => HostCanvas) | undefined;
+  if (typeof Offscreen === "function") return new Offscreen(width, height);
+  return undefined;
+}
+
 /**
  * Draws a decoded image into a canvas and returns a PNG data URL.
- * Browsers supply `document`. A source with `toDataURL` is used directly.
+ * A source with `toDataURL` is used directly. Otherwise this uses
+ * `document.createElement("canvas")`, then `OffscreenCanvas` when there is
+ * no document (workers). The URL is cached on the source object.
  */
 export function rasterDataUrl(source: object, width: number, height: number): string | undefined {
+  const cached = encodedUrl.get(source);
+  if (cached) return cached;
   const direct = dataUrlFrom(source);
-  if (direct) return direct;
-  const document = (globalThis as { document?: { createElement?: (tag: string) => unknown } })
-    .document;
-  const canvas = document?.createElement?.("canvas") as
-    | {
-        width: number;
-        height: number;
-        getContext?: (kind: string) => { drawImage?: (...args: unknown[]) => void } | null;
-        toDataURL?: (type?: string) => string;
-      }
-    | undefined;
-  if (!canvas?.getContext || !canvas.toDataURL) return undefined;
-  canvas.width = width;
-  canvas.height = height;
+  const drawn = direct ?? dataUrlFrom(paintHost(source, width, height) ?? {});
+  if (!drawn) return undefined;
+  encodedUrl.set(source, drawn);
+  return drawn;
+}
+
+function paintHost(source: object, width: number, height: number): HostCanvas | undefined {
+  const canvas = hostCanvas(width, height);
+  if (!canvas?.getContext) return undefined;
   const context = canvas.getContext("2d");
   if (!context?.drawImage) return undefined;
   context.drawImage(source, 0, 0, width, height);
-  const url = canvas.toDataURL("image/png");
-  return url.startsWith("data:image/") ? url : undefined;
+  return canvas;
 }
 
 /**
@@ -86,7 +108,7 @@ export function rasterDataUrl(source: object, width: number, height: number): st
 export function resolveStickerImageSource(
   source: unknown,
   allowSameOrigin = false,
-): { href: string; width: number; height: number } {
+): { href: string; width: number; height: number; source?: object } {
   if (typeof source === "string") {
     throw new StickerImageError(
       "sticker-image-source",
@@ -132,10 +154,10 @@ export function resolveStickerImageSource(
   if (!href) {
     throw new StickerImageError(
       "sticker-image-source",
-      "decoded sticker image has no data URL; pass a canvas with toDataURL or a data URL and size",
+      "cannot encode this sticker image: no document canvas and no OffscreenCanvas are available",
     );
   }
-  return { href, width, height };
+  return { href, width, height, source };
 }
 
 /** Union of the sheet paths. Tiles start at this box, not at each ring. */
@@ -207,6 +229,7 @@ export function appendStickerImage(
       width: size.width,
       height: size.height,
       drawRect: placed.drawRect,
+      ...(size.source ? { source: size.source } : {}),
     },
   };
   const textureAt = layers.findIndex((layer) => layer.role === "texture");

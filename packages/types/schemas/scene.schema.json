@@ -383,6 +383,9 @@
               ],
               "additionalProperties": false,
               "description": "One copy's rectangle. Tiles repeat this size from the sheet bounds."
+            },
+            "source": {
+              "description": "The decoded image, when the caller passed one. `renderToCanvas` draws this if `images` has no entry for `href`. It is not part of the JSON scene."
             }
           },
           "required": [

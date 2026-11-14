@@ -112,7 +112,9 @@ function stickerImage(
   clipAttrs: Record<string, string>,
 ): SvgElement {
   const image = layer.stickerImage;
-  const href = image ? svgImageHref(image.href, options.allowSameOriginImages, options.images) : "";
+  const href = image
+    ? svgImageHref(image.href, options.allowSameOriginImages, options.images, image.source)
+    : "";
   if (!image || !href) {
     throw svgImageError(
       "sticker-image-source",
@@ -172,9 +174,10 @@ function svgImageHref(
   href: string,
   allowSameOrigin: boolean,
   images: Readonly<Record<string, unknown>> | undefined,
+  carried: unknown,
 ): string {
   if (href.startsWith("data:image/")) return href;
-  const embedded = dataUrlOf(images?.[href]);
+  const embedded = dataUrlOf(href ? images?.[href] : undefined) ?? dataUrlOf(carried);
   if (embedded) return embedded;
   if (href.startsWith("blob:") || href.startsWith("file:")) {
     throw svgImageError(

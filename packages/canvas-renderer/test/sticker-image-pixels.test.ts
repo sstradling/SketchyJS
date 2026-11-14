@@ -1,6 +1,6 @@
 import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { describe, expect, it } from "vitest";
-import { rectangle } from "@sketchy-js/core";
+import { line, rectangle } from "@sketchy-js/core";
 import { RoughView } from "@sketchy-js/scene/basic";
 import { buildStickerScene } from "@sketchy-js/scene/stickers";
 import { isStickerImageError } from "@sketchy-js/stickers/image";
@@ -42,6 +42,73 @@ const box = (x: number, y: number, w: number, h: number): Path => [
 ];
 
 describe("sticker image pixels", () => {
+  it("draws a bare canvas carried on the layer without an images map", () => {
+    const source = createCanvas(8, 8);
+    source.getContext("2d").fillStyle = "#1d4e89";
+    source.getContext("2d").fillRect(0, 0, 8, 8);
+    const sheet = box(4, 4, 24, 16);
+    const scene: Scene = {
+      version: 1,
+      size: { width: 40, height: 30 },
+      nodes: [
+        {
+          type: "drawing",
+          drawing: {
+            shape: "rectangle",
+            outline: [],
+            layers: [
+              {
+                role: "sticker-image",
+                paths: [sheet],
+                fillRule: "evenodd",
+                paint: { kind: "solid", color: [0, 0, 0, 0] },
+                clip: { paths: [sheet], fillRule: "evenodd" },
+                stickerImage: {
+                  href: "",
+                  placement: "stretch",
+                  scale: 1,
+                  opacity: 1,
+                  width: 8,
+                  height: 8,
+                  drawRect: { x: 4, y: 4, width: 24, height: 16 },
+                  source,
+                },
+              },
+            ],
+          },
+        },
+      ],
+    };
+    const pixel = paint(scene, {}).getImageData(10, 10, 1, 1).data;
+    expect(pixel[2]).toBeGreaterThan(100);
+    expect(pixel[0]).toBeLessThan(80);
+  });
+
+  it("paints the open-ribbon round cap before the line start", () => {
+    const view = new RoughView()
+      .with({
+        seed: 42n,
+        strokeWidth: 3,
+        roughness: 0,
+        bowing: 0,
+        maxRandomnessOffset: 0,
+        fillColor: [0, 0, 0, 0],
+        stickerBacking: {
+          width: 10,
+          smoothness: 0.2,
+          edge: "smooth",
+          color: [1, 1, 1, 1],
+        },
+      })
+      .draw(line(20, 60, 190, 64));
+    const scene = buildStickerScene(view.registry(), view.contents(), { width: 220, height: 120 });
+    const context = paint(scene, {});
+    const cap = context.getImageData(10, 60, 1, 1).data;
+    const outside = context.getImageData(4, 20, 1, 1).data;
+    expect(cap[0]).toBeGreaterThan(240);
+    expect(outside[0]).toBeLessThan(230);
+  });
+
   it("throws a cached taint error from renderToCanvas", () => {
     let reads = 0;
     const tainted = {

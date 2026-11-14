@@ -105,7 +105,7 @@ The group contour is one closed cycle. Swift chains it from a `Dictionary`, and 
 | `image-hole` | Fully smooth holed sheet, plus a tile command at 24 pt | within 1e-4 |
 | `group-torn` | Circles at (70, 70), diameters 70 and 56, second moved by (36, 8). Epsilon 1.8 | within 1e-4 |
 
-`group-torn` is two circles centered at (70, 70), diameters 70 and 56, the second translated by (36, 8). The parity test builds that group. The pre-simplify union is 111 points in Swift's order (`startIndex` 0), Douglas–Peucker at epsilon 1.8 produces the 21-point centerline, and `offsetClosed` at distance 12 matches `offsetBeforeTear`. Epsilon 0.9 does not reproduce that centerline.
+`group-torn` is two circles centered at (70, 70), diameters 70 and 56, the second translated by (36, 8). The parity test builds that group. The pre-simplify union is 111 points and, for this one sample, starts at the maximum-x vertex (`startIndex` 0 in the file means the array is stored from that vertex, not that every torn group starts there). Douglas–Peucker at epsilon 1.8 produces the 21-point centerline, and `offsetClosed` at distance 12 matches `offsetBeforeTear`. Epsilon 0.9 does not reproduce that centerline. More torn groups are still needed before treating maximum-x as Swift's rule.
 
 Overlapping squares are unioned in the silhouette, before the backing offset, so the shared region is one ring and stays filled. Corner-sharing squares stay two rings. Their offset margins overlap, and the exported fill rule is even-odd, so that lens is open in Swift's path as well. The port matches that path. It does not merge those offset rings into one contour.
 
@@ -115,7 +115,8 @@ Overlapping squares are unioned in the silhouette, before the backing offset, so
 
 Seth's decisions, as implemented:
 
-- A bare `ImageBitmap`, `HTMLImageElement`, `HTMLCanvasElement`, `OffscreenCanvas`, or `VideoFrame` is a source. Its size comes from the object. A canvas with `toDataURL` is embedded as a PNG data URL. A bitmap that cannot be serialized throws `sticker-image-source`.
+- A bare `ImageBitmap`, `HTMLImageElement`, `HTMLCanvasElement`, `OffscreenCanvas`, or `VideoFrame` is a source. Its size comes from the object. The decoded object is kept on the layer, so `renderToCanvas` can draw it without an `images` entry. The `images` map still wins when it has the href.
+- Encoding uses `toDataURL` when the source has it, then a document canvas, then `OffscreenCanvas` when there is no document. The PNG data URL is cached on the source. Node, with neither canvas, throws `sticker-image-source`.
 - A bare `data:` string or href is refused unless it carries explicit width and height. There is no 1×1 default. `{ href, width, height }` and `renderToCanvas`'s `images` map still work.
 - SVG export embeds `data:image` URLs. A same-origin URL is written only when `allowSameOriginImages` is set. `blob:` and `file:` throw `sticker-image-source`, and `isStickerImageError` accepts that SVG error.
 - A tainted canvas throws `StickerImageError` with code `sticker-image-taint` from both `prepareImages` and `renderToCanvas`. The probe is cached per source.
@@ -146,17 +147,17 @@ Seth's decisions, as implemented:
 
 ## Tests
 
-`pnpm test`: **718** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
+`pnpm test`: **724** tests, 45 files. That includes the Phase 0–2 suites and the check that `StickerImageError` is only in the image build.
 
 ## Bundle size
 
-`pnpm size`, minified gzip. The basic SVG scene stays under its 42 KB ceiling (32.0 KB). The stickers entry does not include Clipper.
+`pnpm size`, minified gzip. The basic SVG scene stays under its 42 KB ceiling (32.3 KB). The stickers entry does not include Clipper.
 
 | Entry | Gzip | Ceiling |
 | --- | --- | --- |
 | `@sketchy-js/stickers` (sheet, edges, paper, group union) | 15.3 KB | 18 KB |
 | `@sketchy-js/stickers/image` | 0.5 KB | none (placement helper; the scene entry pulls the image module) |
-| sticker scene (`scene/stickers` + sheets + image) | 33.9 KB | 65 KB |
+| sticker scene (`scene/stickers` + sheets + image) | 34.0 KB | 65 KB |
 | `@sketchy-js/stickers/clipper` | 17.1 KB | 22 KB |
 
 ## Previews
