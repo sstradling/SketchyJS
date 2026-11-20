@@ -146,8 +146,7 @@ export function defineSketchyElement(
 ): void {
   const discovered = globalThis.HTMLElement;
   const Base: HostConstructor | undefined =
-    ElementBase ??
-    (typeof discovered === "function" ? discovered : undefined);
+    ElementBase ?? (typeof discovered === "function" ? discovered : undefined);
   if (!Base) {
     throw new Error(
       "defineSketchyElement needs HTMLElement. In Node, pass the window's HTMLElement from happy-dom or jsdom.",
