@@ -1,11 +1,14 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { circle, type Shape } from "@sketchy-js/core";
+import { circle, roundedRectangle, type Shape } from "@sketchy-js/core";
 import { crayon } from "@sketchy-js/brushes";
 import { contour, wash } from "@sketchy-js/fills";
 import type { Color, DrawLayer, InteriorShade, SceneNode } from "@sketchy-js/types";
+import { closeRingContours } from "./support/close-ring.js";
+import { assembleDrawing } from "../src/assemble.js";
 import { basicSketchy } from "../src/basic.js";
+import { applyCrayon } from "../src/brush-host.js";
 import { sketchScene } from "../src/functional.js";
 import { edgeShade, halo, pitRecess, pitShadow } from "../src/shades.js";
 import { toFixtureOps } from "./support/compare-sets.js";
@@ -241,7 +244,7 @@ describe("v1.6.0 closed rings", () => {
     });
   });
 
-  it("is ready for closed rings whose path contains an explicit Z", () => {
+  it("leaves the unclosed closed-width.json case list unchanged", () => {
     const known = new Set([
       "width-samples-stops",
       "width-samples-variable",
@@ -250,11 +253,234 @@ describe("v1.6.0 closed rings", () => {
       "closed-crayon-ring",
       "closed-ring-same-seed",
     ]);
-    const extra = doc.cases.map((entry) => entry.id).filter((id) => !known.has(id));
-    expect(
-      extra,
-      "A Mac export added closed-width cases. Wire each id through ribbon() or the crayon comparison.",
-    ).toEqual([]);
+    expect(doc.cases.map((entry) => entry.id)).toEqual([...known]);
+  });
+});
+
+describe("v1.6.0 closed rings with an explicit Z", () => {
+  const doc = read<{
+    cases: {
+      id: string;
+      commands?: Command[];
+      first?: Command[];
+      second?: Command[];
+      identical?: boolean;
+      sets?: { type: string; ops: FixtureOp[] }[];
+    }[];
+  }>("strokes/closed-width-z.json");
+  const size = { width: 160, height: 160 };
+  const ring = circle(80, 80, 100);
+  const rounded = roundedRectangle(24, 28, 112, 84, 18);
+
+  function closedDrawing(shape: Shape, raw: Record<string, unknown>) {
+    const drawing = generateFixtureDrawing(shape, raw);
+    expect(drawing, "drawing").toBeDefined();
+    return {
+      ...drawing!,
+      sets: drawing!.sets.map((set) =>
+        set.type === "path" ? { ...set, ops: closeRingContours(set.ops) } : set,
+      ),
+    };
+  }
+
+  const stopsProfile = { ...roundBrush, thicknessProfile: stops };
+  const markerProfile = {
+    tip: { roundness: 0.2, angle: 0, directionSensitive: true },
+    thicknessProfile: {
+      kind: "variable" as const,
+      width: {
+        variation: 0.35,
+        taperStart: 0,
+        taperEnd: 0,
+        pressure: [] as number[],
+        seed: 9,
+        frequency: 3,
+      },
+    },
+    cap: "butt" as const,
+    join: "bevel" as const,
+    opacityProfile: { kind: "uniform" as const },
+  };
+  function crayonProfile(seed: bigint) {
+    return {
+      ...roundBrush,
+      crayon: {
+        grain: 0.28,
+        edgeRoughness: 0.75,
+        widthVariation: 0.18,
+        opacityVariation: 0.35,
+        passes: 2,
+        baseOpacity: 0.8,
+        baseSoftness: 0.5,
+        grit: 0.92,
+        flakeSize: 1.45,
+        seed,
+      },
+      thicknessProfile: {
+        kind: "variable" as const,
+        width: {
+          variation: 0.35,
+          taperStart: 0,
+          taperEnd: 0,
+          pressure: [] as number[],
+          seed: Number(seed),
+          frequency: 3,
+        },
+      },
+    };
+  }
+
+  function layersFor(shape: Shape, raw: Record<string, unknown>, keepInvisible = false) {
+    const drawing = closedDrawing(shape, raw);
+    const assembled = assembleDrawing(drawing, size);
+    if (!raw.brushProfile || !(raw.brushProfile as { crayon?: unknown }).crayon)
+      return assembled.layers;
+    const crayon = registry.resolveSpec("brush", {
+      kind: "crayon",
+      grain: 0.28,
+      edgeRoughness: 0.75,
+      widthVariation: 0.18,
+      opacityVariation: 0.35,
+      passes: 2,
+      baseOpacity: 0.8,
+      baseSoftness: 0.5,
+      grit: 0.92,
+      flakeSize: 1.45,
+    });
+    return applyCrayon(assembled, crayon, drawing.options, keepInvisible).layers;
+  }
+
+  function expectCommands(layers: readonly DrawLayer[], commands: Command[], id: string) {
+    expect(layers.length, id).toBe(commands.length);
+    layers.forEach((layer, index) => {
+      const command = commands[index]!;
+      expectClose(toFixtureOps(layer.paths.flat()), command.path, `${id} command ${index}`);
+      if (command.style === "fill" && command.fillRule === "winding") {
+        expect(layer.fillRule, `${id} ${index}`).toBe("nonzero");
+      }
+      if (layer.paint.kind === "solid" && typeof layer.paint.color !== "string") {
+        const paint = rgba(layer.paint.color);
+        const alpha = (layer.paint.alpha ?? 1) * paint.a;
+        expect(Math.abs(alpha - command.color.a), `${id} alpha ${index}`).toBeLessThanOrEqual(
+          TOLERANCE,
+        );
+      }
+    });
+  }
+
+  it.each([
+    [
+      "closed-z-ring-stops",
+      ring,
+      {
+        seed: 9n,
+        roughness: 0.25,
+        strokeWidth: 8,
+        strokeColor: [0, 0, 0, 1],
+        brushProfile: stopsProfile,
+      },
+    ],
+    [
+      "closed-z-ring-variable",
+      ring,
+      {
+        seed: 9n,
+        roughness: 0.25,
+        strokeWidth: 8,
+        strokeColor: [0, 0, 0, 1],
+        brushProfile: markerProfile,
+      },
+    ],
+    [
+      "closed-z-rounded-rect-stops",
+      rounded,
+      {
+        seed: 17n,
+        roughness: 0.25,
+        strokeWidth: 8,
+        strokeColor: [0, 0, 0, 1],
+        brushProfile: stopsProfile,
+      },
+    ],
+  ] as const)("%s", (id, shape, raw) => {
+    const item = doc.cases.find((entry) => entry.id === id)!;
+    const drawing = closedDrawing(shape, raw);
+    expect(drawing.sets.length, id).toBe(item.sets!.length);
+    drawing.sets.forEach((set, index) => {
+      expect(set.type, `${id} set ${index}`).toBe(item.sets![index]!.type);
+      expectClose(toFixtureOps(set.ops), item.sets![index]!.ops, `${id} set ${index}`);
+    });
+    expectCommands(layersFor(shape, raw), item.commands!, id);
+  });
+
+  it("closed-z-crayon-ring keeps the invisible fill wax and the closed stroke wax", () => {
+    const item = doc.cases.find((entry) => entry.id === "closed-z-crayon-ring")!;
+    const raw = {
+      seed: 11n,
+      roughness: 0.2,
+      strokeWidth: 12,
+      strokeColor: [0, 0, 0, 1],
+      keepInvisibleCrayonLayers: true,
+      brushProfile: crayonProfile(11n),
+    };
+    const drawing = closedDrawing(ring, raw);
+    expect(drawing.sets.length).toBe(item.sets!.length);
+    drawing.sets.forEach((set, index) => {
+      expectClose(
+        toFixtureOps(set.ops),
+        item.sets![index]!.ops,
+        `closed-z-crayon-ring set ${index}`,
+      );
+    });
+    expectCommands(layersFor(ring, raw, true), item.commands!, item.id);
+  });
+
+  it("closed-z-crayon-fill waxes the real fill and the closed stroke without the parity flag", () => {
+    const item = doc.cases.find((entry) => entry.id === "closed-z-crayon-fill")!;
+    const raw = {
+      seed: 13n,
+      roughness: 0.2,
+      bowing: 0,
+      strokeWidth: 12,
+      strokeColor: [0, 0, 0, 1],
+      fillStyle: "solid",
+      fillColor: [0.86, 0.33, 0.18, 1],
+      brushProfile: crayonProfile(13n),
+    };
+    const drawing = closedDrawing(ring, raw);
+    drawing.sets.forEach((set, index) => {
+      expectClose(
+        toFixtureOps(set.ops),
+        item.sets![index]!.ops,
+        `closed-z-crayon-fill set ${index}`,
+      );
+    });
+    expectCommands(layersFor(ring, raw, false), item.commands!, item.id);
+  });
+
+  it("closed-z-ring-same-seed repeats the closed ribbon", () => {
+    const item = doc.cases.find((entry) => entry.id === "closed-z-ring-same-seed")!;
+    expect(item.identical).toBe(true);
+    const raw = {
+      seed: 21n,
+      roughness: 0.3,
+      strokeWidth: 8,
+      strokeColor: [0, 0, 0, 1],
+      brushProfile: stopsProfile,
+    };
+    const drawing = closedDrawing(ring, raw);
+    drawing.sets.forEach((set, index) => {
+      expectClose(
+        toFixtureOps(set.ops),
+        item.sets![index]!.ops,
+        `closed-z-ring-same-seed set ${index}`,
+      );
+    });
+    const first = layersFor(ring, raw);
+    const second = layersFor(ring, raw);
+    expect(JSON.stringify(first)).toBe(JSON.stringify(second));
+    expectCommands(first, item.first!, item.id);
+    expectCommands(second, item.second!, `${item.id} second`);
   });
 });
 

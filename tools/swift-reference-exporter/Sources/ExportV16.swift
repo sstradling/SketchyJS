@@ -15,6 +15,7 @@ func exportVersionFeatures(to directory: String, provenance: Provenance) throws 
     try write(washDocument(provenance), to: "fills/wash.json", in: directory)
     try write(try interiorDocument(provenance, directory: directory), to: "fills/interior-shades.json", in: directory)
     try write(closedWidthDocument(provenance), to: "strokes/closed-width.json", in: directory)
+    try write(closedWidthZDocument(provenance), to: "strokes/closed-width-z.json", in: directory)
     try write(try silhouetteDocument(provenance, directory: directory), to: "stickers/silhouette-shadow.json", in: directory)
 }
 
@@ -715,6 +716,135 @@ private func ringCase(_ id: String, _ view: RoughView, _ drawable: Drawable, _ c
 }
 
 @MainActor
+/// `Circle` outlines omit `closeSubpath`. Insert one `Close` on each outline
+/// subpath before rendering, matching `tools/swift-reference-exporter/close-ring.mjs`.
+/// Rounded rectangles already close, so a second `Close` is not added.
+private func closeSubpaths(_ operations: [Operation]) -> [Operation] {
+    var result: [Operation] = []
+    var open = false
+    for operation in operations {
+        if operation is Move, open {
+            result.append(Close())
+            open = false
+        }
+        result.append(operation)
+        if operation is Move { open = true }
+        if operation is Close { open = false }
+    }
+    if open { result.append(Close()) }
+    return result
+}
+
+private func closeRingContours(_ drawing: Drawing) -> Drawing {
+    let sets = drawing.sets.map { set -> OperationSet in
+        guard set.type == .path else { return set }
+        return OperationSet(
+            type: set.type,
+            operations: closeSubpaths(set.operations),
+            path: set.path,
+            size: set.size,
+            fillLineScale: set.fillLineScale,
+            fillLineWidth: set.fillLineWidth,
+            opacityScale: set.opacityScale
+        )
+    }
+    return Drawing(shape: drawing.shape, sets: sets, options: drawing.options)
+}
+
+@MainActor
+private func closedWidthZDocument(_ provenance: Provenance) -> J {
+    let canvas = CGSize(width: 160, height: 160)
+    let circle = Circle(x: 80, y: 80, diameter: 100)
+    let rounded = RoundedRectangle(x: 24, y: 28, width: 112, height: 84, cornerRadius: 18)
+    let variable = { (seed: UInt64) in
+        VariableStrokeWidth(variation: 0.35, seed: seed, frequency: 3)
+    }
+    return withProvenance(provenance, [
+        "cases": .array([
+            closedRingCase(
+                "closed-z-ring-stops",
+                RoughView().seed(9).roughness(0.25).strokeWidth(8).stroke(Color.black).widthStops(ringStops),
+                circle, canvas
+            ),
+            closedRingCase(
+                "closed-z-ring-variable",
+                RoughView().seed(9).roughness(0.25).strokeWidth(8).stroke(Color.black)
+                    .brushProfile(.marker(variation: 0.35, seed: 9, frequency: 3)),
+                circle, canvas
+            ),
+            closedRingCase(
+                "closed-z-crayon-ring",
+                RoughView().seed(11).roughness(0.2).strokeWidth(12).stroke(Color.black)
+                    .brushProfile(.crayon)
+                    .thicknessProfile(.variable(variable(11))),
+                circle, canvas
+            ),
+            closedSameSeedCase(circle, canvas),
+            closedRingCase(
+                "closed-z-rounded-rect-stops",
+                RoughView().seed(17).roughness(0.25).strokeWidth(8).stroke(Color.black).widthStops(ringStops),
+                rounded, canvas
+            ),
+            closedRingCase(
+                "closed-z-crayon-fill",
+                RoughView().seed(13).roughness(0.2).bowing(0).strokeWidth(12).stroke(Color.black)
+                    .fill(Color(red: 0.86, green: 0.33, blue: 0.18))
+                    .fillStyle(.solid)
+                    .brushProfile(.crayon)
+                    .thicknessProfile(.variable(variable(13))),
+                circle, canvas
+            ),
+        ]),
+    ])
+}
+
+@MainActor
+private func closedRingCase(_ id: String, _ view: RoughView, _ drawable: Drawable, _ canvas: CGSize) -> J {
+    let drawn = view.draw(drawable)
+    guard let generated = NativeGenerator(size: canvas).generate(drawable: drawable, options: drawn.options) else {
+        return .obj(["id": .string(id), "drawing": .null])
+    }
+    let drawing = closeRingContours(generated)
+    let commands = SwiftUIRenderer().commands(for: drawing, options: drawn.options, in: canvas)
+    return .obj([
+        "id": .string(id),
+        "seed": drawn.options.seed.map { .u64($0) } ?? .null,
+        "strokeWidth": .float(drawn.options.strokeWidth),
+        "sets": .array(drawing.sets.map(setJSON)),
+        "order": orderJSON(commands),
+        "commands": .array(commands.map(commandJSON)),
+    ])
+}
+
+@MainActor
+private func closedSameSeedCase(_ drawable: Drawable, _ canvas: CGSize) -> J {
+    let view = RoughView()
+        .seed(21)
+        .roughness(0.3)
+        .strokeWidth(8)
+        .stroke(Color.black)
+        .widthStops(ringStops)
+        .draw(drawable)
+    func once() -> (Drawing?, J) {
+        guard let generated = NativeGenerator(size: canvas).generate(drawable: drawable, options: view.options) else {
+            return (nil, .null)
+        }
+        let drawing = closeRingContours(generated)
+        let commands = SwiftUIRenderer().commands(for: drawing, options: view.options, in: canvas)
+        return (drawing, .array(commands.map(commandJSON)))
+    }
+    let (firstDrawing, first) = once()
+    let (_, second) = once()
+    return .obj([
+        "id": .string("closed-z-ring-same-seed"),
+        "seed": .u64(21),
+        "identical": .bool(first.render() == second.render()),
+        "sets": firstDrawing.map { .array($0.sets.map(setJSON)) } ?? .null,
+        "first": first,
+        "second": second,
+    ])
+}
+
 private func sameSeedCase(_ drawable: Drawable, _ canvas: CGSize) -> J {
     let view = RoughView()
         .seed(21)

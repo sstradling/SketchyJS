@@ -29,6 +29,8 @@ The build target is `$(uname -m)-apple-ios17.0-simulator`. The committed fixture
 
 The provenance strings passed into the binary are the ones recorded in the committed file. They are labels. The geometry comes from the pinned Sketchy sources and the simulator frameworks.
 
+`strokes/closed-width-z.json` is the closed-width cases after `closeRingContours`. Swift `Circle` does not emit `closeSubpath`, so each outline subpath gets one `Close` before the renderer runs. Rounded rectangles already close. The same step is `close-ring.mjs`. A future `export.sh` writes that file from `closedWidthZDocument`. Do not edit the committed JSON by hand.
+
 ## Where the union ring starts
 
 `SilhouetteUnion.chain` is what chooses the first vertex. It does not search for the maximum x.
