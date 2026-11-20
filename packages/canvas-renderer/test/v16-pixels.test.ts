@@ -12,12 +12,17 @@ import {
   type SilhouetteImage,
 } from "@sketchy-js/scene/silhouette";
 import type { Color, InteriorShade, SilhouetteShadowDraw } from "@sketchy-js/types";
+import { Resvg } from "@resvg/resvg-js";
+import { renderToSvgString } from "@sketchy-js/svg-renderer";
 import { renderToCanvas, type Canvas2D, type CanvasSurfaceFactory } from "../src/index.js";
 
 /**
  * Swift PNGs cover what a path cannot: shade blur and a tinted silhouette.
- * The limit is the one in docs/visual-review.md (delta 24, 20%). Geometry is
+ * The limit is the one in docs/visual-review.md (delta 12, 6%). Geometry is
  * checked separately at 1e-4. This file does not widen that limit.
+ *
+ * SVG `stdDeviation` is the shade blur. Canvas `shadowBlur` is twice that,
+ * because the canvas shadow sigma is about `shadowBlur / 2`.
  */
 
 const root = fileURLToPath(new URL("../../../fixtures/swift-reference/v1.6.0/", import.meta.url));
@@ -105,18 +110,74 @@ function shadeScene(id: string) {
   });
 }
 
+function svgPixels(
+  scene: Parameters<typeof renderToCanvas>[0],
+  background: Color,
+): Uint8ClampedArray {
+  const svg = renderToSvgString(scene, { background });
+  const rendered = new Resvg(svg, {
+    fitTo: { mode: "width", value: scene.size.width },
+  }).render();
+  return new Uint8ClampedArray(rendered.pixels);
+}
+
+function scaleBlur(scene: Parameters<typeof renderToCanvas>[0], factor: number) {
+  return {
+    ...scene,
+    nodes: scene.nodes.map((node) => {
+      if (node.type !== "drawing") return node;
+      return {
+        ...node,
+        drawing: {
+          ...node.drawing,
+          layers: node.drawing.layers.map((layer) =>
+            layer.shade && "blur" in layer.shade
+              ? { ...layer, shade: { ...layer.shade, blur: layer.shade.blur * factor } }
+              : layer,
+          ),
+        },
+      };
+    }),
+  };
+}
+
 describe("v1.6.0 shade and silhouette pixels", () => {
   const beige: Color = [0.96, 0.93, 0.88, 1];
 
   it.each(["shade-pit-shadow", "shade-pit-recess", "shade-edge", "shade-halo", "shade-hole"])(
-    "%s stays within the blur allowance",
+    "%s canvas stays within the blur allowance",
     async (id) => {
       const ref = await reference(`images/shades/${id}.png`);
-      const actual = paint(shadeScene(id), id === "shade-hole" ? SWIFT_BLUE : beige);
-      const share = fraction(actual, ref.data);
-      expect(share, `${id} differing fraction ${share}`).toBeLessThanOrEqual(MAX_FRACTION);
+      const background = id === "shade-hole" ? SWIFT_BLUE : beige;
+      const share = fraction(paint(shadeScene(id), background), ref.data);
+      expect(share, `${id} canvas fraction ${share}`).toBeLessThanOrEqual(MAX_FRACTION);
     },
   );
+
+  it.each(["shade-pit-shadow", "shade-pit-recess", "shade-edge", "shade-halo", "shade-hole"])(
+    "%s SVG stays within the blur allowance",
+    async (id) => {
+      const ref = await reference(`images/shades/${id}.png`);
+      const background = id === "shade-hole" ? SWIFT_BLUE : beige;
+      const share = fraction(svgPixels(shadeScene(id), background), ref.data);
+      expect(share, `${id} svg fraction ${share}`).toBeLessThanOrEqual(MAX_FRACTION);
+    },
+  );
+
+  it("rejects a pit shadow at half or double the chosen sigma", async () => {
+    const ref = await reference("images/shades/shade-pit-shadow.png");
+    const scene = shadeScene("shade-pit-shadow");
+    const gate = 0.03;
+    const canvasAt = (factor: number) => fraction(paint(scaleBlur(scene, factor), beige), ref.data);
+    const svgAt = (factor: number) =>
+      fraction(svgPixels(scaleBlur(scene, factor), beige), ref.data);
+    expect(canvasAt(1)).toBeLessThanOrEqual(gate);
+    expect(canvasAt(0.5)).toBeGreaterThan(gate);
+    expect(canvasAt(2)).toBeGreaterThan(gate);
+    expect(svgAt(1)).toBeLessThanOrEqual(gate);
+    expect(svgAt(0.5)).toBeGreaterThan(gate);
+    expect(svgAt(2)).toBeGreaterThan(gate);
+  });
 
   it("pins the tree on the foot and matches both tinted cards", async () => {
     const doc = JSON.parse(readFileSync(root + "stickers/silhouette-shadow.json", "utf8")) as {

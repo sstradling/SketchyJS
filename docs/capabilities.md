@@ -24,10 +24,10 @@ Both renderers consume the same `Scene`. Geometry is decided before either one r
 | Effect | SVG | Canvas | CoreGraphics |
 | --- | --- | --- | --- |
 | Sticker shadow | `feDropShadow`, `stdDeviation = radius / 2` | `shadowBlur = radius` | native shadow |
-| Interior inner shadow | `feOffset` + `feGaussianBlur`, `stdDeviation = blur`, then a flood | `shadowBlur = blur`, `shadowOffset` | same sigma. Sticker shadows still use `radius / 2` |
-| Halo | `stdDeviation = blur` | `shadowBlur = blur` | same sigma |
+| Interior inner shadow | `feOffset` + `feGaussianBlur`, `stdDeviation = blur`, flood composited with the blur, clipped to `SourceAlpha` | `shadowBlur = 2 * blur`, `shadowOffset` | Canvas sigma is about `shadowBlur / 2`, so the blur matches. Sticker shadows still use `radius / 2` |
+| Halo | `stdDeviation = blur` | `shadowBlur = 2 * blur` | same sigma as the inner shadow |
 
-Shade blur uses sigma = `blur` on both SVG and Canvas. Sticker shadows keep `stdDeviation = radius / 2`. Compare geometry in the parity tests. Compare SVG with Canvas, and the shade cards with the Swift PNGs, using the channel limits in [visual-review.md](visual-review.md).
+Shade blur uses SVG `stdDeviation = blur`. Canvas `shadowBlur` is `2 * blur` because the canvas shadow sigma is about `shadowBlur / 2`. Sticker shadows keep `stdDeviation = radius / 2`. Compare geometry in the parity tests. Compare SVG with Canvas, and the shade cards with the Swift PNGs, using the channel limits in [visual-review.md](visual-review.md).
 
 ## What the basic import pays for
 

@@ -4,12 +4,17 @@ import type { Canvas2D } from "./context.js";
 /**
  * Paints an interior shade into Canvas 2D.
  *
- * `shadowBlur` is the shade blur sigma in CSS pixels. SVG uses the same sigma
- * as `feGaussianBlur` `stdDeviation`. Sticker shadows are a different ratio.
- * Gradients and the inner shadow are clipped even-odd,
- * so a hole stays empty. A halo strokes at twice the band width and is clipped
- * to the outside of the shape.
+ * Canvas `shadowBlur` is about twice the SVG Gaussian sigma, so
+ * `shadowBlur = 2 * blur` while SVG uses `stdDeviation = blur`. Sticker
+ * shadows are a different ratio. Gradients and the inner shadow are clipped
+ * even-odd, so a hole stays empty. A halo strokes at twice the band width
+ * and is clipped to the outside of the shape.
  */
+
+/** `shadowBlur` for a shade whose SVG sigma is `blur`. */
+export function canvasShadowBlur(blur: number): number {
+  return blur * 2;
+}
 
 export function paintShade(layer: DrawLayer, context: Canvas2D): void {
   const shade = layer.shade;
@@ -40,7 +45,7 @@ function paintInner(
   const pad = shade.blur * 3 + Math.abs(shade.x) + Math.abs(shade.y) + 4;
   const color = css(shade.color, shade.opacity);
   context.shadowColor = color;
-  context.shadowBlur = shade.blur;
+  context.shadowBlur = canvasShadowBlur(shade.blur);
   context.shadowOffsetX = shade.x;
   context.shadowOffsetY = shade.y;
   context.fillStyle = "#000";
@@ -116,7 +121,7 @@ function paintHalo(
   context.lineJoin = "round";
   if (shade.blur > 0 && shade.glow > 0) {
     context.shadowColor = css(shade.color, shade.glow);
-    context.shadowBlur = shade.blur;
+    context.shadowBlur = canvasShadowBlur(shade.blur);
   }
   trace(context, layer);
   context.stroke();

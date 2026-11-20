@@ -6,11 +6,16 @@ import { el, type SvgElement } from "./tree.js";
 /**
  * Paints an interior shade into SVG.
  *
- * Blur is `feGaussianBlur` with `stdDeviation = blur`. That sigma matches the
- * Swift shade cards better than `blur / 2`. Canvas uses `shadowBlur = blur`,
- * the same sigma. Sticker shadows still use `stdDeviation = radius / 2`.
- * Gradients are clipped even-odd, so holes stay empty.
- * A halo is the outside half of a double-width stroke, then the same blur.
+ * `stdDeviation` is the Gaussian sigma, equal to the shade's `blur`. Canvas
+ * `shadowBlur` is about twice that sigma (`shadowBlur = 2 * blur`). Sticker
+ * shadows still use `stdDeviation = radius / 2`. Gradients and the inner
+ * shadow are clipped even-odd, so a hole stays empty. A halo is the outside
+ * half of a double-width stroke, then the same blur.
+ *
+ * The pit-shadow filter inverts `SourceAlpha`, offsets and blurs that, colors
+ * the blur, then clips the result to the original `SourceAlpha`. That last
+ * clip is the inset. Compositing the flood with `SourceAlpha` directly drops
+ * the blur.
  */
 
 interface DefsLike {
@@ -28,7 +33,7 @@ export function renderShade(
   const id = `${options.idPrefix}-shade-${defs.elements.length}`;
   if (shade.kind === "halo") return halo(id, d, shade, options, defs);
   defs.elements.push(clipPath(id, d));
-  if (shade.kind === "innerShadow") return innerShadow(id, d, layer, shade, options, defs);
+  if (shade.kind === "innerShadow") return innerShadow(id, d, shade, defs);
   if (shade.kind === "linear") return linear(id, d, layer, shade, options, defs);
   return radial(id, d, layer, shade, options, defs);
 }
@@ -40,34 +45,34 @@ function clipPath(id: string, d: string): SvgElement {
 function innerShadow(
   id: string,
   d: string,
-  layer: DrawLayer,
   shade: Extract<InteriorShade, { kind: "innerShadow" }>,
-  options: ResolvedSvgOptions,
   defs: DefsLike,
 ): SvgElement {
-  const box = bounds(layer);
-  const pad = shade.blur * 3 + Math.abs(shade.x) + Math.abs(shade.y) + 4;
   const color = cssColor(shade.color);
   const deviation = formatNumber(shade.blur, 3);
   defs.elements.push(
     el("filter", { id: `${id}-filter`, x: "-50%", y: "-50%", width: "200%", height: "200%" }, [
+      el("feComponentTransfer", { in: "SourceAlpha", result: "invert" }, [
+        el("feFuncA", { type: "table", tableValues: "1 0" }),
+      ]),
       el("feOffset", {
+        in: "invert",
         dx: formatNumber(shade.x, 3),
         dy: formatNumber(shade.y, 3),
-        in: "SourceAlpha",
+        result: "offset",
       }),
-      el("feGaussianBlur", { stdDeviation: deviation }),
+      el("feGaussianBlur", { in: "offset", stdDeviation: deviation, result: "blurred" }),
       el("feFlood", {
         "flood-color": color.value,
         "flood-opacity": formatNumber(color.opacity * shade.opacity, 3),
+        result: "flood",
       }),
-      el("feComposite", { in2: "SourceAlpha", operator: "in" }),
+      el("feComposite", { in: "flood", in2: "blurred", operator: "in", result: "colored" }),
+      el("feComposite", { in: "colored", in2: "SourceAlpha", operator: "in" }),
     ]),
   );
-  const n = (value: number): string => formatNumber(value, options.precision);
-  const exterior = `M${n(box.x - pad)},${n(box.y - pad)}H${n(box.x + box.width + pad)}V${n(box.y + box.height + pad)}H${n(box.x - pad)}Z${d}`;
   return el("g", { "clip-path": `url(#${id}-clip)` }, [
-    el("path", { d: exterior, fill: "#000", "fill-rule": "evenodd", filter: `url(#${id}-filter)` }),
+    el("path", { d, fill: "#000", filter: `url(#${id}-filter)` }),
   ]);
 }
 

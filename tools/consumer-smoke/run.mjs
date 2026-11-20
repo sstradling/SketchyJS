@@ -20,7 +20,7 @@ import { build } from "esbuild";
  * Packs every workspace package, installs the tarballs into a clean consumer project (no
  * workspace links), then checks that: every export resolves under Node ESM, TypeScript resolves
  * the types under NodeNext and Bundler, publint and are-the-types-wrong accept the tarball, the
- * published files contain only dist (and schemas), and tree shaking drops unused code.
+ * published files contain dist (and schemas), plus README.md and LICENSE, and tree shaking drops unused code.
  */
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const keep = process.argv.includes("--keep");
@@ -97,14 +97,17 @@ if (!install.ok) {
       console.log("wrote smoke hashes", actual);
     } else {
       const expected = JSON.parse(readFileSync(hashFile, "utf8"));
-      for (const key of ["react", "element", "canvas", "stickers"]) {
-        if (actual[key] !== expected[key]) {
+      const keys = ["react", "element", "canvas", "stickers", "canvasComponent", "animation"];
+      let matched = true;
+      for (const key of keys) {
+        if (actual[key] === undefined || actual[key] !== expected[key]) {
+          matched = false;
           fail(
             `${key} render hash mismatch\n  expected ${expected[key]}\n  actual   ${actual[key]}`,
           );
         }
       }
-      console.log("seeded render hashes match");
+      if (!matched) process.exit(1);
     }
   }
 }
@@ -343,6 +346,9 @@ for (const dir of packageDirs) {
       ),
   );
   if (unexpected.length > 0) fail(`${dir}: unexpected files in tarball: ${unexpected.join(", ")}`);
+  for (const required of ["README.md", "LICENSE"]) {
+    if (!entries.includes(required)) fail(`${dir}: tarball is missing ${required}`);
+  }
   if (entries.some((p) => p.endsWith(".map") && !p.startsWith("dist/")))
     fail(`${dir}: stray source maps`);
 }
@@ -416,4 +422,5 @@ if (failures.length > 0) {
   console.error(`\n${failures.length} smoke failure(s)`);
   process.exit(1);
 }
-console.log("\nexport smoke tests passed");
+console.log("seeded render hashes match");
+console.log("export smoke tests passed");

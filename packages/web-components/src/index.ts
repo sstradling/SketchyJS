@@ -142,13 +142,22 @@ type HostConstructor = new () => {
 export function defineSketchyElement(
   tagName = "sketchy-shape",
   registry?: CustomElementRegistryLike,
-  ElementBase: HostConstructor = HTMLElement,
+  ElementBase?: HostConstructor,
 ): void {
+  const discovered = globalThis.HTMLElement;
+  const Base: HostConstructor | undefined =
+    ElementBase ??
+    (typeof discovered === "function" ? discovered : undefined);
+  if (!Base) {
+    throw new Error(
+      "defineSketchyElement needs HTMLElement. In Node, pass the window's HTMLElement from happy-dom or jsdom.",
+    );
+  }
   const target =
     registry ?? (globalThis as { customElements?: CustomElementRegistryLike }).customElements;
   if (!target) throw new Error("defineSketchyElement needs a CustomElementRegistry");
   if (target.get(tagName)) return;
-  const SketchyShape = class extends ElementBase {
+  const SketchyShape = class extends Base {
     static observedAttributes: readonly string[] = OBSERVED;
     readonly sketchyPrefix = `sk${++nextElementId}`;
 

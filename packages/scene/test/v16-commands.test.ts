@@ -482,6 +482,19 @@ describe("v1.6.0 closed rings with an explicit Z", () => {
     expectCommands(first, item.first!, item.id);
     expectCommands(second, item.second!, `${item.id} second`);
   });
+
+  it("fails when a new closed-z case has no recipe", () => {
+    const known = new Set([
+      "closed-z-ring-stops",
+      "closed-z-ring-variable",
+      "closed-z-crayon-ring",
+      "closed-z-ring-same-seed",
+      "closed-z-rounded-rect-stops",
+      "closed-z-crayon-fill",
+    ]);
+    const extra = doc.cases.map((entry) => entry.id).filter((id) => !known.has(id));
+    expect(extra, `wire a recipe for ${extra.join(", ")}`).toEqual([]);
+  });
 });
 
 describe("v1.6.0 contour hole", () => {

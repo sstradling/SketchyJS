@@ -1,4 +1,12 @@
-import { createElement, useEffect, useId, useMemo, useState, type ReactElement } from "react";
+import {
+  createElement,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactElement,
+} from "react";
 import { generateFrame, type VarianceConfig } from "@sketchy-js/animate";
 import { sketch, type ViewOptions } from "@sketchy-js/scene/basic";
 import { renderToSvgString } from "@sketchy-js/svg-renderer";
@@ -54,8 +62,10 @@ export interface SketchAnimationConfig extends VarianceConfig {
  * Equal configs share the schedule; a new object with the same fields does not reset it.
  */
 export function useSketchAnimation(scene: Scene, config: SketchAnimationConfig): Scene {
-  const key = sketchValueKey({
-    scene,
+  const sceneRef = useRef(scene);
+  sceneRef.current = scene;
+  const sceneKey = useMemo(() => sketchValueKey(scene), [scene]);
+  const configKey = sketchValueKey({
     steps: config.steps,
     variance: config.variance,
     seed: config.seed,
@@ -69,9 +79,16 @@ export function useSketchAnimation(scene: Scene, config: SketchAnimationConfig):
       setFrame((current) => (current + 1) % steps);
     }, interval);
     return () => clearInterval(id);
-  }, [key, interval, config.steps]);
-  // `key` is the scene and the variance config. `frame` is the step.
-  return useMemo(() => generateFrame(scene, config, frame), [key, frame]);
+  }, [sceneKey, configKey, interval, config.steps]);
+  return useMemo(
+    () =>
+      generateFrame(
+        sceneRef.current,
+        { steps: config.steps, variance: config.variance, seed: config.seed },
+        frame,
+      ),
+    [sceneKey, configKey, frame, config.steps, config.variance, config.seed],
+  );
 }
 
 /** Phase of an animated contour, in points. `elapsed` is seconds. */

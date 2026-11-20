@@ -16,7 +16,9 @@
   },
   "files": [
     "dist",
-    "schemas"
+    "schemas",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",

@@ -24,12 +24,28 @@ if (unique.length !== 1) {
   process.exit(1);
 }
 const version = unique[0];
+const gate = process.argv.includes("--gate");
+const pending = readdirSync(join(root, ".changeset")).filter(
+  (name) => name.endsWith(".md") && name !== "README.md",
+);
 console.log(`versions: ${version} across ${versions.size} packages`);
-if (version === "0.0.0") {
-  console.log("refusing to tag or publish: versions are still 0.0.0");
-  console.log(
-    "the release PR sets 1.6.0 explicitly. A Changesets bump from 0.0.0 would publish 0.1.0.",
-  );
+console.log(`pending changesets: ${pending.length}`);
+if (gate) {
+  if (version === "0.0.0") {
+    console.error("refusing to publish: versions are still 0.0.0");
+    process.exit(1);
+  }
+  if (version !== "1.6.0") {
+    console.error(`refusing to publish: expected 1.6.0, got ${version}`);
+    process.exit(1);
+  }
+  if (pending.length > 0) {
+    console.error(`refusing to publish: ${pending.length} changeset(s) are still pending`);
+    process.exit(1);
+  }
+} else if (version === "0.0.0") {
+  console.log("dry run only: versions are still 0.0.0, so this is not a release");
+  console.log("a real release passes --gate and refuses 0.0.0 before publish");
 } else if (version !== "1.6.0") {
   console.error(`refusing: expected 0.0.0 (this phase) or 1.6.0 (the release), got ${version}`);
   process.exit(1);

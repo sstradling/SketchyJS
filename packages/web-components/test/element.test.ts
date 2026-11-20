@@ -42,6 +42,10 @@ describe("sketchy-shape", () => {
     expect(scene.nodes.length).toBe(1);
   });
 
+  it("names the missing DOM when defineSketchyElement runs in Node", () => {
+    expect(() => defineSketchyElement()).toThrow(/needs HTMLElement/);
+  });
+
   it("rejects a seed that is not an integer", () => {
     expect(() => seedFromAttribute("nope")).toThrow(/seed must be an integer/);
     expect(seedFromAttribute(undefined)).toBeUndefined();

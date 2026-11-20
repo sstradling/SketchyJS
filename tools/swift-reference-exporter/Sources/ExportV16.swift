@@ -715,7 +715,6 @@ private func ringCase(_ id: String, _ view: RoughView, _ drawable: Drawable, _ c
     ])
 }
 
-@MainActor
 /// `Circle` outlines omit `closeSubpath`. Insert one `Close` on each outline
 /// subpath before rendering, matching `tools/swift-reference-exporter/close-ring.mjs`.
 /// Rounded rectangles already close, so a second `Close` is not added.
@@ -845,6 +844,7 @@ private func closedSameSeedCase(_ drawable: Drawable, _ canvas: CGSize) -> J {
     ])
 }
 
+@MainActor
 private func sameSeedCase(_ drawable: Drawable, _ canvas: CGSize) -> J {
     let view = RoughView()
         .seed(21)

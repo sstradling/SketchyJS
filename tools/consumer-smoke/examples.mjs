@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { createElement } from "react";
+import { act, createElement } from "react";
+import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Window } from "happy-dom";
 import { rectangle } from "@sketchy-js/core";
@@ -7,7 +8,8 @@ import { basicSketchy, sketch } from "@sketchy-js/scene/basic";
 import { buildStickerScene } from "@sketchy-js/scene/stickers";
 import { renderToSvgString } from "@sketchy-js/svg-renderer";
 import { renderToCanvas } from "@sketchy-js/canvas-renderer";
-import { Sketchy } from "@sketchy-js/react";
+import { Sketchy, useSketch, useSketchAnimation } from "@sketchy-js/react";
+import { SketchyCanvas } from "@sketchy-js/react/canvas";
 import { defineSketchyElement } from "@sketchy-js/web-components";
 
 /**
@@ -70,11 +72,60 @@ const sticker = buildStickerScene(
   size,
 );
 
+globalThis.window = window;
+globalThis.document = window.document;
+globalThis.HTMLElement = window.HTMLElement;
+globalThis.Node = window.Node;
+const canvasCalls = [];
+window.HTMLCanvasElement.prototype.getContext = function getContext() {
+  const recording = { canvas: this };
+  return new Proxy(recording, {
+    get(target, property) {
+      if (property in target) return target[property];
+      if (typeof property !== "string") return undefined;
+      return () => {
+        canvasCalls.push(property);
+      };
+    },
+    set(target, property, value) {
+      target[property] = value;
+      return true;
+    },
+  });
+};
+const frames = [];
+function Animated() {
+  const scene = useSketch(shape, size, { seed: 7n, fillStyle: "hachure" });
+  const frame = useSketchAnimation(scene, { steps: 4, variance: 0.05, seed: 7n, intervalMs: 1000 });
+  frames.push(
+    JSON.stringify(frame.nodes[0]?.drawing?.layers?.[0]?.paths?.[0]?.slice?.(0, 2) ?? null),
+  );
+  return createElement(SketchyCanvas, { scene, label: "canvas" });
+}
+const mount = window.document.createElement("div");
+window.document.body.appendChild(mount);
+const root = createRoot(mount);
+const realSetInterval = globalThis.setInterval;
+globalThis.setInterval = () => 1;
+try {
+  await act(async () => {
+    root.render(createElement(Animated));
+  });
+} finally {
+  globalThis.setInterval = realSetInterval;
+  root.unmount();
+}
+if (!canvasCalls.includes("fill") && !canvasCalls.includes("stroke")) {
+  throw new Error("SketchyCanvas did not call renderToCanvas");
+}
+
 const hash = (text) => createHash("sha256").update(text).digest("hex");
 const output = {
   react: hash(react),
   element: hash(element.innerHTML),
   canvas: hash(JSON.stringify(calls)),
   stickers: hash(renderToSvgString(sticker)),
+  canvasComponent: hash(canvasCalls.join(",")),
+  animation: hash(frames[0] ?? ""),
 };
 console.log(JSON.stringify(output));

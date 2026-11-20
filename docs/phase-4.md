@@ -35,7 +35,7 @@ view.with({ fillStyle: "wash" })
 interiorShades
   -> not read by generateDrawing
   -> attachShades inserts layers after the fill (halo after the stroke)
-  -> SVG feGaussianBlur stdDeviation = blur; Canvas shadowBlur = blur
+  -> SVG feGaussianBlur stdDeviation = blur; Canvas shadowBlur = 2 * blur
 
 treeShadow(image, at)
   -> scene node type "silhouette"
@@ -73,8 +73,9 @@ Darwin files are at `fixtures/swift-reference/v1.6.0/`, merged from `cursor/sket
 | --- | --- | --- |
 | `fills/contour.json` | intensity 0, 0.35, 1, ramp, falloff, animated phases, SVG hole, short clip, wash passes | plans, sets, clip, and probes match |
 | `fills/wash.json` | default, sky, scatter, trim, bow | sets match |
-| `fills/interior-shades.json` | pit, recess, edge, halo, hole | order, silhouette path, shade parameters, and unchanged generator sets match. PNGs are within delta 24 and 20% |
+| `fills/interior-shades.json` | pit, recess, edge, halo, hole | order, silhouette path, shade parameters, and unchanged generator sets match. SVG (resvg) and Canvas PNGs are within delta 12 and 6% |
 | `strokes/closed-width.json` | width samples, stops ring, variable ring, crayon ring, same seed | samples, hachure, winding ribbon, and wax passes match |
+| `strokes/closed-width-z.json` | closed-z ring stops, variable, crayon ring, same seed, rounded rect, crayon fill | explicit `Z` on the outline. Exact structure, then 1e-4 |
 | `stickers/silhouette-shadow.json` | affine, tree | foot `(14, 63.5)`, tree skew `-0.58` and squash `0.32`, composed matrix, and both PNGs match |
 | re-run of the 1.5.0 list | fills and shapes generated again; every other unchanged file compared byte for byte with v1.5.0 | geometry is identical. `darwin/options/defaults.json` adds only `contourDrift`, `contourEasing`, `contourFalloff`, `contourGradientAngle`, `contourGuide`, `contourIntensity`, `contourIntensityEnd`, `contourIntensityStart`, `interiorShades`, and `washPasses` |
 
@@ -114,7 +115,7 @@ Generation is the expensive part. Painting in a worker is slower than painting o
 
 ## Release
 
-The workflow is `.github/workflows/release.yml`. It runs only for master, and only after CI on that commit is green (`workflow_run` or a green CI run for a manual dispatch). Node 22 and 24 both verify. A dry run is the default: it checks publish metadata with `npm publish --dry-run` and does not upload or tag. A real run versions with Changesets, publishes with provenance, and only then creates the annotated `v`-prefixed tag and the GitHub release. This PR does not publish.
+The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master and a green CI run for that commit. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run refuses `0.0.0`, a version other than `1.6.0`, and pending changesets before `changeset publish`. It commits and pushes the version, publishes with provenance, and only then pushes the annotated `v` tag and creates the GitHub release. This PR does not publish.
 
 This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that number would publish `0.1.0` and is refused.
 
@@ -127,12 +128,13 @@ This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that numb
 - `SketchyCanvas` is `@sketchy-js/react/canvas`. The main React entry stays SVG.
 - No WebGL, no worker renderer. Generation and paint are timed separately in `tools/worker-bench`.
 - Versions are `0.0.0`. One fixed Changesets group will move together to 1.6.0. The release that sets that version is a later PR.
-- Closed rings with an explicit `Z` are not in the fixtures yet. The parity file fails if a new closed-width id appears, so the Mac export can be wired without replacing the current cases.
+- `strokes/closed-width-z.json` holds the explicit-`Z` cases (ring stops, variable, crayon ring, same seed, rounded rect, crayon fill). They pass at 1e-4. The parity file fails if a new id appears in either closed-width file.
+- There is no Swift arc-contour fixture. Arc contours emit one unscaled stroke set, matching `fillArc`, and that remains a known gap.
 
 ## Decisions
 
 1. Arc contour bands match Swift: one set, no per-band width.
 2. `ContourGuide.path` stays unported.
-3. Shade sigma is `blur` on SVG and Canvas. Sticker shadows stay at `radius / 2`.
+3. SVG shade sigma is `stdDeviation = blur`. Canvas `shadowBlur` is `2 * blur` (canvas sigma is about `shadowBlur / 2`). Sticker shadows stay at `radius / 2`.
 4. The 42 KB basic-scene ceiling stays. Contour and wash are subpath imports.
 5. One fixed version group, every package at 1.6.0, for the release PR.

@@ -6,9 +6,9 @@ import { Window } from "happy-dom";
 import { describe, expect, it } from "vitest";
 import { circle, rectangle } from "@sketchy-js/core";
 import { pitShadow } from "@sketchy-js/scene";
+import { sketch } from "@sketchy-js/scene/basic";
 import { SketchyCanvas } from "../src/canvas.js";
 import { Sketchy, sketchValueKey, useSketch, useSketchAnimation } from "../src/index.js";
-import type { Scene } from "@sketchy-js/types";
 
 const size = { width: 80, height: 60 };
 const shape = rectangle(8, 8, 40, 30);
@@ -25,16 +25,34 @@ function installDom(): Window {
 }
 
 describe("React bindings", () => {
-  it("mounts SketchyCanvas for a scene", () => {
-    installDom();
-    const scene: Scene = { version: 1, size, nodes: [] };
+  it("paints SketchyCanvas through renderToCanvas", () => {
+    const window = installDom();
+    const calls: string[] = [];
+    const proto = window.HTMLCanvasElement.prototype as unknown as {
+      getContext: (this: HTMLCanvasElement) => unknown;
+    };
+    proto.getContext = function getContext(this: HTMLCanvasElement) {
+      const context: Record<string, unknown> = { canvas: this };
+      return new Proxy(context, {
+        get(target, property) {
+          if (property in target) return target[property as string];
+          if (typeof property !== "string") return undefined;
+          return (..._args: unknown[]) => {
+            calls.push(property);
+          };
+        },
+        set(target, property, value) {
+          target[property as string] = value;
+          return true;
+        },
+      });
+    };
+    const scene = sketch(shape, size, { seed: 4n, fillStyle: "hachure" });
     const root = createRoot(document.body);
     act(() => {
       root.render(createElement(SketchyCanvas, { scene, label: "canvas" }));
     });
-    const canvas = document.querySelector("canvas");
-    expect(canvas?.getAttribute("aria-label")).toBe("canvas");
-    expect(canvas?.getAttribute("width")).toBe("80");
+    expect(calls, calls.join(",")).toEqual(expect.arrayContaining(["beginPath", "stroke"]));
     root.unmount();
   });
 

@@ -38,3 +38,8 @@ jobs:
       - run: node scripts/release-dry-run.mjs
       - run: pnpm size
       - run: pnpm docs:api
+      - name: actionlint
+        if: matrix.node == 22
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
