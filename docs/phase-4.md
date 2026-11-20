@@ -115,7 +115,7 @@ Generation is the expensive part. Painting in a worker is slower than painting o
 
 ## Release
 
-The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master and a green CI run for that commit. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run refuses `0.0.0`, a version other than `1.6.0`, and pending changesets before `changeset publish`. It commits and pushes the version, publishes with provenance, and only then pushes the annotated `v` tag and creates the GitHub release. This PR does not publish.
+The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master and a green CI run for that commit. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run refuses `0.0.0`, a version other than `1.6.0`, and pending changesets with `scripts/release-dry-run.mjs --gate` before `changeset publish`. The release PR already carries `1.6.0`, so the workflow does not run `changeset version` and does not create a version commit. It publishes with provenance, and only then pushes the annotated `v` tag and creates the GitHub release. This PR does not publish.
 
 This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that number would publish `0.1.0` and is refused.
 

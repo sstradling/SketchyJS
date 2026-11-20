@@ -82,7 +82,7 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Gate, version, publish, then tag and create the GitHub Release
+      - name: Gate, publish, then tag and create the GitHub Release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,16 +92,9 @@ jobs:
           test "$(git rev-parse --abbrev-ref HEAD)" = "master"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The release PR already sets every package to 1.6.0. `changeset version`
+          # exits 1 when nothing is pending, so this job does not run it or commit.
           node scripts/release-dry-run.mjs --gate
-          pnpm changeset version
-          node scripts/release-dry-run.mjs --gate
-          git add -A
-          if git diff --cached --quiet; then
-            echo "version commit already present"
-          else
-            git commit -m "Version packages"
-          fi
-          git push origin HEAD
           pnpm changeset publish
           version=$(node -p "require('./packages/core/package.json').version")
           test "$version" = "1.6.0"
