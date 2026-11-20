@@ -28,7 +28,7 @@
   },
   "pending": [],
   "accepted": [],
-  "treeSha256": "067344c8fea20595ee00ad443edd57fc3668d7d4d6e4ce9479337b5a415bdc25",
+  "treeSha256": "b7d4017e2e4dcb8aec0422fd836aac14c354895a33ec367e135b5e9079ffebfb",
   "files": [
     {
       "path": "animation/frames.json",
@@ -277,6 +277,15 @@
       "path": "stickers/silhouette-shadow.json",
       "sha256": "80711d0394eafe3d0effe3a94f5780e71d981f84df333e2b8edc1912f2447fe7",
       "bytes": 1544,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "strokes/closed-width-z.json",
+      "sha256": "0407076d93aa52a7b2053e17716aafcc66f2b3d17883b72620067f2709f055f1",
+      "bytes": 5018033,
       "kind": "data",
       "fidelity": "native-framework",
       "platform": "darwin-x86_64",
