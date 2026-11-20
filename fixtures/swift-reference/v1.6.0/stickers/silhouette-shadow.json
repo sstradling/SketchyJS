@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "anchor": [8.0, 40.0],
+      "color": { "a": 1.0, "b": 0.054901960784313725, "g": 0.18823529411764706, "r": 0.08627450980392157 },
+      "composedTransform": [0.9, 0.15, -0.4, 0.5, 98.8, 88.8],
+      "id": "silhouette-affine",
+      "opacity": 0.42,
+      "png": "images/silhouette-affine.png",
+      "pngBytes": 1600,
+      "position": [90.0, 110.0],
+      "transform": [0.9, 0.15, -0.4, 0.5, 0.0, 0.0]
+    },
+    {
+      "anchor": [14.0, 63.5],
+      "anchorMatchesFoot": true,
+      "color": { "a": 1.0, "b": 0.054901960784313725, "g": 0.18823529411764706, "r": 0.08627450980392157 },
+      "composedTransform": [1.0, 0.0, -0.58, 0.32, 112.83, 99.68],
+      "footAnchor": [14.0, 63.5],
+      "id": "silhouette-tree",
+      "opacity": 0.42,
+      "png": "images/silhouette-tree.png",
+      "pngBytes": 1489,
+      "position": [90.0, 120.0],
+      "transform": [1.0, 0.0, -0.58, 0.32, 0.0, 0.0]
+    }
+  ],
+  "provenance": {
+    "arch": "x86_64",
+    "commit": "650763d8c2696daf5dc44d0f25286b64ba91fc13",
+    "hashing": "SWIFT_DETERMINISTIC_HASHING=1",
+    "minimumOS": "17.0",
+    "os": "darwin",
+    "platform": "darwin-x86_64",
+    "repo": "https://github.com/sstradling/Sketchy",
+    "sdk": "iphonesimulator",
+    "sdkVersion": "26.0",
+    "simulator": "iPhone 17 Pro",
+    "simulatorRuntime": "iOS 26.0 (23A343)",
+    "swift": "6.2 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)",
+    "tag": "v1.6.0",
+    "xcode": "26.0.1 (17A400)"
+  },
+  "sourceImage": "images/silhouette-source.png",
+  "sourceSize": [28.0, 64.0]
+}

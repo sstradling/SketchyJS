@@ -5,6 +5,12 @@ import { fileURLToPath } from "node:url";
 
 export const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
 export const referenceDir = join(repoRoot, "fixtures", "swift-reference", "v1.5.0");
+export const referenceV16Dir = join(repoRoot, "fixtures", "swift-reference", "v1.6.0");
+export const upstreamV16 = {
+  repo: "https://github.com/sstradling/Sketchy",
+  tag: "v1.6.0",
+  commit: "650763d8c2696daf5dc44d0f25286b64ba91fc13",
+};
 export const exporterDir = join(repoRoot, "tools", "swift-fixture-exporter");
 export const upstream = {
   repo: "https://github.com/sstradling/Sketchy",
