@@ -1,5 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,7 +61,7 @@ for (const dir of packageDirs) {
 const files = readdirSync(tarballs).sort();
 const tarballFor = (name) => files.find((f) => f.startsWith(`sketchy-js-${name}-`));
 
-const dependencies = { react: "18.3.1" };
+const dependencies = { react: "18.3.1", "react-dom": "18.3.1", "happy-dom": "^21.0.4" };
 for (const dir of packageDirs)
   dependencies[`@sketchy-js/${dir}`] = `file:${join(tarballs, tarballFor(dir))}`;
 writeFileSync(
@@ -73,6 +81,32 @@ const install = run(
 if (!install.ok) {
   console.error(install.stderr);
   fail("npm install of tarballs failed");
+} else {
+  copyFileSync(
+    fileURLToPath(new URL("./examples.mjs", import.meta.url)),
+    join(consumer, "examples.mjs"),
+  );
+  const rendered = run("node", ["examples.mjs"], { cwd: consumer });
+  if (!rendered.ok) fail(`seeded renders failed\n${rendered.stdout}\n${rendered.stderr}`);
+  else {
+    const line = rendered.stdout.trim().split("\n").pop();
+    const actual = JSON.parse(line);
+    const hashFile = fileURLToPath(new URL("./hashes.json", import.meta.url));
+    if (process.env.UPDATE_SMOKE_HASHES === "1") {
+      writeFileSync(hashFile, `${JSON.stringify(actual, null, 2)}\n`);
+      console.log("wrote smoke hashes", actual);
+    } else {
+      const expected = JSON.parse(readFileSync(hashFile, "utf8"));
+      for (const key of ["react", "element", "canvas", "stickers"]) {
+        if (actual[key] !== expected[key]) {
+          fail(
+            `${key} render hash mismatch\n  expected ${expected[key]}\n  actual   ${actual[key]}`,
+          );
+        }
+      }
+      console.log("seeded render hashes match");
+    }
+  }
 }
 
 /** Public entry points and one symbol each must expose. Skeleton packages export nothing yet. */
@@ -138,9 +172,17 @@ const expectations = {
   "@sketchy-js/scene/silhouette": { symbols: ["treeShadow", "footAnchor", "silhouetteScene"] },
   "@sketchy-js/fills/contour": { symbols: ["contour"] },
   "@sketchy-js/fills/wash": { symbols: ["wash", "skyWash"] },
-  "@sketchy-js/react": { symbols: ["Sketchy", "SketchySvg", "useSketch", "useContourPhase"] },
+  "@sketchy-js/react": {
+    symbols: ["Sketchy", "SketchySvg", "useSketch", "useContourPhase", "useSketchAnimation"],
+  },
+  "@sketchy-js/react/canvas": { symbols: ["SketchyCanvas"] },
   "@sketchy-js/web-components": {
-    symbols: ["registerSketchyElements", "sceneFromAttributes", "paintSketchyElement"],
+    symbols: [
+      "registerSketchyElements",
+      "defineSketchyElement",
+      "sceneFromAttributes",
+      "paintSketchyElement",
+    ],
   },
 };
 const skeletons = ["contrib"];
@@ -166,8 +208,10 @@ if (!svg.startsWith("<svg ") || !svg.includes("<path")) { console.error("end-to-
 const { readFileSync: readManifest } = await import("node:fs");
 const reactManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/react/package.json", import.meta.url), "utf8"));
 const stickerManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/stickers/package.json", import.meta.url), "utf8"));
-const reactDeps = { ...reactManifest.dependencies, ...reactManifest.peerDependencies };
-if (reactDeps["@sketchy-js/canvas-renderer"]) { console.error("react depends on canvas"); bad++; }
+if (reactManifest.dependencies?.["@sketchy-js/canvas-renderer"]) {
+  console.error("react's main dependency list includes canvas; keep it an optional peer of the canvas subpath");
+  bad++;
+}
 if (stickerManifest.dependencies?.["@sketchy-js/react"] || stickerManifest.peerDependencies?.["@sketchy-js/react"]) {
   console.error("stickers depend on react"); bad++;
 }

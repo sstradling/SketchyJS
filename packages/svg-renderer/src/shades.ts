@@ -6,9 +6,10 @@ import { el, type SvgElement } from "./tree.js";
 /**
  * Paints an interior shade into SVG.
  *
- * Blur is `feGaussianBlur` with `stdDeviation = radius / 2`, the same ratio as
- * a sticker `feDropShadow`. Canvas uses `shadowBlur = radius`. Neither matches
- * CoreGraphics' blur kernel. Gradients are clipped even-odd, so holes stay empty.
+ * Blur is `feGaussianBlur` with `stdDeviation = blur`. That sigma matches the
+ * Swift shade cards better than `blur / 2`. Canvas uses `shadowBlur = blur`,
+ * the same sigma. Sticker shadows still use `stdDeviation = radius / 2`.
+ * Gradients are clipped even-odd, so holes stay empty.
  * A halo is the outside half of a double-width stroke, then the same blur.
  */
 
@@ -47,7 +48,7 @@ function innerShadow(
   const box = bounds(layer);
   const pad = shade.blur * 3 + Math.abs(shade.x) + Math.abs(shade.y) + 4;
   const color = cssColor(shade.color);
-  const deviation = formatNumber(shade.blur / 2, 3);
+  const deviation = formatNumber(shade.blur, 3);
   defs.elements.push(
     el("filter", { id: `${id}-filter`, x: "-50%", y: "-50%", width: "200%", height: "200%" }, [
       el("feOffset", {
@@ -140,7 +141,7 @@ function halo(
   defs: DefsLike,
 ): SvgElement {
   const color = cssColor(shade.color);
-  const deviation = formatNumber(shade.blur / 2, 3);
+  const deviation = formatNumber(shade.blur, 3);
   defs.elements.push(
     el("filter", { id: `${id}-filter`, x: "-50%", y: "-50%", width: "200%", height: "200%" }, [
       el("feGaussianBlur", { in: "SourceAlpha", stdDeviation: deviation, result: "blur" }),

@@ -19,7 +19,7 @@ Contour drift changes the centerlines and the cache key of a generator that incl
 
 ## Workers
 
-A worker renderer was measured and deferred. See the benchmark in [phase-4.md](phase-4.md). Do not add WebGL for these scenes. The cost is path construction, and it is already a few milliseconds for a dense hachure page.
+A worker renderer was measured and deferred. On 48 hachure rectangles at 640×480, seed 42, spacing 2, generation takes 18.36 ms and painting the already built scene takes 3.35 ms. A `worker_threads` paint was 4.37 ms, slower than painting on the main thread. The cost that matters is generation, and moving paint off thread does not help. Do not add WebGL for these scenes.
 
 ## Bundles
 

@@ -36,7 +36,8 @@
       "dependencies": ["types", "core"]
     },
     "react": {
-      "dependencies": ["types", "scene", "svg-renderer"],
+      "dependencies": ["types", "scene", "svg-renderer", "animate"],
+      "optionalPeers": ["canvas-renderer"],
       "externalPeers": ["react"]
     },
     "web-components": {

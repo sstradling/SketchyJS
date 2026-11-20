@@ -26,14 +26,24 @@ export interface SketchAttributes {
   label?: string;
 }
 
+/** Integer seed, or a clear error. An empty attribute means "use the default seed". */
+export function seedFromAttribute(value: string | undefined): bigint | undefined {
+  if (value === undefined || value === "") return undefined;
+  if (!/^-?\d+$/.test(value)) {
+    throw new Error(`seed must be an integer, received ${JSON.stringify(value)}`);
+  }
+  return BigInt(value);
+}
+
 /** Builds the scene an element would draw. Useful without a DOM. */
 export function sceneFromAttributes(
   attrs: SketchAttributes,
   size: Size = { width: 200, height: 160 },
 ): Scene {
   const shape = shapeFrom(attrs);
+  const seed = seedFromAttribute(attrs.seed);
   const options: ViewOptions = {
-    ...(attrs.seed ? { seed: BigInt(attrs.seed) } : {}),
+    ...(seed !== undefined ? { seed } : {}),
     ...(attrs.fill ? { fillStyle: attrs.fill as NonNullable<ViewOptions["fillStyle"]> } : {}),
   };
   return sketch(shape, size, options);
@@ -60,8 +70,8 @@ type ElementHost = {
   innerHTML: string;
 };
 
-/** Paints `host` from its attributes. Tests pass a fake element. */
-export function paintSketchyElement(host: ElementHost, size?: Size): Scene {
+/** Paints `host` from its attributes. `idPrefix` keeps clip ids unique per element. */
+export function paintSketchyElement(host: ElementHost, size?: Size, idPrefix = "sk"): Scene {
   const read = (name: string): string | undefined => host.getAttribute(name) ?? undefined;
   const take = (name: string): { [key: string]: string } => {
     const value = read(name);
@@ -85,31 +95,91 @@ export function paintSketchyElement(host: ElementHost, size?: Size): Scene {
       height: Number(read("canvas-height") ?? 160),
     },
   );
-  host.innerHTML = renderToSvgString(scene);
+  host.innerHTML = renderToSvgString(scene, { idPrefix });
   const label = read("label");
   if (label) host.setAttribute("aria-label", label);
   host.setAttribute("role", "img");
   return scene;
 }
 
+const OBSERVED = [
+  "shape",
+  "x",
+  "y",
+  "width",
+  "height",
+  "diameter",
+  "d",
+  "seed",
+  "fill",
+  "label",
+  "canvas-width",
+  "canvas-height",
+] as const;
+
+let nextElementId = 0;
+
 interface CustomElementRegistryLike {
   get(name: string): unknown;
-  define(name: string, constructor: CustomElementConstructor): void;
+  /** `never` lets a happy-dom or jsdom registry satisfy this without a cast. */
+  define(name: string, constructor: never): void;
 }
 
 /**
- * Registers `<sketchy-shape>`. Call this once from the app.
- * `registry` defaults to the browser's `customElements`.
+ * Registers a sketchy element. The default tag is `sketchy-shape`.
+ * Importing this module does not register anything.
+ *
+ * `ElementBase` is the realm's `HTMLElement` (happy-dom and jsdom each have their own).
  */
-export function registerSketchyElements(registry?: CustomElementRegistryLike): void {
+type HostConstructor = new () => {
+  isConnected: boolean;
+  innerHTML: string;
+  getAttribute(name: string): string | null;
+  setAttribute(name: string, value: string): void;
+  removeAttribute(name: string): void;
+};
+
+export function defineSketchyElement(
+  tagName = "sketchy-shape",
+  registry?: CustomElementRegistryLike,
+  ElementBase: HostConstructor = HTMLElement,
+): void {
   const target =
     registry ?? (globalThis as { customElements?: CustomElementRegistryLike }).customElements;
-  if (!target) throw new Error("registerSketchyElements needs a CustomElementRegistry");
-  if (target.get("sketchy-shape")) return;
-  const SketchyShape = class extends HTMLElement {
+  if (!target) throw new Error("defineSketchyElement needs a CustomElementRegistry");
+  if (target.get(tagName)) return;
+  const SketchyShape = class extends ElementBase {
+    static observedAttributes: readonly string[] = OBSERVED;
+    readonly sketchyPrefix = `sk${++nextElementId}`;
+
     connectedCallback(): void {
-      paintSketchyElement(this);
+      this.paint();
+    }
+
+    attributeChangedCallback(): void {
+      if (this.isConnected) this.paint();
+    }
+
+    private paint(): void {
+      try {
+        paintSketchyElement(this, undefined, this.sketchyPrefix);
+        this.removeAttribute("data-sketchy-error");
+      } catch (error) {
+        this.innerHTML = "";
+        this.setAttribute(
+          "data-sketchy-error",
+          error instanceof Error ? error.message : "invalid attributes",
+        );
+      }
     }
   };
-  target.define("sketchy-shape", SketchyShape);
+  target.define(tagName, SketchyShape as never);
+}
+
+/** Registers `<sketchy-shape>`. Call this once from the app. */
+export function registerSketchyElements(
+  registry?: CustomElementRegistryLike,
+  ElementBase?: HostConstructor,
+): void {
+  defineSketchyElement("sketchy-shape", registry, ElementBase);
 }

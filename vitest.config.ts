@@ -13,6 +13,10 @@ const packages = [
   "stickers",
   "scene",
   "svg-renderer",
+  "canvas-renderer",
+  "animate",
+  "react",
+  "web-components",
 ];
 
 /** Tests import workspace packages from source, so they run without a build. */

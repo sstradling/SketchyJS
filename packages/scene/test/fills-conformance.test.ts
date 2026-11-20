@@ -3,6 +3,7 @@ import { Rng, type Pt } from "@sketchy-js/core";
 import { resolveSketchOptions } from "@sketchy-js/core/options";
 import { assertDeterministic } from "@sketchy-js/plugin";
 import type { Diagnostic, FillStyle, PathOp, SketchOptions } from "@sketchy-js/types";
+import { contour, wash } from "@sketchy-js/fills";
 import { basicSketchy } from "../src/basic.js";
 import { createFillStage } from "../src/fill-stage.js";
 
@@ -58,6 +59,8 @@ const regions: [string, Pt[]][] = [
   ["small region", rect(0, 0, 3, 3)],
 ];
 
+const registry = basicSketchy.use(contour).use(wash);
+
 function run(
   style: FillStyle,
   polygon: Pt[],
@@ -66,7 +69,7 @@ function run(
   const options = resolveSketchOptions({ fillStyle: style, seed: 5n, ...extra });
   const diagnostics: Diagnostic[] = [];
   const stage = createFillStage({
-    fill: basicSketchy.resolveSpec("fill", { kind: style }),
+    fill: registry.resolveSpec("fill", { kind: style }),
     options,
     report: (d) => diagnostics.push(d),
   });
@@ -114,8 +117,13 @@ describe.each(styles)("built-in %s fill conformance", (style) => {
 });
 
 describe("fill plugin metadata", () => {
+  it("leaves contour and wash off the basic import", () => {
+    expect(() => basicSketchy.resolveSpec("fill", { kind: "contour" })).toThrow();
+    expect(() => basicSketchy.resolveSpec("fill", { kind: "wash" })).toThrow();
+  });
+
   it.each(styles)("%s is registered as a shared-stream fill using plugin api 1.0", (style) => {
-    const { plugin } = basicSketchy.resolveSpec("fill", { kind: style });
+    const { plugin } = registry.resolveSpec("fill", { kind: style });
     expect(plugin.kind).toBe("fill");
     expect(plugin.id).toBe(style);
     expect(plugin.api).toBe("1.0");

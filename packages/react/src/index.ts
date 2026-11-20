@@ -1,4 +1,5 @@
-import { createElement, useEffect, useMemo, useState, type ReactElement } from "react";
+import { createElement, useEffect, useId, useMemo, useState, type ReactElement } from "react";
+import { generateFrame, type VarianceConfig } from "@sketchy-js/animate";
 import { sketch, type ViewOptions } from "@sketchy-js/scene/basic";
 import { renderToSvgString } from "@sketchy-js/svg-renderer";
 import type { Scene, Size } from "@sketchy-js/types";
@@ -25,9 +26,52 @@ export interface SketchProps {
   readonly background?: string;
 }
 
-/** Builds a scene. Memoize `shapes`, `size`, and `options` to avoid redrawing. */
+/** Stable key so two equal option objects share one scene. Bigints survive the encoding. */
+export function sketchValueKey(value: unknown): string {
+  const encoded = JSON.stringify(value, (_key: string, item: unknown): unknown =>
+    typeof item === "bigint" ? `${item}n` : item,
+  );
+  return encoded ?? "";
+}
+
+/**
+ * Builds a scene. The memo key is the value of `shapes`, `size`, and `options`,
+ * not their object identity. A new options object with the same fields does not redraw.
+ */
 export function useSketch(shapes: Shapes, size: Size, options?: ViewOptions): Scene {
-  return useMemo(() => sketch(shapes, size, options), [shapes, size, options]);
+  const key = sketchValueKey({ shapes, size, options });
+  // The dependency is `key`, the value of the arguments, so a new object with the same fields does not redraw.
+  return useMemo(() => sketch(shapes, size, options), [key]);
+}
+
+/** Animation settings for `useSketchAnimation`. `intervalMs` defaults to Sketchy's medium speed. */
+export interface SketchAnimationConfig extends VarianceConfig {
+  intervalMs?: number;
+}
+
+/**
+ * The current animation frame of `scene`. The frame advances on `intervalMs`.
+ * Equal configs share the schedule; a new object with the same fields does not reset it.
+ */
+export function useSketchAnimation(scene: Scene, config: SketchAnimationConfig): Scene {
+  const key = sketchValueKey({
+    scene,
+    steps: config.steps,
+    variance: config.variance,
+    seed: config.seed,
+  });
+  const interval = config.intervalMs ?? 300;
+  const [frame, setFrame] = useState(0);
+  useEffect(() => {
+    setFrame(0);
+    const steps = Math.max(2, config.steps);
+    const id = setInterval(() => {
+      setFrame((current) => (current + 1) % steps);
+    }, interval);
+    return () => clearInterval(id);
+  }, [key, interval, config.steps]);
+  // `key` is the scene and the variance config. `frame` is the step.
+  return useMemo(() => generateFrame(scene, config, frame), [key, frame]);
 }
 
 /** Phase of an animated contour, in points. `elapsed` is seconds. */
@@ -57,7 +101,10 @@ export function SketchySvg({
   label: string;
   background?: string;
 }): ReactElement {
+  const reactId = useId();
+  const idPrefix = `sk${reactId.replace(/[^a-zA-Z0-9]/g, "")}`;
   const svg = renderToSvgString(scene, {
+    idPrefix,
     ...(background ? { background } : {}),
   });
   return createElement("div", {

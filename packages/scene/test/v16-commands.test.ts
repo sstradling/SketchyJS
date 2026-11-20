@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { circle, type Shape } from "@sketchy-js/core";
 import { crayon } from "@sketchy-js/brushes";
+import { contour, wash } from "@sketchy-js/fills";
 import type { Color, DrawLayer, InteriorShade, SceneNode } from "@sketchy-js/types";
 import { basicSketchy } from "../src/basic.js";
 import { sketchScene } from "../src/functional.js";
@@ -47,7 +48,7 @@ interface Command {
   };
 }
 
-const registry = basicSketchy.use(crayon);
+const registry = basicSketchy.use(contour).use(wash).use(crayon);
 
 function expectClose(
   actual: readonly FixtureOp[],
@@ -198,6 +199,7 @@ describe("v1.6.0 closed rings", () => {
       roughness: 0.2,
       strokeWidth: 12,
       strokeColor: [0, 0, 0, 1],
+      keepInvisibleCrayonLayers: true,
       brushProfile: {
         ...roundBrush,
         crayon: {
@@ -237,6 +239,22 @@ describe("v1.6.0 closed rings", () => {
         TOLERANCE,
       );
     });
+  });
+
+  it("is ready for closed rings whose path contains an explicit Z", () => {
+    const known = new Set([
+      "width-samples-stops",
+      "width-samples-variable",
+      "closed-ring-stops",
+      "closed-ring-variable",
+      "closed-crayon-ring",
+      "closed-ring-same-seed",
+    ]);
+    const extra = doc.cases.map((entry) => entry.id).filter((id) => !known.has(id));
+    expect(
+      extra,
+      "A Mac export added closed-width cases. Wire each id through ribbon() or the crayon comparison.",
+    ).toEqual([]);
   });
 });
 
@@ -326,8 +344,6 @@ describe("v1.6.0 interior shades", () => {
       layer.role === "shade" ? `shade:${layer.shade?.kind}` : layer.role,
     );
     expect(order).toEqual(item.order.map((entry) => entry.role));
-    expect(item.generatedSetsEqual, id).toBe(true);
-    expect(item.drawingCacheKeyEqual, id).toBe(true);
     const withShades = generateFixtureDrawing(shape, options(id));
     const bare = generateFixtureDrawing(shape, { ...options(id), interiorShades: [] });
     expect(JSON.stringify(withShades?.sets), `${id} sets`).toBe(JSON.stringify(bare?.sets));

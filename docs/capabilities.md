@@ -24,11 +24,11 @@ Both renderers consume the same `Scene`. Geometry is decided before either one r
 | Effect | SVG | Canvas | CoreGraphics |
 | --- | --- | --- | --- |
 | Sticker shadow | `feDropShadow`, `stdDeviation = radius / 2` | `shadowBlur = radius` | native shadow |
-| Interior inner shadow | `feOffset` + `feGaussianBlur`, `stdDeviation = blur / 2`, then a flood | `shadowBlur = blur`, `shadowOffset` | native shadow, clipped to the interior |
-| Halo | `stdDeviation = blur / 2` | `shadowBlur = blur` | native blur |
+| Interior inner shadow | `feOffset` + `feGaussianBlur`, `stdDeviation = blur`, then a flood | `shadowBlur = blur`, `shadowOffset` | same sigma. Sticker shadows still use `radius / 2` |
+| Halo | `stdDeviation = blur` | `shadowBlur = blur` | same sigma |
 
-`stdDeviation = radius / 2` is the same ratio the sticker shadow already uses. It is not a pixel match to Canvas or to CoreGraphics. Compare geometry in the parity tests. Compare SVG with Canvas using the channel limits in [visual-review.md](visual-review.md). Do not compare either to a Swift PNG at zero tolerance.
+Shade blur uses sigma = `blur` on both SVG and Canvas. Sticker shadows keep `stdDeviation = radius / 2`. Compare geometry in the parity tests. Compare SVG with Canvas, and the shade cards with the Swift PNGs, using the channel limits in [visual-review.md](visual-review.md).
 
 ## What the basic import pays for
 
-`@sketchy-js/scene/basic` registers every built-in fill, including contour and wash, and the SVG renderer can paint the result. It does not import stickers, the silhouette helper, React, or the canvas renderer. Stickers do not import React. React does not import Canvas.
+`@sketchy-js/scene/basic` registers the built-in fills except contour and wash. Those two are `@sketchy-js/fills/contour` and `@sketchy-js/fills/wash`, then `registry.use(...)`. The basic import does not include stickers, the silhouette helper, React, or the canvas renderer. Stickers do not import React. The React entry does not import Canvas; `SketchyCanvas` is `@sketchy-js/react/canvas`.

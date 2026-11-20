@@ -38,14 +38,16 @@ function context(seed: bigint, options: SketchOptions): PluginContext {
 /**
  * Replaces stroked layers with the crayon plugin's wax passes.
  *
- * A clear fill still produces wax. Sketchy emits those passes with a clear color, so the
- * command list of a default-filled crayon ring includes them. Renderers multiply the color
- * alpha, and the passes stay invisible.
+ * A layer whose color alpha is 0 is left as-is. The default fill is clear, and waxing it
+ * turns a few hachure strokes into tens of megabytes of invisible ellipses. The closed-crayon
+ * fixture still lists those passes, so the parity test sets `keepInvisibleCrayonLayers` on the
+ * raw options. That flag is not a `SketchOptions` field and is not part of the public API.
  */
 export function applyCrayon(
   drawing: Drawing,
   plugin: ResolvedPlugin,
   options: SketchOptions,
+  keepInvisible = false,
 ): Drawing {
   const crayon = options.brushProfile.crayon;
   if (!crayon) return drawing;
@@ -70,6 +72,11 @@ export function applyCrayon(
       continue;
     }
     const color = layer.paint.kind === "solid" ? layer.paint.color : options.strokeColor;
+    const colorAlpha = typeof color === "string" ? 1 : (color[3] ?? 1);
+    if (!keepInvisible && colorAlpha * (layer.paint.alpha ?? 1) === 0) {
+      layers.push(layer);
+      continue;
+    }
     for (const path of layer.paths) {
       const produced = generate(
         {

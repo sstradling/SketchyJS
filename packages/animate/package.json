@@ -27,5 +27,14 @@
   "license": "MIT",
   "engines": {
     "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sstradling/SketchyJS.git",
+    "directory": "packages/animate"
+  },
+  "homepage": "https://github.com/sstradling/SketchyJS#readme",
+  "bugs": {
+    "url": "https://github.com/sstradling/SketchyJS/issues"
   }
 }

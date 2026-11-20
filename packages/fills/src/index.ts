@@ -28,7 +28,7 @@ export {
 };
 export { skyWash, scaleWash } from "./wash.js";
 
-/** Built-in fill plugins, in registration order. Importing this pulls in all of them. */
+/** Built-in fills on the basic import. Contour and wash stay on their subpaths. */
 export const builtinFills: readonly FillPlugin[] = [
   solid,
   hachure,
@@ -40,6 +40,4 @@ export const builtinFills: readonly FillPlugin[] = [
   sunBurst,
   starBurst,
   scribble,
-  contour,
-  wash,
 ];

@@ -43,6 +43,14 @@ function spacingPasses(o: SketchOptions): SketchOptions[] {
   }));
 }
 
+/**
+ * Test-only switch read off the raw draw options before `resolveSketchOptions` drops
+ * unknown keys. It is not declared on `SketchOptions`.
+ */
+function keepInvisibleCrayon(raw: object): boolean {
+  return (raw as { keepInvisibleCrayonLayers?: boolean }).keepInvisibleCrayonLayers === true;
+}
+
 /** Crayon and watercolor run only when that brush plugin is registered. */
 function lookupBrush(
   resolver: FillResolver,
@@ -177,12 +185,13 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
         continue;
       }
       const assembled = attachShades(assembleDrawing(generated, size), item.shape, options, size);
+      const keepInvisible = keepInvisibleCrayon(item.options);
       nodes.push({
         type: "drawing",
         drawing: watercolorPlugin
           ? applyWatercolor(assembled, watercolorPlugin, options)
           : crayonPlugin
-            ? applyCrayon(assembled, crayonPlugin, options)
+            ? applyCrayon(assembled, crayonPlugin, options, keepInvisible)
             : assembled,
       });
     }

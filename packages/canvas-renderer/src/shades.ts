@@ -4,9 +4,9 @@ import type { Canvas2D } from "./context.js";
 /**
  * Paints an interior shade into Canvas 2D.
  *
- * `shadowBlur` is the shade's blur radius in CSS pixels. SVG uses
- * `stdDeviation = radius / 2`. The two are not the same kernel, and neither
- * matches CoreGraphics. Gradients and the inner shadow are clipped even-odd,
+ * `shadowBlur` is the shade blur sigma in CSS pixels. SVG uses the same sigma
+ * as `feGaussianBlur` `stdDeviation`. Sticker shadows are a different ratio.
+ * Gradients and the inner shadow are clipped even-odd,
  * so a hole stays empty. A halo strokes at twice the band width and is clipped
  * to the outside of the shape.
  */

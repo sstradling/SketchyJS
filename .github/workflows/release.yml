@@ -7,13 +7,60 @@ on:
         description: Publish nothing and create no tags
         type: boolean
         default: true
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [master]
 
 permissions:
   contents: write
   id-token: write
 
 jobs:
-  release:
+  guard:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Refuse anything that is not a green CI result on master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            test "${{ github.event.workflow_run.conclusion }}" = "success"
+            test "${{ github.event.workflow_run.head_branch }}" = "master"
+          else
+            test "${{ github.ref }}" = "refs/heads/master"
+            conclusion=$(gh run list --workflow CI --branch master --commit "${{ github.sha }}" --json conclusion --jq '.[0].conclusion')
+            test "$conclusion" = "success"
+          fi
+
+  verify:
+    needs: guard
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm size
+      - run: node scripts/publish-dry-run.mjs
+      - run: node scripts/release-dry-run.mjs
+      - run: pnpm smoke:exports
+
+  publish:
+    needs: verify
+    if: github.event_name == 'workflow_dispatch' && inputs.dry_run == false && github.ref == 'refs/heads/master'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -25,21 +72,22 @@ jobs:
           registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - run: pnpm test
-      - run: pnpm size
-      - run: node scripts/release-dry-run.mjs
-      - name: Fresh consumer tarball install
-        run: pnpm smoke:exports
-      - name: Publish with provenance, tag, and GitHub release
-        if: ${{ inputs.dry_run == false }}
+      - name: Version, publish, then tag and create the GitHub Release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: "true"
         run: |
           set -euo pipefail
+          test "$(git rev-parse --abbrev-ref HEAD)" = "master"
+          pnpm changeset version
+          git add -A
+          git commit -m "Version packages" || true
+          pnpm changeset publish
           version=$(node -p "require('./packages/core/package.json').version")
           test "$version" = "1.6.0"
-          pnpm -r publish --access public --provenance --no-git-checks
-          git tag -a "v$version" -m "SketchyJS $version"
-          git push origin "v$version"
+          if ! git rev-parse "v$version" >/dev/null 2>&1; then
+            git tag -a "v$version" -m "SketchyJS $version"
+            git push origin "v$version"
+          fi
           gh release create "v$version" --title "SketchyJS $version" --generate-notes

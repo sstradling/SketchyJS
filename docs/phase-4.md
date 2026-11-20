@@ -35,7 +35,7 @@ view.with({ fillStyle: "wash" })
 interiorShades
   -> not read by generateDrawing
   -> attachShades inserts layers after the fill (halo after the stroke)
-  -> SVG feGaussianBlur stdDeviation = blur/2; Canvas shadowBlur = blur
+  -> SVG feGaussianBlur stdDeviation = blur; Canvas shadowBlur = blur
 
 treeShadow(image, at)
   -> scene node type "silhouette"
@@ -84,54 +84,55 @@ Where 1.6.0 intentionally changed a 1.5.0 result, the 1.6.0 fixture wins. The kn
 
 `tools/worker-bench` drew 48 hachure rectangles at 640×480, seed 42, spacing 2, eight times after a warmup.
 
-| Runner | Median |
+| Step | Median |
 | --- | --- |
-| Main thread | 3.76 ms |
-| `worker_threads` | 3.75 ms |
+| Generation | 18.36 ms |
+| Paint of the built scene | 3.35 ms |
+| Main thread, canvas plus paint | 3.46 ms |
+| `worker_threads` paint | 4.37 ms |
 
-The worker is not faster. Message passing would add cost on top of that. **OffscreenCanvas is deferred.** WebGL and WebGPU were not prototyped: the scenes are path construction, not fill-rate, and a GPU backend would not change a 4 ms CPU draw.
+Generation is the expensive part. Painting in a worker is slower than painting on the main thread. **OffscreenCanvas stays deferred.** WebGL and WebGPU were not prototyped.
 
 ## Sizes
 
-`pnpm size`, minified gzip. Standing ceilings hold. The fills ceiling is now 16 KB because contour and wash joined the built-in set (measured 13.5 KB). The old 12 KB figure was the nine fills from 1.5.0.
+`pnpm size`, minified gzip. Standing ceilings hold, including 42 KB for the basic SVG scene. Contour and wash are subpath imports, so the basic scene is 34.9 KB and the basic fill set is 8.8 KB. The fills ceiling stays 16 KB.
 
 | Entry | Gzip | Ceiling |
 | --- | --- | --- |
-| Basic SVG scene | 39.4 KB | 42 KB |
+| Basic SVG scene | 34.9 KB | 42 KB |
 | Core | 17.5 KB | 18 KB |
-| All built-in fills | 13.5 KB | 16 KB |
-| `fills/contour` | 5.0 KB | 8 KB |
+| Basic fills, without contour and wash | 8.8 KB | 16 KB |
+| `fills/contour` | 5.1 KB | 8 KB |
 | `fills/wash` | 2.6 KB | 8 KB |
 | Canvas renderer | 3.9 KB | 12 KB |
 | Stickers | 15.3 KB | 18 KB |
-| Sticker scene | 35.2 KB | 65 KB |
+| Sticker scene | 35.3 KB | 65 KB |
 | Clipper | 17.1 KB | 22 KB |
-| React (SVG scene, React itself external) | 39.6 KB | 42 KB |
-| Web components | 39.9 KB | 42 KB |
+| React (SVG scene, React itself external) | 35.1 KB | 42 KB |
+| Web components | 35.6 KB | 42 KB |
 | `scene/silhouette` | 0.5 KB | 2 KB |
 
 ## Release
 
-The workflow is `.github/workflows/release.yml`. `workflow_dispatch` defaults to a dry run. A dry run verifies the tree, runs `scripts/release-dry-run.mjs`, and does not publish or tag. A real run, only after versions are set to 1.6.0 in one commit, publishes with npm provenance, creates one annotated `v1.6.0` tag, writes the GitHub release notes, and repeats the fresh-consumer tarball install.
+The workflow is `.github/workflows/release.yml`. It runs only for master, and only after CI on that commit is green (`workflow_run` or a green CI run for a manual dispatch). Node 22 and 24 both verify. A dry run is the default: it checks publish metadata with `npm publish --dry-run` and does not upload or tag. A real run versions with Changesets, publishes with provenance, and only then creates the annotated `v`-prefixed tag and the GitHub release. This PR does not publish.
 
 This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that number would publish `0.1.0` and is refused.
 
 ## Known gaps
 
-- The 1.6.0 Darwin fixtures are merged and the parity tests match them. No case failed at 1e-4, and the shade and silhouette PNGs stayed inside the delta 24 / 20% allowance.
-- Arc contour keeps per-band widths. Swift's single-set `fillArc` flattens bands when it goes through `fillPolygon`. Polygons and ellipses use the sets API on both sides.
-- `ContourGuide.path` (flatten a `CGPath`) is not a helper. Pass a polyline.
-- Shade and halo blur are not a pixel match to CoreGraphics. The ratio is documented in [capabilities.md](capabilities.md). The Swift cards still fit the existing delta 24 / 20% allowance, so that allowance was not raised.
+- The 1.6.0 Darwin fixtures match at 1e-4. Shade and silhouette PNGs fit delta 12 and 6%.
+- Arc contours flatten to one unscaled set, matching Swift `fillArc`. Polygon bands keep their scales.
+- `ContourGuide.path` is intentionally not ported. Pass a polyline.
 - A silhouette with no data URL and no live canvas draws nothing in SVG. Canvas can paint a live source.
-- React and the custom element render SVG only. Canvas remains `renderToCanvas`.
-- No WebGL, no worker renderer.
-- Versions are `0.0.0`. The release that sets 1.6.0 is a later PR.
+- `SketchyCanvas` is `@sketchy-js/react/canvas`. The main React entry stays SVG.
+- No WebGL, no worker renderer. Generation and paint are timed separately in `tools/worker-bench`.
+- Versions are `0.0.0`. One fixed Changesets group will move together to 1.6.0. The release that sets that version is a later PR.
+- Closed rings with an explicit `Z` are not in the fixtures yet. The parity file fails if a new closed-width id appears, so the Mac export can be wired without replacing the current cases.
 
-## Open questions for Seth
+## Decisions
 
-1. Answered by the fixture merge: `v1.6.0/` keeps the 1.5.0 layout, the re-run geometry is byte-identical, and only `darwin/options/defaults.json` gained the new fields. Closed width is the intentional 1.5.0 behavior change, and it matches the new ring fixtures.
-2. Should arc fills keep per-band contour widths, or flatten the way Swift's single-set `fillArc` does?
-3. Is `stdDeviation = blur / 2` the shade ratio you want to keep, matching sticker shadows, or should SVG move to the Canvas radius?
-4. The React and web-component bundles sit at 39.6 KB and 39.9 KB of the 42 KB basic-scene ceiling because they include that scene. Should the ceiling for those entries stay at 42 KB?
-5. `ContourGuide.path` flattening: do you want it in this library, or will callers pass polylines?
-6. The first release tag is `v1.6.0` with every package at that version. Confirm the fixed group should not split react or web-components onto their own number.
+1. Arc contour bands match Swift: one set, no per-band width.
+2. `ContourGuide.path` stays unported.
+3. Shade sigma is `blur` on SVG and Canvas. Sticker shadows stay at `radius / 2`.
+4. The 42 KB basic-scene ceiling stays. Contour and wash are subpath imports.
+5. One fixed version group, every package at 1.6.0, for the release PR.

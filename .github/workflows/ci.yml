@@ -25,6 +25,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm build
+      - run: node scripts/publish-dry-run.mjs
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm schemas:check

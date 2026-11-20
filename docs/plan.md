@@ -6,7 +6,7 @@
 
 Tooling baseline: Node.js 22+ (see `.nvmrc`) and pnpm 10.33.4.
 
-This plan targets feature parity with Sketchy `v1.5.0` (`fb17a6e`), not literal SwiftUI API compatibility. The Swift package is a native Swift port of rough.js-style geometry: it generates seeded drawing operations, then SwiftUI/CoreGraphics paint those operations. SketchyJS should preserve the observable drawing semantics, use idiomatic TypeScript and web rendering APIs, and keep the computational core usable without a browser or DOM.
+The first stable SketchyJS release is **v1.6.0**, matching Sketchy 1.6.0. The sticker baseline inside this plan remains Sketchy `v1.5.0` (`fb17a6e`). The plan is not a literal SwiftUI API. The Swift package is a native Swift port of rough.js-style geometry: it generates seeded drawing operations, then SwiftUI/CoreGraphics paint those operations. SketchyJS should preserve the observable drawing semantics, use idiomatic TypeScript and web rendering APIs, and keep the computational core usable without a browser or DOM.
 
 One important feature: Sketchy `v1.5.0` ships `StickerImage`, an image-masked sticker texture alongside the seeded procedural `StickerTexture.paper(...)` fibers. `StickerImage` wraps a caller-supplied, already decoded `UIImage` (Sketchy never fetches a URL) and masks it with the sticker sheet, so the image follows `.smooth`, `.fullySmooth()`, and `.torn()` edges, holes, and shared `SketchGroup` sheets. Placement is `.tile`, `.stretch`, or `.fill`, adjusted by `scale` and `opacity`. SketchyJS ports this as `StickerImage` on `StickerBacking.image` (see the table row and the `@sketchy-js/stickers` sketch below); acceptance fixtures come from the `v1.5.0` reference exporter.
 

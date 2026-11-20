@@ -37,6 +37,23 @@ function time(fn, n) {
   return samples[Math.floor(samples.length / 2)];
 }
 
+const options = { seed: 42n, fillStyle: "hachure", fillSpacing: 2 };
+sketch(shapes, size, options);
+const generationMs = time(() => {
+  const start = globalThis.performance.now();
+  sketch(shapes, size, options);
+  return globalThis.performance.now() - start;
+}, 8);
+
+const paintCanvas = createCanvas(size.width, size.height);
+const paintContext = paintCanvas.getContext("2d");
+renderToCanvas(scene, paintContext);
+const paintMs = time(() => {
+  const start = globalThis.performance.now();
+  renderToCanvas(scene, paintContext);
+  return globalThis.performance.now() - start;
+}, 8);
+
 draw(scene);
 const mainMs = time(() => {
   const start = globalThis.performance.now();
@@ -57,6 +74,8 @@ await worker.terminate();
 const benefit = mainMs - workerMs;
 const result = {
   scene: "48 hachure rectangles, 640×480, seed 42, spacing 2",
+  generationMedianMs: Number(generationMs.toFixed(2)),
+  paintMedianMs: Number(paintMs.toFixed(2)),
   mainThreadMedianMs: Number(mainMs.toFixed(2)),
   workerMedianMs: Number(workerMs.toFixed(2)),
   workerFasterMs: Number(benefit.toFixed(2)),

@@ -1,22 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { path, rectangle } from "@sketchy-js/core";
-import { RoughView } from "../src/basic.js";
+import { arc, path, rectangle } from "@sketchy-js/core";
+import { contour, wash } from "@sketchy-js/fills";
+import { basicSketchy } from "../src/basic.js";
+import { sketchScene } from "../src/functional.js";
 import { footAnchor, treeShadow } from "../src/silhouette.js";
 import { pitShadow } from "../src/shades.js";
+import { generateFixtureDrawing } from "./support/swift.js";
+
+const fills = basicSketchy.use(contour).use(wash);
 
 describe("phase 4 fills and shades", () => {
   it("clips a contour SVG hole with the even-odd rule", () => {
-    const scene = new RoughView()
-      .with({
+    const scene = sketchScene(
+      fills,
+      path("M10 10 H110 V90 H10 Z M40 30 H80 V70 H40 Z"),
+      { width: 140, height: 120 },
+      {
         fillStyle: "contour",
         seed: 1n,
         fillAngle: 0,
         fillSpacing: 4,
         contourIntensity: 0,
         fillColor: [0, 0, 0, 1],
-      })
-      .draw(path("M10 10 H110 V90 H10 Z M40 30 H80 V70 H40 Z"))
-      .build({ width: 140, height: 120 });
+      },
+    );
     const drawing = scene.nodes[0]?.type === "drawing" ? scene.nodes[0].drawing : undefined;
     const clips =
       drawing?.layers.flatMap((layer) => (layer.clip ? [layer.clip.fillRule] : [])) ?? [];
@@ -27,10 +34,16 @@ describe("phase 4 fills and shades", () => {
   });
 
   it("draws a wash with more than one stroke width", () => {
-    const scene = new RoughView()
-      .with({ fillStyle: "wash", seed: 3n, fillColor: [0.2, 0.45, 0.8, 1] })
-      .draw(rectangle(8, 8, 180, 90))
-      .build({ width: 200, height: 120 });
+    const scene = sketchScene(
+      fills,
+      rectangle(8, 8, 180, 90),
+      { width: 200, height: 120 },
+      {
+        fillStyle: "wash",
+        seed: 3n,
+        fillColor: [0.2, 0.45, 0.8, 1],
+      },
+    );
     const widths =
       scene.nodes[0]?.type === "drawing"
         ? scene.nodes[0].drawing.layers.flatMap((layer) =>
@@ -41,21 +54,42 @@ describe("phase 4 fills and shades", () => {
     expect(Math.max(...widths) - Math.min(...widths)).toBeGreaterThan(4);
   });
 
-  it("paints a pit shadow without changing the hachure", () => {
+  it("flattens an arc contour to one unscaled set", () => {
+    const drawing = generateFixtureDrawing(arc(40, 40, 80, 60, 0.2, 4, true), {
+      fillStyle: "contour",
+      seed: "3",
+      contourFalloff: 1,
+      fillSpacing: 6,
+    });
+    const bands = drawing?.sets.filter((set) => set.type === "fillSketch") ?? [];
+    expect(bands.length).toBe(1);
+    expect(bands[0]?.fillLineScale).toBeUndefined();
+    const polygon = generateFixtureDrawing(rectangle(10, 10, 80, 60), {
+      fillStyle: "contour",
+      seed: "3",
+      contourFalloff: 1,
+      fillSpacing: 6,
+      contourIntensity: 1,
+    });
+    const scales = (polygon?.sets ?? [])
+      .map((set) => set.fillLineScale)
+      .filter((scale) => scale !== undefined);
+    expect(scales.length).toBeGreaterThan(1);
+  });
+
+  it("paints a pit shadow without changing the solid fill", () => {
     const size = { width: 100, height: 80 };
-    const plain = new RoughView()
-      .with({ seed: 4n, fillStyle: "solid", fillColor: [0.8, 0.2, 0.2, 1] })
-      .draw(rectangle(10, 10, 60, 40))
-      .build(size);
-    const shaded = new RoughView()
-      .with({
-        seed: 4n,
-        fillStyle: "solid",
-        fillColor: [0.8, 0.2, 0.2, 1],
-        interiorShades: [pitShadow()],
-      })
-      .draw(rectangle(10, 10, 60, 40))
-      .build(size);
+    const plain = sketchScene(basicSketchy, rectangle(10, 10, 60, 40), size, {
+      seed: 4n,
+      fillStyle: "solid",
+      fillColor: [0.8, 0.2, 0.2, 1],
+    });
+    const shaded = sketchScene(basicSketchy, rectangle(10, 10, 60, 40), size, {
+      seed: 4n,
+      fillStyle: "solid",
+      fillColor: [0.8, 0.2, 0.2, 1],
+      interiorShades: [pitShadow()],
+    });
     const paths = (scene: typeof plain, role: string): string =>
       JSON.stringify(
         scene.nodes[0]?.type === "drawing"

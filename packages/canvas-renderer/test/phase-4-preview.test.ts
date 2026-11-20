@@ -4,7 +4,7 @@ import { Resvg } from "@resvg/resvg-js";
 import { describe, expect, it } from "vitest";
 import { circle, rectangle } from "@sketchy-js/core";
 import { defaultSketchOptions } from "@sketchy-js/core/options";
-import { skyWash } from "@sketchy-js/fills";
+import { contour, skyWash, wash } from "@sketchy-js/fills";
 import { crayon } from "@sketchy-js/brushes";
 import { basicSketchy, RoughView } from "@sketchy-js/scene/basic";
 import { edgeShade, halo, pitRecess, pitShadow } from "@sketchy-js/scene";
@@ -86,44 +86,41 @@ describe("phase 4 previews", () => {
     mkdirSync(dir, { recursive: true });
     const size = { width: 360, height: 260 };
     const profile = defaultSketchOptions().brushProfile;
-    const contour = new RoughView()
-      .with({
-        seed: 7n,
-        fillStyle: "contour",
-        fillColor: blue,
-        strokeColor: ink,
-        contourGuide: { kind: "arc", x: 180, y: 520, radius: 460 },
-        contourIntensity: 1,
-        contourFalloff: 0.65,
-        fillSpacing: 6,
-      })
-      .draw(rectangle(30, 24, 300, 200))
-      .build(size);
-    const wash = new RoughView()
-      .with({
-        seed: 11n,
-        fillStyle: "wash",
-        fillColor: [0.45, 0.62, 0.82, 1],
-        strokeColor: ink,
-        washPasses: [
-          {
-            ...skyWash[0]!,
-            seed: 3n,
-            widthMin: 10,
-            widthSpan: 6,
-            spacingMin: 8,
-            spacingSpan: 4,
-            trimMax: 10,
-            bow: 8,
-          },
-        ],
-      })
-      .draw(rectangle(24, 30, 310, 190))
-      .build(size);
-    const sky = new RoughView()
-      .with({ seed: 11n, fillStyle: "wash", fillColor: [0.55, 0.72, 0.9, 1], strokeColor: ink })
-      .draw(rectangle(20, 20, 320, 200))
-      .build({ width: 420, height: 280 });
+    const withFills = basicSketchy.use(contour).use(wash);
+    const contourScene = sketchScene(withFills, rectangle(30, 24, 300, 200), size, {
+      seed: 7n,
+      fillStyle: "contour",
+      fillColor: blue,
+      strokeColor: ink,
+      contourGuide: { kind: "arc", x: 180, y: 520, radius: 460 },
+      contourIntensity: 1,
+      contourFalloff: 0.65,
+      fillSpacing: 6,
+    });
+    const washScene = sketchScene(withFills, rectangle(24, 30, 310, 190), size, {
+      seed: 11n,
+      fillStyle: "wash",
+      fillColor: [0.45, 0.62, 0.82, 1],
+      strokeColor: ink,
+      washPasses: [
+        {
+          ...skyWash[0]!,
+          seed: 3n,
+          widthMin: 10,
+          widthSpan: 6,
+          spacingMin: 8,
+          spacingSpan: 4,
+          trimMax: 10,
+          bow: 8,
+        },
+      ],
+    });
+    const sky = sketchScene(
+      withFills,
+      rectangle(20, 20, 320, 200),
+      { width: 420, height: 280 },
+      { seed: 11n, fillStyle: "wash", fillColor: [0.55, 0.72, 0.9, 1], strokeColor: ink },
+    );
     const shades = new RoughView()
       .with({
         seed: 4n,
@@ -185,8 +182,8 @@ describe("phase 4 previews", () => {
       .build({ width: 220, height: 160 });
 
     const files: [string, Scene, number][] = [
-      ["contour.png", contour, 0.08],
-      ["wash.png", wash, 0.08],
+      ["contour.png", contourScene, 0.08],
+      ["wash.png", washScene, 0.08],
       ["sky-wash.png", sky, 0.12],
       ["interior-shades.png", shades, 0.2],
       ["closed-variable.png", variable, 0.08],
@@ -194,10 +191,17 @@ describe("phase 4 previews", () => {
       ["react-example.png", reactExample, 0.05],
     ];
     for (const [name, scene, limit] of files) {
+      expect(scene.nodes.length, name).toBeGreaterThan(0);
+      expect(scene.diagnostics, name).toBeUndefined();
+      const svg = renderToSvgString(scene, { background });
+      expect(svg, name).toContain("<path");
       const { png, fraction } = renderPng(scene);
       expect(fraction, name).toBeLessThan(limit);
+      expect(png.byteLength, name).toBeGreaterThan(500);
       if (process.env.UPDATE_EXAMPLES === "1") writeFileSync(new URL(name, dir), png);
-      expect(statSync(new URL(name, dir)).size).toBeLessThan(10 * 1024 * 1024);
+      const file = statSync(new URL(name, dir));
+      expect(file.size, name).toBeGreaterThan(500);
+      expect(file.size, name).toBeLessThan(10 * 1024 * 1024);
     }
     const shadowPng = renderPng(shadow, { [image.href]: image.canvas });
     expect(shadowPng.fraction).toBeLessThan(0.2);

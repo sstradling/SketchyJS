@@ -24,7 +24,7 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
     ceiling: 18,
   },
   {
-    name: "fills: built-ins including contour and wash",
+    name: "fills: basic built-ins, contour and wash excluded",
     code: `export { builtinFills } from "@sketchy-js/fills";`,
     ceiling: 16,
   },

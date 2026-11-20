@@ -21,8 +21,11 @@ import { renderToCanvas, type Canvas2D, type CanvasSurfaceFactory } from "../src
  */
 
 const root = fileURLToPath(new URL("../../../fixtures/swift-reference/v1.6.0/", import.meta.url));
-const DELTA = 24;
-const MAX_FRACTION = 0.2;
+/** SwiftUI `Color.blue` in this export is sRGB (0, 136, 255), not CSS blue. */
+const SWIFT_BLUE = [0, 136 / 255, 1, 1] as const;
+
+const DELTA = 12;
+const MAX_FRACTION = 0.06;
 
 const surface: CanvasSurfaceFactory = (width, height) => {
   const canvas = createCanvas(Math.max(1, Math.ceil(width)), Math.max(1, Math.ceil(height)));
@@ -109,7 +112,7 @@ describe("v1.6.0 shade and silhouette pixels", () => {
     "%s stays within the blur allowance",
     async (id) => {
       const ref = await reference(`images/shades/${id}.png`);
-      const actual = paint(shadeScene(id), id === "shade-hole" ? "#0000ff" : beige);
+      const actual = paint(shadeScene(id), id === "shade-hole" ? SWIFT_BLUE : beige);
       const share = fraction(actual, ref.data);
       expect(share, `${id} differing fraction ${share}`).toBeLessThanOrEqual(MAX_FRACTION);
     },

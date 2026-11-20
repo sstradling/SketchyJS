@@ -111,6 +111,22 @@ export const contour = /*#__PURE__*/ defineFill({
       });
     }
 
+    // Swift's `fillArc` goes through one `fillPolygon` set and drops per-band scale.
+    // An arc sector matches that: one stroke list, the fill weight, no band widths.
+    if (input.region.shape?.kind === "arc") {
+      const flat: Path[] = [];
+      const pieces = new Map<number, number>();
+      for (const stroke of plan.strokes) {
+        const piece = pieces.get(stroke.slot) ?? 0;
+        pieces.set(stroke.slot, piece + 1);
+        const path = roughen(stroke, piece, input.seed, ctx);
+        if (path.length > 0) flat.push(path);
+      }
+      return flat.length === 0
+        ? []
+        : [{ kind: "strokes", centerlines: [flat.flat()], clip: "none" }];
+    }
+
     const parts: FillPart[] = [];
     let band: { scale: number; paths: Path[] } | undefined;
     const pieceCount = new Map<number, number>();

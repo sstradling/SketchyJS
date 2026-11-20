@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { Shape } from "@sketchy-js/core";
 import { generateDrawing, type SketchDrawing } from "@sketchy-js/core";
 import { resolveSketchOptions } from "@sketchy-js/core/options";
+import { contour, wash } from "@sketchy-js/fills";
 import { basicSketchy } from "../../src/basic.js";
 import { createFillStage } from "../../src/fill-stage.js";
 import type { FillStyle, PathOp, SketchOptions } from "@sketchy-js/types";
@@ -140,7 +141,7 @@ export function generateFixtureDrawing(
   diagnostics: { code: string }[] = [],
 ): SketchDrawing | undefined {
   const options = resolveSketchOptions(fixtureOptions(raw));
-  const fill = basicSketchy.resolveSpec("fill", { kind: options.fillStyle });
+  const fill = basicSketchy.use(contour).use(wash).resolveSpec("fill", { kind: options.fillStyle });
   const stage = createFillStage({ fill, options, report: (d) => diagnostics.push(d) });
   return generateDrawing(shape, options, stage);
 }

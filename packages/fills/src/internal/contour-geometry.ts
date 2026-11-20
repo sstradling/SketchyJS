@@ -109,15 +109,12 @@ export function planContour(polygon: readonly Point[], options: ContourPlanOptio
   const phaseSlots = slotShift(phase, drift.along, gap, count);
   const falloff = clamp01(options.falloff);
   const strokes: ContourStroke[] = [];
-  const pieceCount = new Map<number, number>();
   const minChord = Math.max(8, f(scan.across * 0.35));
   for (const placement of placements(count, falloff, phaseSlots)) {
     const offset = scan.position(placement.u);
     const scale = widthScale(placement.u, falloff);
     for (const piece of scan.pieces(offset, polygon)) {
       if (chord(piece) < minChord) continue;
-      const pieceIndex = pieceCount.get(placement.slot) ?? 0;
-      pieceCount.set(placement.slot, pieceIndex + 1);
       strokes.push({ slot: placement.slot, offset, scale, points: piece });
     }
   }

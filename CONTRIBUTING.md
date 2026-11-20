@@ -93,7 +93,7 @@ Include the package and version, a minimal reproduction (shape, options, seed), 
 
 ## Licensing
 
-Contributions are made under the repository's license. A `LICENSE` file and a code of conduct have not been added yet and will land before the first release; the maintainers will confirm the license before accepting code contributions. By opening a pull request you confirm that you wrote the code or have the right to submit it. Do not copy code from projects whose licenses are incompatible; rough.js-derived algorithms must keep the required notices (see the plan's relationship-to-rough.js section).
+Contributions are made under the MIT license in [LICENSE](LICENSE). Third-party notices stay in [THIRD_PARTY_NOTICES](THIRD_PARTY_NOTICES). By opening a pull request you confirm that you wrote the code or have the right to submit it. Do not copy code from projects whose licenses are incompatible; rough.js-derived algorithms must keep the required notices (see the plan's relationship-to-rough.js section).
 
 ## Security
 
