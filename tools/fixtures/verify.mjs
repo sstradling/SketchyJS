@@ -108,6 +108,14 @@ const v16FeatureCases = {
     "closed-crayon-ring",
     "closed-ring-same-seed",
   ],
+  "strokes/closed-width-z.json": [
+    "closed-z-ring-stops",
+    "closed-z-ring-variable",
+    "closed-z-crayon-ring",
+    "closed-z-ring-same-seed",
+    "closed-z-rounded-rect-stops",
+    "closed-z-crayon-fill",
+  ],
   "stickers/silhouette-shadow.json": ["silhouette-affine", "silhouette-tree"],
 };
 
@@ -192,6 +200,18 @@ export function verifyV160(dir = referenceV16Dir) {
   }
   const same = (closed.cases ?? []).find((entry) => entry.id === "closed-ring-same-seed");
   if (!same?.identical) problems.push("closed-ring-same-seed did not repeat");
+  const closedZPath = join(dir, "strokes/closed-width-z.json");
+  if (existsSync(closedZPath)) {
+    const closedZ = JSON.parse(readFileSync(closedZPath, "utf8"));
+    const repeated = (closedZ.cases ?? []).find((entry) => entry.id === "closed-z-ring-same-seed");
+    if (!repeated?.identical) problems.push("closed-z-ring-same-seed did not repeat");
+    for (const item of closedZ.cases ?? []) {
+      const contours = (item.sets ?? []).filter((set) => set.type === "path" || set.type === "fillPath");
+      if (contours.length === 0 || contours.some((set) => !(set.ops ?? []).some((op) => op[0] === "Z"))) {
+        problems.push(`${item.id} input path has no close op`);
+      }
+    }
+  }
   const shadow = JSON.parse(readFileSync(join(dir, "stickers/silhouette-shadow.json"), "utf8"));
   for (const item of shadow.cases ?? []) {
     if (!Array.isArray(item.composedTransform) || item.composedTransform.length !== 6) {
