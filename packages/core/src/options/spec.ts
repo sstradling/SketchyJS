@@ -14,6 +14,8 @@ const FILL_STYLES = [
   "zigzagLine",
   "scribble",
   "watercolor",
+  "contour",
+  "wash",
 ] as const;
 
 /**
@@ -73,6 +75,18 @@ export const SKETCH_OPTIONS = {
     enforcedBy: "modifier",
   }),
   scribbleUseBrushStroke: /*#__PURE__*/ bool("Options.scribbleUseBrushStroke", false),
+  contourIntensity: /*#__PURE__*/ num("float", "Options.contourIntensity", 1),
+  contourGradientAngle: /*#__PURE__*/ num("float", "Options.contourGradientAngle", 90),
+  contourEasing: /*#__PURE__*/ choice(
+    "Options.contourEasing",
+    ["linear", "easeIn", "easeOut", "easeInOut"],
+    "linear",
+  ),
+  contourFalloff: /*#__PURE__*/ num("float", "Options.contourFalloff", 0, {
+    min: 0,
+    max: 1,
+    enforcedBy: "modifier",
+  }),
   svgFillStrokeAlignment: /*#__PURE__*/ choice(
     "Options.svgFillStrokeAlignment",
     ["center", "inside", "outside"],
@@ -92,6 +106,12 @@ export const STRUCTURAL_SKETCH_KEYS = [
   "svgStrokeWidth",
   "brushProfile",
   "stickerBacking",
+  "contourGuide",
+  "contourIntensityStart",
+  "contourIntensityEnd",
+  "contourDrift",
+  "washPasses",
+  "interiorShades",
 ] as const;
 
 /** `CrayonStyle` initializer clamps. The default seed is the sentinel `1`. */

@@ -14,7 +14,9 @@
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
@@ -22,10 +24,21 @@
   },
   "dependencies": {
     "@sketchy-js/types": "workspace:*",
-    "@sketchy-js/scene": "workspace:*"
+    "@sketchy-js/scene": "workspace:*",
+    "@sketchy-js/svg-renderer": "workspace:*",
+    "@sketchy-js/core": "workspace:*"
   },
   "license": "MIT",
   "engines": {
     "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sstradling/SketchyJS.git",
+    "directory": "packages/web-components"
+  },
+  "homepage": "https://github.com/sstradling/SketchyJS#readme",
+  "bugs": {
+    "url": "https://github.com/sstradling/SketchyJS/issues"
   }
 }

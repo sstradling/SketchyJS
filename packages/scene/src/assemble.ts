@@ -83,18 +83,25 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
   const layers: DrawLayer[] = [];
 
   const fillStrokes = (
+    set: OperationSet,
     paths: Path[],
     role: "fill" | "fill-pattern",
     clip: ClipDescriptor | undefined,
-  ): DrawLayer => ({
-    role,
-    paths,
-    fillRule: "nonzero",
-    paint: fillPaint,
-    strokeWidth: aligned.width,
-    ...strokeStyle(o),
-    ...(clip ? { clip } : {}),
-  });
+  ): DrawLayer => {
+    const scale =
+      set.fillLineScale !== undefined ? Math.min(4, Math.max(0.05, set.fillLineScale)) : 1;
+    const width = set.fillLineWidth ?? aligned.width * scale;
+    const alpha = Math.min(1, Math.max(0, (fillPaint.alpha ?? 1) * (set.opacityScale ?? 1)));
+    return {
+      role,
+      paths,
+      fillRule: "nonzero",
+      paint: { ...fillPaint, alpha },
+      strokeWidth: width,
+      ...strokeStyle(o),
+      ...(clip ? { clip } : {}),
+    };
+  };
 
   for (const set of drawing.sets) {
     switch (set.type) {
@@ -116,7 +123,7 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
           ? { paths: [transformPath(set.clip, matrix)], fillRule: "nonzero" as const }
           : undefined;
         layers.push(
-          fillStrokes([transformPath(set.ops, matrix)], "fill", scribbleClip ?? aligned.clip),
+          fillStrokes(set, [transformPath(set.ops, matrix)], "fill", scribbleClip ?? aligned.clip),
         );
         break;
       }
@@ -124,7 +131,10 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
         layers.push({
           role: "fill",
           paths: [transformPath(set.ops, matrix)],
-          fillRule: set.fillRule ?? "nonzero",
+          // A compound path (a hole) is even-odd, matching the SwiftUI fill of
+          // a path that contains more than one contour. A single contour stays
+          // nonzero; the two rules paint that shape the same.
+          fillRule: set.fillRule ?? (moveCount(set.ops) > 1 ? "evenodd" : "nonzero"),
           paint: { kind: "solid", color: o.fillColor, alpha: set.opacity ?? o.fillOpacity },
           ...(set.clip
             ? { clip: { paths: [transformPath(set.clip, matrix)], fillRule: "nonzero" as const } }
@@ -134,17 +144,25 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
       case "path2DFill": {
         if (set.path === undefined) break;
         const path = transformPath(svgPathToOps(set.path), matrix);
-        layers.push({ role: "fill", paths: [path], fillRule: "nonzero", paint: fillPaint });
+        layers.push({
+          role: "fill",
+          paths: [path],
+          fillRule: moveCount(path) > 1 ? "evenodd" : "nonzero",
+          paint: fillPaint,
+        });
         break;
       }
       case "path2DPattern": {
         if (set.path === undefined) break;
         const shape = transformPath(svgPathToOps(set.path), matrix);
         if (set.ops.length > 0) {
-          const clip: ClipDescriptor = { paths: [shape], fillRule: "nonzero" };
-          layers.push(fillStrokes([transformPath(set.ops, matrix)], "fill-pattern", clip));
+          const clip: ClipDescriptor = {
+            paths: [shape],
+            fillRule: set.fillRule ?? "nonzero",
+          };
+          layers.push(fillStrokes(set, [transformPath(set.ops, matrix)], "fill-pattern", clip));
         } else {
-          layers.push(fillStrokes([shape], "fill-pattern", aligned.clip));
+          layers.push(fillStrokes(set, [shape], "fill-pattern", aligned.clip));
         }
         break;
       }
@@ -158,6 +176,13 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
  * Curved bevel, variable width, and calligraphic tips become filled outlines.
  * A varying opacity profile becomes one luminance-mask group.
  */
+/** Contours in one operation list. More than one means the path has a hole or a second island. */
+function moveCount(ops: readonly { op: string }[]): number {
+  let count = 0;
+  for (const op of ops) if (op.op === "M") count++;
+  return count;
+}
+
 function applyAdvancedStroke(drawing: Drawing, o: SketchOptions): Drawing {
   const profile = o.brushProfile;
   if (profile.crayon || profile.watercolor) return drawing;

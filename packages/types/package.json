@@ -16,7 +16,9 @@
   },
   "files": [
     "dist",
-    "schemas"
+    "schemas",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
@@ -25,5 +27,14 @@
   "license": "MIT",
   "engines": {
     "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sstradling/SketchyJS.git",
+    "directory": "packages/types"
+  },
+  "homepage": "https://github.com/sstradling/SketchyJS#readme",
+  "bugs": {
+    "url": "https://github.com/sstradling/SketchyJS/issues"
   }
 }

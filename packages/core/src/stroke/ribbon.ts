@@ -122,9 +122,6 @@ export function opacityRibbon(
       ? 1
       : opacityAt(brush.opacityProfile, 0, true) * strokeOpacity;
   for (const line of centerlines(path)) {
-    const widthBrush = line.closed
-      ? { ...brush, thicknessProfile: { kind: "uniform" as const } }
-      : brush;
     const opacityAtT = (t: number): number => {
       const raw = opacityAt(brush.opacityProfile, t, line.closed) * strokeOpacity;
       const blended = line.closed ? seamBlend(raw, uniform, t, 0.06) : raw;
@@ -132,8 +129,8 @@ export function opacityRibbon(
     };
     pieces.push(
       ...ribbonPieces(line.samples, line.closed, brush.cap, (sample) => {
-        const multiplier = thicknessWidth(widthBrush.thicknessProfile, sample.t, width);
-        const local = effectiveWidth(widthBrush.tip, multiplier, sample.tangent);
+        const localWidth = thicknessWidth(brush.thicknessProfile, sample.t, width, line.closed);
+        const local = effectiveWidth(brush.tip, localWidth, sample.tangent);
         return { half: Math.max(0, local) / 2, opacity: opacityAtT(sample.t) };
       }),
     );

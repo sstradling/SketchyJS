@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildManifest } from "../build-manifest.mjs";
-import { verifyManifest } from "../verify.mjs";
+import { verifyManifest, verifyV160 } from "../verify.mjs";
 
 interface AcceptedReference {
   id: string;
@@ -43,6 +43,10 @@ describe("committed Swift reference manifest", () => {
 
   it("matches the files on disk", () => {
     expect(verifyManifest()).toEqual([]);
+  });
+
+  it("checks the Sketchy 1.6.0 corpus and its case list", () => {
+    expect(verifyV160()).toEqual([]);
   });
 
   it("is pinned to Sketchy v1.5.0", () => {

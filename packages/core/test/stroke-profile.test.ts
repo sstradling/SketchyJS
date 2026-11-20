@@ -3,6 +3,7 @@ import type { BrushProfile, Path } from "@sketchy-js/types";
 import {
   effectiveWidth,
   opacityRibbon,
+  strokeToOutline,
   thicknessMultiplier,
   thicknessWidth,
 } from "../src/stroke/index.js";
@@ -51,6 +52,23 @@ describe("brush tips and thickness", () => {
     expect(thicknessWidth({ kind: "stops", stops: [] }, 0.5, 6)).toBe(6);
   });
 
+  it("blends a closed ring back to the width at the start", () => {
+    const stops = {
+      kind: "stops" as const,
+      stops: [
+        { position: 0, width: 2 },
+        { position: 1, width: 10 },
+      ],
+    };
+    expect(thicknessWidth(stops, 0, 8, true)).toBeCloseTo(2, 5);
+    expect(thicknessWidth(stops, 1, 8, true)).toBeCloseTo(2, 5);
+    expect(thicknessWidth(stops, 0.5, 8, true)).toBeCloseTo(6, 5);
+    expect(thicknessWidth(stops, 1, 8, false)).toBeCloseTo(10, 5);
+    expect(thicknessWidth(stops, 0.03, 8, true)).toBeLessThan(
+      thicknessWidth(stops, 0.03, 8, false),
+    );
+  });
+
   it("varies width from a seed and repeats", () => {
     const width = {
       variation: 1,
@@ -69,6 +87,43 @@ describe("brush tips and thickness", () => {
     expect(at(7, 0.3)).toBeLessThanOrEqual(1.6);
     const times = [0.15, 0.4, 0.7];
     expect(times.map((t) => at(7, t))).not.toEqual(times.map((t) => at(11, t)));
+  });
+});
+
+describe("closed join", () => {
+  it("changes the outline when the centerline ends in Z and blends the first 6%", () => {
+    const profile: BrushProfile = {
+      ...uniform,
+      thicknessProfile: {
+        kind: "stops",
+        stops: [
+          { position: 0, width: 4 },
+          { position: 0.15, width: 14 },
+          { position: 0.85, width: 14 },
+          { position: 1, width: 4 },
+        ],
+      },
+    };
+    const line: Path = [
+      { op: "M", x: 10, y: 10 },
+      { op: "L", x: 110, y: 10 },
+      { op: "L", x: 110, y: 80 },
+      { op: "L", x: 10, y: 80 },
+    ];
+    const style = {
+      width: 8,
+      cap: "round" as const,
+      join: "round" as const,
+      miterLimit: 10,
+      profile,
+    };
+    const open = strokeToOutline(line, style);
+    const closed = strokeToOutline([...line, { op: "Z" }], style);
+    expect(JSON.stringify(open)).not.toBe(JSON.stringify(closed));
+    const stops = profile.thicknessProfile;
+    expect(thicknessWidth(stops, 0.02, 8, true)).toBeLessThan(
+      thicknessWidth(stops, 0.02, 8, false),
+    );
   });
 });
 

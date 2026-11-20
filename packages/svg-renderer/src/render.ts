@@ -1,6 +1,8 @@
 import type { ClipDescriptor, DrawLayer, Paint, Scene, SceneNode } from "@sketchy-js/types";
 import { cssColor, formatNumber, matrixAttribute, pathData } from "./format.js";
 import { resolveSvgOptions, type ResolvedSvgOptions, type SvgRenderOptions } from "./options.js";
+import { renderShade } from "./shades.js";
+import { renderSilhouette } from "./silhouette.js";
 import { el, type SvgElement } from "./tree.js";
 
 /** Collects deduplicated `clipPath` and `mask` definitions while layers are rendered. */
@@ -253,6 +255,7 @@ function controlBox(paths: DrawLayer["paths"]): {
  * and hachure-style fills); one without paints filled areas.
  */
 function renderLayer(layer: DrawLayer, options: ResolvedSvgOptions, defs: Defs): SvgElement {
+  if (layer.shade) return renderShade(layer, options, defs);
   const { precision } = options;
   const paint = resolvePaint(layer.paint, options);
   const opacity = opacityAttribute(paint.opacity, precision);
@@ -355,6 +358,7 @@ function renderNode(node: SceneNode, options: ResolvedSvgOptions, defs: Defs): S
       node.children.map((c) => renderNode(c, options, defs)),
     );
   }
+  if (node.type === "silhouette") return renderSilhouette(node.shadow, options, defs, transform);
   return el("g", { transform }, renderLayers(node.drawing.layers, options, defs));
 }
 

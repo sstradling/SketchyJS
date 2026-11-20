@@ -99,16 +99,43 @@ function hasAdjustment(o: SketchOptions): boolean {
 }
 
 function patternSet(
-  ops: OperationSet["ops"],
+  set: OperationSet,
   path: string,
   bounds: { width: number; height: number },
+  evenOdd: boolean,
 ): OperationSet {
   return {
     type: "path2DPattern",
-    ops,
+    ops: set.ops,
     path,
     size: { width: f(bounds.width), height: f(bounds.height) },
+    ...(set.fillLineScale !== undefined ? { fillLineScale: set.fillLineScale } : {}),
+    ...(set.fillLineWidth !== undefined ? { fillLineWidth: set.fillLineWidth } : {}),
+    ...(set.opacityScale !== undefined ? { opacityScale: set.opacityScale } : {}),
+    ...(evenOdd ? { fillRule: "evenodd" as const } : {}),
   };
+}
+
+/** Contour and wash keep one set per width band, and clip SVG holes even-odd. */
+function patternSets(
+  sets: readonly OperationSet[],
+  path: string,
+  bounds: { width: number; height: number },
+  style: string,
+): OperationSet[] {
+  const evenOdd = style === "contour" || style === "wash";
+  const banded = sets.some(
+    (set) =>
+      set.fillLineScale !== undefined ||
+      set.fillLineWidth !== undefined ||
+      set.opacityScale !== undefined,
+  );
+  const groups = banded || evenOdd ? sets : [mergeSets(sets)];
+  return groups.map((set) => patternSet(set, path, bounds, evenOdd));
+}
+
+function mergeSets(sets: readonly OperationSet[]): OperationSet {
+  return { type: "fillSketch", ops: mergedOps(sets) };
 }
 
 /**
@@ -133,7 +160,7 @@ export function pathFill(stage: FillStage, ctx: RoughCtx, d: string): readonly O
     if (direct) return [{ type: "path2DFill", ops: [], path: clipped }];
     const sets = stage.run({ kind: "polygon", points: outer }, ctx);
     if (sets.length === 0) return [];
-    return [patternSet(mergedOps(sets), clipped, controlPointBounds(svgPathToOps(clipped)))];
+    return patternSets(sets, clipped, controlPointBounds(svgPathToOps(clipped)), o.fillStyle);
   }
   if (direct && wash) return stage.run({ kind: "svgPath", d }, ctx);
   if (direct) return [{ type: "path2DFill", ops: [], path: d }];
@@ -150,5 +177,5 @@ export function pathFill(stage: FillStage, ctx: RoughCtx, d: string): readonly O
   ];
   const sets = stage.run({ kind: "polygon", points: box }, ctx);
   if (sets.length === 0) return [];
-  return [patternSet(mergedOps(sets), d, bounds)];
+  return patternSets(sets, d, bounds, o.fillStyle);
 }

@@ -11,6 +11,26 @@ export interface Canvas2D {
   quadraticCurveTo(cpx: number, cpy: number, x: number, y: number): void;
   bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
   closePath(): void;
+  /** Present on a real 2D context. Geometry recorders omit it; shades then use the path. */
+  ellipse?(
+    cx: number,
+    cy: number,
+    rx: number,
+    ry: number,
+    rotation: number,
+    start: number,
+    end: number,
+  ): void;
+  rect?(x: number, y: number, w: number, h: number): void;
+  createLinearGradient?(x0: number, y0: number, x1: number, y1: number): CanvasGradientLike;
+  createRadialGradient?(
+    x0: number,
+    y0: number,
+    r0: number,
+    x1: number,
+    y1: number,
+    r1: number,
+  ): CanvasGradientLike;
   fill(rule?: "nonzero" | "evenodd"): void;
   stroke(): void;
   clip(rule?: "nonzero" | "evenodd"): void;

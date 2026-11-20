@@ -520,7 +520,8 @@ export interface StrokeOutlineStyle {
 /**
  * Filled outline of a centerline. Samples Béziers adaptively, offsets by the
  * brush tip and thickness profile, and inserts the join at sharp corners.
- * Closed contours use a uniform width so the join does not seam.
+ * Closed contours keep the profile. The first and last 6% blend toward the
+ * start width so the join meets. The middle of a ring stays empty.
  *
  * This is Sketchy's `StrokeToFillConverter`, including curved bevel.
  */
@@ -533,11 +534,11 @@ export function strokeToOutline(path: Path, style: StrokeOutlineStyle): Path {
     const samples = sampleSubpath(sub, closed);
     if (samples.length < 2) continue;
     const profile = style.profile;
-    const uniform =
-      closed && profile ? { ...profile, thicknessProfile: { kind: "uniform" as const } } : profile;
     const halfAt = (t: number, tangent: number): number => {
-      const base = uniform ? thicknessWidth(uniform.thicknessProfile, t, style.width) : style.width;
-      const width = uniform ? effectiveWidth(uniform.tip, base, tangent) : base;
+      const base = profile
+        ? thicknessWidth(profile.thicknessProfile, t, style.width, closed)
+        : style.width;
+      const width = profile ? effectiveWidth(profile.tip, base, tangent) : base;
       return Math.max(0, width) / 2;
     };
     const left: Step[] = [];
@@ -558,7 +559,7 @@ export function strokeToOutline(path: Path, style: StrokeOutlineStyle): Path {
           sample.outgoing,
           halfAt(sample.t, sample.tangent),
           halfAt(sample.t, sample.outgoing),
-          uniform?.join ?? style.join,
+          profile?.join ?? style.join,
           style.miterLimit,
           left,
           right,
@@ -584,7 +585,7 @@ export function strokeToOutline(path: Path, style: StrokeOutlineStyle): Path {
       ops.push({ op: "Z" });
     } else {
       ops.push(...replay(left.slice(1), store));
-      const cap = uniform?.cap ?? style.cap;
+      const cap = profile?.cap ?? style.cap;
       const endFrom = stepPoint(lastLeft);
       const endTo = stepPoint(lastRight);
       const startTo = stepPoint(firstLeft);

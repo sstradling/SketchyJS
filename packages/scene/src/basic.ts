@@ -8,6 +8,15 @@ import { RoughView as BaseRoughView, type ViewOptions, type ViewState } from "./
 export type { ViewOptions } from "./view.js";
 export { sketchScene } from "./functional.js";
 export { buildScene } from "./build.js";
+export {
+  edgeShade,
+  halo,
+  innerShadow,
+  linearShade,
+  pitRecess,
+  pitShadow,
+  radialShade,
+} from "./shades.js";
 
 /** Registry holding the built-in fill plugins. Immutable; `use` returns a new registry. */
 export const basicSketchy: SketchyRegistry = /*#__PURE__*/ builtinFills.reduce<SketchyRegistry>(

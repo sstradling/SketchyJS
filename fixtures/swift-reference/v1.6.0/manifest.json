@@ -1,0 +1,322 @@
+{
+  "schema": 1,
+  "source": {
+    "repo": "https://github.com/sstradling/Sketchy",
+    "tag": "v1.6.0",
+    "commit": "650763d8c2696daf5dc44d0f25286b64ba91fc13"
+  },
+  "exporter": {
+    "name": "swift-reference-exporter",
+    "swift": "6.2 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)",
+    "platform": "darwin-x86_64",
+    "sdk": "iphonesimulator",
+    "minimumOS": "17.0",
+    "note": "Pinned Sketchy sources compiled for the iOS simulator. The Linux shim exporter was not rerun. regression/changed.json is the case diff against v1.5.0."
+  },
+  "darwin": {
+    "name": "swift-reference-exporter",
+    "swift": "6.2 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)",
+    "platform": "darwin-x86_64",
+    "arch": "x86_64",
+    "sdk": "iphonesimulator",
+    "sdkVersion": "26.0",
+    "minimumOS": "17.0",
+    "xcode": "26.0.1 (17A400)",
+    "simulator": "iPhone 17 Pro",
+    "simulatorRuntime": "iOS 26.0 (23A343)",
+    "hashing": "SWIFT_DETERMINISTIC_HASHING=1"
+  },
+  "pending": [],
+  "accepted": [],
+  "treeSha256": "b7d4017e2e4dcb8aec0422fd836aac14c354895a33ec367e135b5e9079ffebfb",
+  "files": [
+    {
+      "path": "animation/frames.json",
+      "sha256": "893e289c4feeec434f09333277aa7c8c325cb13c28aa874a61ef0ecacd91fab7",
+      "bytes": 10586,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "brushes/crayon-watercolor.json",
+      "sha256": "ef652d8125bd1d07a5682664252aa6b7c8f12f10bb7a590681f485c352813cd4",
+      "bytes": 3336504,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/fills/direct-fillers.json",
+      "sha256": "a098316bda457e776c75cebf16791c79526c04bf71239935c8ea1091ced8bc45",
+      "bytes": 889545,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/fills/fills.json",
+      "sha256": "48be1e2af26f05e8dbbf31924a8ea2054801d165d14207e4c160411e5ab7454e",
+      "bytes": 1288168,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/fills/scribble.json",
+      "sha256": "e8b547fe7a7eebf77b913cda7e6287e590dc97f77fa71d800448819fdfd8d246",
+      "bytes": 7655,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/options/clamps.json",
+      "sha256": "21015d4daa67731cc6c6f7b3000e135b5b1a10501e507a082b1704121335c42e",
+      "bytes": 38796,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/options/defaults.json",
+      "sha256": "b037268bf48b86c1343ba222b255837796c4460001117616f424b9ed5082d692",
+      "bytes": 3288,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/rng/splitmix64.json",
+      "sha256": "658c4c132f95ed5e9fc0ea9b553be73ca51626f867caeb218682dee18ea17ad5",
+      "bytes": 14546,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/rng/unit-float.json",
+      "sha256": "6bf95b1cdcc793116a970bc494d514c5ce99d37f09f20407a9f6c25a907fbd81",
+      "bytes": 81363,
+      "kind": "data",
+      "fidelity": "verbatim-engine",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/shapes/shapes.json",
+      "sha256": "fd42543b729acf381400485864b56b1e79ade297920167ee455963a14d9deb5e",
+      "bytes": 61748,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "darwin/svg/path-parse.json",
+      "sha256": "4d2081d17d683850c0ad7be760d22c2ca2b36065453f90f5d6f0fcdd6caad2aa",
+      "bytes": 30473,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "fills/contour.json",
+      "sha256": "0bdda88bbe74fc861333980bf2d0b1ec9f82c3d5bfcfee08981876ab3397d457",
+      "bytes": 632731,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "fills/interior-shades.json",
+      "sha256": "f66b772a12229270443bf3b42a20c4a86de2ec2c6ddfb87a10d8f6aa8a546588",
+      "bytes": 23993,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "fills/wash.json",
+      "sha256": "da568e14c6338bfd67cc1f3f109f78c496649bdf7e5bcfc545e5dd17b54d4d86",
+      "bytes": 40318,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/shades/shade-edge.png",
+      "sha256": "0105b583270c0eaf000e36204c1d1db034a836f078c85f3e278ec55cb9c32a4c",
+      "bytes": 10311,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/shades/shade-halo.png",
+      "sha256": "78b818db89772f806f057cdd90e3b0ab94c4bb07b78f23acae147287224419e8",
+      "bytes": 7091,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/shades/shade-hole.png",
+      "sha256": "4970ce8b70535ed7b25956c6ce0497fd16c1a5201d268850152a55b9394055d0",
+      "bytes": 3347,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/shades/shade-pit-recess.png",
+      "sha256": "b943f9f08b5735b4fc37a7c0eff136f8871c3df6097ecd213d02d1f160961eb8",
+      "bytes": 3672,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/shades/shade-pit-shadow.png",
+      "sha256": "80e1832a00267ff0bf841e5d48ebc6aefc4807c35415f29f1e8fbe8f0e499911",
+      "bytes": 5824,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/silhouette-affine.png",
+      "sha256": "c23734c60a955a274712ac7a472e292a5e1d7ab950d0c1564d6e7295f3c6fc7f",
+      "bytes": 1600,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/silhouette-source.png",
+      "sha256": "3a4459fb3423dc13673da9e3a419523b4a471c85751daa556a40c75e09dd1ccb",
+      "bytes": 679,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "images/silhouette-tree.png",
+      "sha256": "320390a195a4c8c8ca44c18700a86edc0dd058bbe032abbd82dc516c7b49cc40",
+      "bytes": 1489,
+      "kind": "image",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "provenance.json",
+      "sha256": "37c0eb5331b79e633fcb0d30456f09056b768507d84f35e84bbbe3709df690ba",
+      "bytes": 483,
+      "kind": "data",
+      "fidelity": "provenance",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "regression/changed.json",
+      "sha256": "ea5e87d42fc8351bedfff5b003b49f1ac0bde670d6bea25eb2f000c6668dd5dd",
+      "bytes": 1063,
+      "kind": "data",
+      "fidelity": "comparison",
+      "platform": "darwin-x86_64",
+      "generator": "diff-v16"
+    },
+    {
+      "path": "stickers/contours.json",
+      "sha256": "d1dd8eef8732983e05507c274d15583b3c90cb4170b6d155abfac99788668114",
+      "bytes": 327862,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "stickers/image-placement.json",
+      "sha256": "3c25b88f063e21766600d641e5da4ce7af17bef96254a30719b8b9007376f111",
+      "bytes": 348984,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "stickers/phase3.json",
+      "sha256": "3915930da7c4f95748df5c881d45172790aac426ba13b0653b1b1e8b299a9b42",
+      "bytes": 483446,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "stickers/silhouette-shadow.json",
+      "sha256": "80711d0394eafe3d0effe3a94f5780e71d981f84df333e2b8edc1912f2447fe7",
+      "bytes": 1544,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "strokes/closed-width-z.json",
+      "sha256": "0407076d93aa52a7b2053e17716aafcc66f2b3d17883b72620067f2709f055f1",
+      "bytes": 5018033,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "strokes/closed-width.json",
+      "sha256": "6d55b3df643ef8a5142bdae2f65b25b693c371c0979171c35311d776d8823976",
+      "bytes": 3799736,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "strokes/outlines.json",
+      "sha256": "8af8fe7ec5881cf14a682c02dce89b212d3c6e43dce8eb103e00131b460d6613",
+      "bytes": 13341,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    },
+    {
+      "path": "text/outlines.json",
+      "sha256": "639837f0dfe6ffce63e7b24570b0638fd6ddb44811bf973dc3cd1e8b87776fbf",
+      "bytes": 14982,
+      "kind": "data",
+      "fidelity": "native-framework",
+      "platform": "darwin-x86_64",
+      "generator": "swift-reference-exporter"
+    }
+  ]
+}

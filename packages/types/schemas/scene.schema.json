@@ -102,9 +102,28 @@
             "children"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "const": "silhouette"
+            },
+            "shadow": {
+              "$ref": "#/definitions/SilhouetteShadowDraw"
+            },
+            "transform": {
+              "$ref": "#/definitions/Matrix2D"
+            }
+          },
+          "required": [
+            "type",
+            "shadow"
+          ],
+          "additionalProperties": false
         }
-      ],
-      "description": "A node in a built scene."
+      ]
     },
     "Drawing": {
       "type": "object",
@@ -422,6 +441,35 @@
           ],
           "additionalProperties": false,
           "description": "When set, this layer is one piece of a luminance mask. Pieces that share `group` are painted faintest-first in opaque gray, then tinted once, so overlaps do not darken."
+        },
+        "shade": {
+          "$ref": "#/definitions/InteriorShade",
+          "description": "Interior shade painted from the clean silhouette, not the rough outline. The generator does not read it. Holes use `fillRule` even-odd."
+        },
+        "shadeEllipse": {
+          "type": "object",
+          "properties": {
+            "cx": {
+              "type": "number"
+            },
+            "cy": {
+              "type": "number"
+            },
+            "rx": {
+              "type": "number"
+            },
+            "ry": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "cx",
+            "cy",
+            "rx",
+            "ry"
+          ],
+          "additionalProperties": false,
+          "description": "Circle and ellipse shades use this oval instead of a polygon of `paths`."
         }
       },
       "required": [
@@ -443,6 +491,7 @@
         "fill",
         "fill-pattern",
         "stroke",
+        "shade",
         "mask"
       ],
       "description": "Paint order within a sticker or shape: `sheet-shadow` first, `stroke` last."
@@ -620,6 +669,158 @@
       "additionalProperties": false,
       "description": "A clip applied to a layer. `path` is in the layer's coordinate space."
     },
+    "InteriorShade": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "innerShadow"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "blur": {
+              "type": "number"
+            },
+            "color": {
+              "$ref": "#/definitions/Color"
+            }
+          },
+          "required": [
+            "kind",
+            "opacity",
+            "x",
+            "y",
+            "blur",
+            "color"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "linear"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ShadeStop"
+              }
+            },
+            "angle": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "stops",
+            "angle"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "radial"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ShadeStop"
+              }
+            },
+            "centerX": {
+              "type": "number"
+            },
+            "centerY": {
+              "type": "number"
+            },
+            "startRadius": {
+              "type": "number"
+            },
+            "endRadius": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "stops",
+            "centerX",
+            "centerY",
+            "startRadius",
+            "endRadius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "halo"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "glow": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number"
+            },
+            "blur": {
+              "type": "number"
+            },
+            "color": {
+              "$ref": "#/definitions/Color"
+            }
+          },
+          "required": [
+            "kind",
+            "opacity",
+            "glow",
+            "width",
+            "blur",
+            "color"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "A shade painted inside a closed shape, or a soft band just outside it. The generator ignores these, so the seed and any geometry cache stay put. Holes stay empty. `StickerShadow` is still the paper's outer drop shadow."
+    },
+    "ShadeStop": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "number"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "location",
+        "color",
+        "opacity"
+      ],
+      "additionalProperties": false,
+      "description": "One colour stop of an interior gradient. `location` and `opacity` are 0...1."
+    },
     "Matrix2D": {
       "type": "array",
       "minItems": 6,
@@ -651,6 +852,75 @@
       ],
       "maxItems": 6,
       "description": "A 2D affine matrix in SVG order: `[a, b, c, d, e, f]` maps (x, y) to (ax + cy + e, bx + dy + f)."
+    },
+    "SilhouetteShadowDraw": {
+      "type": "object",
+      "properties": {
+        "href": {
+          "type": "string",
+          "description": "Caller-decoded image as a data URL, or any href the renderer already has."
+        },
+        "width": {
+          "type": "number"
+        },
+        "height": {
+          "type": "number"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "opacity": {
+          "type": "number",
+          "description": "Clamped to 0...1. Multiplied by the colour alpha."
+        },
+        "transform": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 6,
+          "maxItems": 6,
+          "description": "`a b c d e f`, applied after subtracting `anchor` and before `position`."
+        },
+        "anchor": {
+          "$ref": "#/definitions/Point"
+        },
+        "position": {
+          "$ref": "#/definitions/Point"
+        },
+        "source": {
+          "description": "Live canvas or bitmap. `renderToCanvas` draws this when `images` has no entry for `href`. Not JSON-safe. Serializable scenes keep the pixels in `href`."
+        }
+      },
+      "required": [
+        "href",
+        "width",
+        "height",
+        "color",
+        "opacity",
+        "transform",
+        "anchor",
+        "position"
+      ],
+      "additionalProperties": false,
+      "description": "A tinted image drawn with an affine transform around an anchor. Painted directly: no seed and no drawing cache. Not a `StickerShadow`."
+    },
+    "Point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "description": "A point in scene coordinates (y grows downward, as in SVG and Canvas)."
     },
     "PluginUse": {
       "type": "object",

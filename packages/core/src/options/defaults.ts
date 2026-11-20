@@ -23,5 +23,6 @@ export function defaultSketchOptions(): SketchOptions {
       join: "round",
       opacityProfile: { kind: "uniform" },
     },
+    interiorShades: [],
   };
 }

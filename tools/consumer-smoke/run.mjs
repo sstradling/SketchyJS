@@ -1,5 +1,13 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,7 +20,7 @@ import { build } from "esbuild";
  * Packs every workspace package, installs the tarballs into a clean consumer project (no
  * workspace links), then checks that: every export resolves under Node ESM, TypeScript resolves
  * the types under NodeNext and Bundler, publint and are-the-types-wrong accept the tarball, the
- * published files contain only dist (and schemas), and tree shaking drops unused code.
+ * published files contain dist (and schemas), plus README.md and LICENSE, and tree shaking drops unused code.
  */
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const keep = process.argv.includes("--keep");
@@ -53,7 +61,7 @@ for (const dir of packageDirs) {
 const files = readdirSync(tarballs).sort();
 const tarballFor = (name) => files.find((f) => f.startsWith(`sketchy-js-${name}-`));
 
-const dependencies = {};
+const dependencies = { react: "18.3.1", "react-dom": "18.3.1", "happy-dom": "^21.0.4" };
 for (const dir of packageDirs)
   dependencies[`@sketchy-js/${dir}`] = `file:${join(tarballs, tarballFor(dir))}`;
 writeFileSync(
@@ -73,6 +81,35 @@ const install = run(
 if (!install.ok) {
   console.error(install.stderr);
   fail("npm install of tarballs failed");
+} else {
+  copyFileSync(
+    fileURLToPath(new URL("./examples.mjs", import.meta.url)),
+    join(consumer, "examples.mjs"),
+  );
+  const rendered = run("node", ["examples.mjs"], { cwd: consumer });
+  if (!rendered.ok) fail(`seeded renders failed\n${rendered.stdout}\n${rendered.stderr}`);
+  else {
+    const line = rendered.stdout.trim().split("\n").pop();
+    const actual = JSON.parse(line);
+    const hashFile = fileURLToPath(new URL("./hashes.json", import.meta.url));
+    if (process.env.UPDATE_SMOKE_HASHES === "1") {
+      writeFileSync(hashFile, `${JSON.stringify(actual, null, 2)}\n`);
+      console.log("wrote smoke hashes", actual);
+    } else {
+      const expected = JSON.parse(readFileSync(hashFile, "utf8"));
+      const keys = ["react", "element", "canvas", "stickers", "canvasComponent", "animation"];
+      let matched = true;
+      for (const key of keys) {
+        if (actual[key] === undefined || actual[key] !== expected[key]) {
+          matched = false;
+          fail(
+            `${key} render hash mismatch\n  expected ${expected[key]}\n  actual   ${actual[key]}`,
+          );
+        }
+      }
+      if (!matched) process.exit(1);
+    }
+  }
 }
 
 /** Public entry points and one symbol each must expose. Skeleton packages export nothing yet. */
@@ -135,8 +172,23 @@ const expectations = {
   },
   "@sketchy-js/stickers/clipper": { symbols: ["clipperBackend", "CLIPPER_SCALE"] },
   "@sketchy-js/scene/stickers": { symbols: ["SketchGroup", "SketchPart", "buildStickerScene"] },
+  "@sketchy-js/scene/silhouette": { symbols: ["treeShadow", "footAnchor", "silhouetteScene"] },
+  "@sketchy-js/fills/contour": { symbols: ["contour"] },
+  "@sketchy-js/fills/wash": { symbols: ["wash", "skyWash"] },
+  "@sketchy-js/react": {
+    symbols: ["Sketchy", "SketchySvg", "useSketch", "useContourPhase", "useSketchAnimation"],
+  },
+  "@sketchy-js/react/canvas": { symbols: ["SketchyCanvas"] },
+  "@sketchy-js/web-components": {
+    symbols: [
+      "registerSketchyElements",
+      "defineSketchyElement",
+      "sceneFromAttributes",
+      "paintSketchyElement",
+    ],
+  },
 };
-const skeletons = ["react", "web-components", "contrib"];
+const skeletons = ["contrib"];
 
 writeFileSync(
   join(consumer, "check.mjs"),
@@ -156,6 +208,23 @@ const { renderToSvgString } = await import("@sketchy-js/svg-renderer");
 const { rectangle } = await import("@sketchy-js/core");
 const svg = renderToSvgString(sketch(rectangle(10, 10, 80, 60), { width: 100, height: 80 }, { seed: 42n, fillStyle: "hachure" }));
 if (!svg.startsWith("<svg ") || !svg.includes("<path")) { console.error("end-to-end SVG render failed", svg.slice(0, 80)); bad++; }
+const { readFileSync: readManifest } = await import("node:fs");
+const reactManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/react/package.json", import.meta.url), "utf8"));
+const stickerManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/stickers/package.json", import.meta.url), "utf8"));
+if (reactManifest.dependencies?.["@sketchy-js/canvas-renderer"]) {
+  console.error("react's main dependency list includes canvas; keep it an optional peer of the canvas subpath");
+  bad++;
+}
+if (stickerManifest.dependencies?.["@sketchy-js/react"] || stickerManifest.peerDependencies?.["@sketchy-js/react"]) {
+  console.error("stickers depend on react"); bad++;
+}
+const { renderToCanvas } = await import("@sketchy-js/canvas-renderer");
+if (typeof renderToCanvas !== "function") { console.error("canvas renderer missing"); bad++; }
+const { stickerCommands } = await import("@sketchy-js/stickers");
+if (typeof stickerCommands !== "function") { console.error("stickers missing"); bad++; }
+const { sceneFromAttributes } = await import("@sketchy-js/web-components");
+const seeded = sceneFromAttributes({ shape: "rectangle", seed: "42", fill: "hachure" }, { width: 100, height: 80 });
+if (!seeded.nodes?.length) { console.error("seeded consumer scene empty"); bad++; }
 const { SplitMix64 } = await import("@sketchy-js/core");
 const rng = new SplitMix64(42n);
 const first = rng.nextU64();
@@ -277,6 +346,9 @@ for (const dir of packageDirs) {
       ),
   );
   if (unexpected.length > 0) fail(`${dir}: unexpected files in tarball: ${unexpected.join(", ")}`);
+  for (const required of ["README.md", "LICENSE"]) {
+    if (!entries.includes(required)) fail(`${dir}: tarball is missing ${required}`);
+  }
   if (entries.some((p) => p.endsWith(".map") && !p.startsWith("dist/")))
     fail(`${dir}: stray source maps`);
 }
@@ -350,4 +422,5 @@ if (failures.length > 0) {
   console.error(`\n${failures.length} smoke failure(s)`);
   process.exit(1);
 }
-console.log("\nexport smoke tests passed");
+console.log("seeded render hashes match");
+console.log("export smoke tests passed");

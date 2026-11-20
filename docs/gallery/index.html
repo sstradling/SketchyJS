@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>SketchyJS gallery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body {
+        font:
+          16px/1.45 system-ui,
+          sans-serif;
+        margin: 0;
+        color: #1c1915;
+        background: #f4efe6;
+      }
+      header,
+      main {
+        max-width: 880px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0;
+      }
+      button {
+        font: inherit;
+        padding: 6px 10px;
+        border: 1px solid #1c1915;
+        background: white;
+      }
+      button[aria-pressed="true"] {
+        background: #1c1915;
+        color: white;
+      }
+      figure {
+        margin: 0;
+        background: white;
+        padding: 12px;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+      code {
+        font-family: ui-monospace, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>SketchyJS gallery</h1>
+      <p>
+        Seeded drawings from this repository. Each picture is the Canvas render of the same scene
+        the SVG renderer draws. Seeds are part of the caption. Nothing here fetches a network image.
+      </p>
+    </header>
+    <main>
+      <nav id="tabs"></nav>
+      <figure>
+        <img id="shot" alt="" />
+        <figcaption id="cap"></figcaption>
+      </figure>
+    </main>
+    <script type="module">
+      const shots = [
+        {
+          id: "contour",
+          src: "../examples/phase-4/contour.png",
+          seed: "7",
+          text: "Contour fill. Arc guide, falloff 0.65. Strokes span the rectangle and flatten toward the bottom.",
+        },
+        {
+          id: "wash",
+          src: "../examples/phase-4/wash.png",
+          seed: "11",
+          text: "Wash fill with one custom pass: angle scatter, end trim, sine bow.",
+        },
+        {
+          id: "sky",
+          src: "../examples/phase-4/sky-wash.png",
+          seed: "11",
+          text: "WashPass.sky, the two-pass sky recipe, via fillStyle wash with no washPasses.",
+        },
+        {
+          id: "shades",
+          src: "../examples/phase-4/interior-shades.png",
+          seed: "4",
+          text: "Pit shadow, pit recess, edge shade, and a halo. The generator output matches the unshaded circle.",
+        },
+        {
+          id: "variable",
+          src: "../examples/phase-4/closed-variable.png",
+          seed: "8",
+          text: "Closed ring with width stops. The join blends across the first and last 6%.",
+        },
+        {
+          id: "crayon",
+          src: "../examples/phase-4/closed-crayon.png",
+          seed: "8",
+          text: "Closed crayon ring. Wax thickness follows the same profile.",
+        },
+        {
+          id: "tree",
+          src: "../examples/phase-4/tree-shadow.png",
+          seed: "none",
+          text: "Silhouette tree shadow. rgb(22, 48, 14), 42% opacity, skew -0.58, squash 0.32. No seed.",
+        },
+        {
+          id: "react",
+          src: "../examples/phase-4/react-example.png",
+          seed: "42",
+          text: "The scene SketchySvg renders for a seeded hachure rectangle. The component does not load Canvas.",
+        },
+      ];
+      const nav = document.querySelector("#tabs");
+      const img = document.querySelector("#shot");
+      const cap = document.querySelector("#cap");
+      function show(shot) {
+        for (const button of nav.children)
+          button.setAttribute("aria-pressed", String(button.dataset.id === shot.id));
+        img.src = shot.src;
+        img.alt = shot.text;
+        cap.textContent = `Seed ${shot.seed}. ${shot.text}`;
+      }
+      for (const shot of shots) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.dataset.id = shot.id;
+        button.textContent = shot.id;
+        button.addEventListener("click", () => show(shot));
+        nav.append(button);
+      }
+      show(shots[0]);
+    </script>
+  </body>
+</html>

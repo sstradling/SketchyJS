@@ -47,6 +47,7 @@ function hrefs(scene: Scene): string[] {
         visit(node.children);
         continue;
       }
+      if (node.type !== "drawing") continue;
       for (const layer of node.drawing.layers) {
         const href = layer.stickerImage?.href;
         if (href && !found.includes(href)) found.push(href);

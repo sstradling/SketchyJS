@@ -11,6 +11,7 @@ import {
 import { computedHachureGap, effectiveFillWeight } from "@sketchy-js/core/options";
 import type {
   AnyPlugin,
+  ContourInput,
   FillInput,
   FillPart,
   FillRegion,
@@ -18,6 +19,7 @@ import type {
   PathOp,
   PluginContext,
   Point,
+  WashPassInput,
 } from "@sketchy-js/plugin";
 import type { Diagnostic, SketchOptions } from "@sketchy-js/types";
 import { bridgeShapeOptions } from "./options-resolve.js";
@@ -174,12 +176,18 @@ export function partsToSets(
             : undefined;
       const opacity = part.kind === "area" ? part.paint?.alpha : undefined;
       const fillRule = part.kind === "area" ? part.fillRule : undefined;
+      const strokeScale = part.kind === "strokes" ? part.strokeScale : undefined;
+      const strokeWidth = part.kind === "strokes" ? part.strokeWidth : undefined;
+      const opacityScale = part.kind === "strokes" ? part.opacity : undefined;
       sets.push({
         type: part.kind === "area" ? "fillPath" : "fillSketch",
         ops: path,
         ...(clip ? { clip } : {}),
         ...(opacity !== undefined ? { opacity } : {}),
         ...(fillRule ? { fillRule } : {}),
+        ...(strokeScale !== undefined ? { fillLineScale: strokeScale } : {}),
+        ...(strokeWidth !== undefined ? { fillLineWidth: strokeWidth } : {}),
+        ...(opacityScale !== undefined ? { opacityScale } : {}),
       });
     }
   }
@@ -232,6 +240,9 @@ export function createFillStage(init: FillStageInit): FillStage {
             ? { pattern: options.scribbleTightnessPattern }
             : {}),
         },
+        ...(options.seed !== undefined ? { seed: BigInt(options.seed) } : {}),
+        ...contourInput(options),
+        ...washInput(options),
       };
       const resolved = bridgeShapeOptions(
         plugin,
@@ -254,5 +265,36 @@ export function createFillStage(init: FillStageInit): FillStage {
         input.region.path,
       );
     },
+  };
+}
+
+/** Copies contour options onto the fill input. Other fills ignore the field. */
+function contourInput(options: SketchOptions): { contour: ContourInput } {
+  return {
+    contour: {
+      intensity: options.contourIntensity,
+      gradientAngle: options.contourGradientAngle,
+      easing: options.contourEasing,
+      falloff: options.contourFalloff,
+      ...(options.contourGuide ? { guide: options.contourGuide } : {}),
+      ...(options.contourIntensityStart !== undefined
+        ? { intensityStart: options.contourIntensityStart }
+        : {}),
+      ...(options.contourIntensityEnd !== undefined
+        ? { intensityEnd: options.contourIntensityEnd }
+        : {}),
+      ...(options.contourDrift ? { drift: options.contourDrift } : {}),
+    },
+  };
+}
+
+/** Copies wash bands. An omitted list lets `.wash` use the sky recipe. */
+function washInput(options: SketchOptions): { washPasses?: readonly WashPassInput[] } {
+  if (!options.washPasses || options.washPasses.length === 0) return {};
+  return {
+    washPasses: options.washPasses.map((pass) => ({
+      ...pass,
+      seed: typeof pass.seed === "bigint" ? pass.seed : BigInt(pass.seed),
+    })),
   };
 }

@@ -1,6 +1,8 @@
-# Phase 3 Darwin fixture exporter
+# Darwin fixture exporter
 
-This directory is the Swift harness that wrote `fixtures/swift-reference/v1.5.0/stickers/phase3.json`. It compiles Sketchy **v1.5.0** (`fb17a6e7344f46da994ece07da1505be7d431b16`) and runs it in the iOS simulator, so the contours come from UIKit and CoreGraphics. Sketchy sources are not stored in this repository. The script reads a local checkout with `git archive` and deletes that archive when it exits.
+This directory is the Swift harness for `fixtures/swift-reference/`. It compiles a pinned Sketchy commit and runs it in the iOS simulator, so the geometry comes from UIKit and CoreGraphics. Sketchy sources are not stored in this repository. The script reads a local checkout with `git archive` and deletes that archive when it exits.
+
+`fixtures/swift-reference/v1.5.0/stickers/phase3.json` came from Sketchy **v1.5.0** (`fb17a6e7344f46da994ece07da1505be7d431b16`). `fixtures/swift-reference/v1.6.0/` came from Sketchy **v1.6.0** (`650763d8c2696daf5dc44d0f25286b64ba91fc13`). That directory replays the v1.5.0 case list and adds contour, wash, interior shade, closed variable-width, and silhouette-shadow cases. `regression/changed.json` is the case diff. The v1.5.0 files are not overwritten.
 
 The JSON writer is the shared one at `tools/swift-fixture-exporter/Sources/exporter/JSON.swift`.
 
@@ -13,11 +15,21 @@ xcrun simctl boot "iPhone 17 Pro"   # skip when a simulator is already booted
 tools/swift-reference-exporter/scripts/export.sh \
   /path/to/Sketchy \
   /tmp/phase3.json
+
+tools/swift-reference-exporter/scripts/export.sh \
+  /path/to/Sketchy \
+  fixtures/swift-reference/v1.6.0 \
+  --commit 650763d8c2696daf5dc44d0f25286b64ba91fc13 \
+  --tag v1.6.0
 ```
+
+The version-directory form records provenance from the machine: Sketchy commit and tag, `uname -m`, `xcodebuild -version`, `swift --version`, the booted simulator and its runtime, the iphonesimulator SDK version, minimum OS 17.0, and `SWIFT_DETERMINISTIC_HASHING=1`. It refuses to write inside the Sketchy checkout.
 
 The build target is `$(uname -m)-apple-ios17.0-simulator`. The committed fixture was produced on `darwin-x86_64` with Xcode 26.0.1 (17A400), Swift 6.2 (`swiftlang-6.2.0.19.9 clang-1700.3.19.1`), and the iPhone 17 Pro simulator on iOS 26.0 (23A343). `SWIFT_DETERMINISTIC_HASHING=1` is set for the simulator process. Group union walks a dictionary, and that flag keeps the ring's starting vertex stable.
 
 The provenance strings passed into the binary are the ones recorded in the committed file. They are labels. The geometry comes from the pinned Sketchy sources and the simulator frameworks.
+
+`strokes/closed-width-z.json` is the closed-width cases after `closeRingContours`. Swift `Circle` does not emit `closeSubpath`, so each outline subpath gets one `Close` before the renderer runs. Rounded rectangles already close. The same step is `close-ring.mjs`. A future `export.sh` writes that file from `closedWidthZDocument`. Do not edit the committed JSON by hand.
 
 ## Where the union ring starts
 

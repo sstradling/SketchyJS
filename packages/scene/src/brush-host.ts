@@ -36,13 +36,18 @@ function context(seed: bigint, options: SketchOptions): PluginContext {
 }
 
 /**
- * Replaces stroke layers with the crayon plugin's wax passes. Fill strokes are left alone when
- * the fill is fully transparent, which is how a clear fill stays out of the wax.
+ * Replaces stroked layers with the crayon plugin's wax passes.
+ *
+ * A layer whose color alpha is 0 is left as-is. The default fill is clear, and waxing it
+ * turns a few hachure strokes into tens of megabytes of invisible ellipses. The closed-crayon
+ * fixture still lists those passes, so the parity test sets `keepInvisibleCrayonLayers` on the
+ * raw options. That flag is not a `SketchOptions` field and is not part of the public API.
  */
 export function applyCrayon(
   drawing: Drawing,
   plugin: ResolvedPlugin,
   options: SketchOptions,
+  keepInvisible = false,
 ): Drawing {
   const crayon = options.brushProfile.crayon;
   if (!crayon) return drawing;
@@ -68,7 +73,7 @@ export function applyCrayon(
     }
     const color = layer.paint.kind === "solid" ? layer.paint.color : options.strokeColor;
     const colorAlpha = typeof color === "string" ? 1 : (color[3] ?? 1);
-    if (colorAlpha * (layer.paint.alpha ?? 1) === 0) {
+    if (!keepInvisible && colorAlpha * (layer.paint.alpha ?? 1) === 0) {
       layers.push(layer);
       continue;
     }
@@ -86,6 +91,9 @@ export function applyCrayon(
             miterLimit: options.strokeMiterLimit,
           },
           seed,
+          // Fill strokes stay an even width. Only the outline uses the profile,
+          // including on a closed ring. Sketchy's fill-sketch crayon call omits it.
+          ...(layer.role === "stroke" ? { thickness: options.brushProfile.thicknessProfile } : {}),
         },
         plugin.options,
         ctx,

@@ -19,10 +19,16 @@
       "types": "./dist/stickers.d.ts",
       "import": "./dist/stickers.js"
     },
+    "./silhouette": {
+      "types": "./dist/silhouette.d.ts",
+      "import": "./dist/silhouette.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
@@ -48,5 +54,14 @@
   "license": "MIT",
   "engines": {
     "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sstradling/SketchyJS.git",
+    "directory": "packages/scene"
+  },
+  "homepage": "https://github.com/sstradling/SketchyJS#readme",
+  "bugs": {
+    "url": "https://github.com/sstradling/SketchyJS/issues"
   }
 }

@@ -76,6 +76,12 @@ The Darwin fixtures are `strokes/outlines.json`, `brushes/crayon-watercolor.json
 
 `stickers/phase3.json` was exported later from the same commit and does not replace `stickers/contours.json` or `stickers/image-placement.json`. Its `provenance` object records `darwin-x86_64`, Xcode, and the iOS simulator runtime. The cases are a flat torn chop (`jaggedness` 0), paper fibers, a hole smaller than the margin, an open ribbon, smoothness `0.5`, smoothness `1.5` (stored as `1` because `StickerBacking` clamps to `0...1`), a group hole, a group affine transform, a torn group, an image masked to a holed sheet, overlapping group squares, and corner-sharing group squares. `fixtures:verify` checks that list and the pin. `fixtures:regen -- --check` ignores the file because its generator is `darwin-fixture-exporter`.
 
+## Sketchy 1.6.0
+
+`fixtures/swift-reference/v1.6.0/` is a second corpus, pinned to Sketchy commit `650763d8c2696daf5dc44d0f25286b64ba91fc13`. `tools/swift-reference-exporter/scripts/export.sh` archives that commit and writes the directory. It does not modify the Sketchy checkout and it does not overwrite `v1.5.0/`.
+
+The directory replays the v1.5.0 Darwin case list (`darwin/`, `strokes/outlines.json`, `brushes/crayon-watercolor.json`, `stickers/`, `animation/frames.json`, `text/outlines.json`). `regression/changed.json` is the case diff against v1.5.0. Provenance-only differences are listed separately. New cases cover `.contour`, `.wash`, `.interiorShades`, closed `.widthStops` and `.variable` (including crayon), and `SilhouetteShadow`. `strokes/closed-width-z.json` adds the same closed-width profiles on contours that contain an explicit close (`Z`): ring stops, ring variable, a crayon ring, a same-seed pair, a rounded rectangle with width stops, and a crayon ring with a solid non-clear fill. The earlier `strokes/closed-width.json` rings stay as exported. Interior-shade and silhouette pixels are PNGs because blur and the tinted image are painted rather than stored as paths. `provenance.json` records the Sketchy commit, Darwin arch, Xcode, Swift, simulator, iOS runtime, SDK, minimum OS, and `SWIFT_DETERMINISTIC_HASHING=1`. `fixtures:verify` checks the pin, the case lists, the manifest, and the diff.
+
 ### macOS regeneration plan
 
 1. On a Mac with Xcode, check out this repository and the pinned Sketchy tag.

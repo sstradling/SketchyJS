@@ -1,4 +1,7 @@
-import type { Path, PathOp } from "@sketchy-js/plugin";
+import { thicknessWidth } from "@sketchy-js/core";
+import type { BrushInput, Path, PathOp } from "@sketchy-js/plugin";
+
+type ThicknessProfile = NonNullable<BrushInput["thickness"]>;
 import { ellipsePath } from "./ellipse.js";
 
 /** One wax layer: a filled path and the opacity multiplied onto the stroke color. */
@@ -143,6 +146,34 @@ export function crayonSamples(path: Path): { samples: Sample[]; closed: boolean 
   return result;
 }
 
+/** Width at `t`. A missing profile is the base width, so a uniform crayon is unchanged. */
+function waxWidth(
+  profile: ThicknessProfile | undefined,
+  base: number,
+  t: number,
+  closed: boolean,
+): number {
+  if (!profile) return base;
+  return Math.max(0, thicknessWidth(profile, t, base, closed));
+}
+
+/** Arc-length parameter of each sample, 0 at the start and 1 at the end. */
+function arcParameters(samples: readonly Sample[]): number[] {
+  const lengths = [0];
+  for (let index = 1; index < samples.length; index++) {
+    lengths.push(lengths[index - 1]! + dist(samples[index - 1]!, samples[index]!));
+  }
+  const total = lengths[lengths.length - 1] ?? 0;
+  const inverse = total > 0.01 ? 1 / total : 0;
+  return lengths.map((length) => length * inverse);
+}
+
+function alongT(times: readonly number[], index: number, t: number): number {
+  const start = times[index - 1] ?? 0;
+  const end = times[index] ?? start;
+  return start + (end - start) * t;
+}
+
 function stampEllipses(
   into: PathOp[],
   samples: readonly Sample[],
@@ -152,8 +183,11 @@ function stampEllipses(
   kind: "base" | "grit",
   pass: number,
   serialStart: number,
+  profile?: ThicknessProfile,
+  closed = false,
 ): void {
   if (samples.length < 2) return;
+  const times = arcParameters(samples);
   if (kind === "base") {
     const softness = style.baseSoftness;
     const step = Math.max(0.4, width * 0.2);
@@ -168,23 +202,24 @@ function stampEllipses(
       if (!(span > 0.01)) continue;
       while (next <= traveled + span && serial < budget) {
         const t = Math.min(1, Math.max(0, (next - traveled) / span));
+        const local = waxWidth(profile, width, alongT(times, index, t), closed);
         const point = lerp(start, end, t);
         const normal = end.tangent + Math.PI / 2;
         const swell = unit(seed, 0, serial, 6) - 0.5;
         const wobble = 1 + style.widthVariation * swell * 0.22;
-        const drift = (unit(seed, 1, serial, 8) - 0.5) * width * softness * 0.1;
+        const drift = (unit(seed, 1, serial, 8) - 0.5) * local * softness * 0.1;
         const center = {
           x: point.x + Math.cos(normal) * drift,
           y: point.y + Math.sin(normal) * drift,
         };
-        const along = Math.max(step * 2.4, width * 0.9);
+        const along = Math.max(step * 2.4, local * 0.9);
         into.push(
           ...ellipsePath(
             center.x,
             center.y,
             end.tangent,
             along,
-            width * (1.08 + softness * 0.28) * wobble,
+            local * (1.08 + softness * 0.28) * wobble,
           ),
         );
         serial += 1;
@@ -195,9 +230,7 @@ function stampEllipses(
     return;
   }
   const flake = Math.max(0.45, width * (0.16 + 0.15 * style.flakeSize));
-  const speck = Math.max(0.28, flake * 0.34);
   const step = Math.max(0.4, flake * 0.62);
-  const rows = Math.min(4, Math.max(2, Math.ceil((width * 0.55) / flake)));
   let traveled = 0;
   let next = step * 0.35;
   let serial = serialStart;
@@ -210,14 +243,21 @@ function stampEllipses(
     if (!(span > 0.01)) continue;
     while (next <= traveled + span && serial < budget) {
       const t = Math.min(1, Math.max(0, (next - traveled) / span));
+      const local = waxWidth(profile, width, alongT(times, index, t), closed);
+      const localFlake = Math.max(0.45, local * (0.16 + 0.15 * style.flakeSize));
+      const localSpeck = Math.max(0.28, localFlake * 0.34);
+      const localRows = Math.min(
+        4,
+        Math.max(2, Math.ceil((local * 0.55) / Math.max(localFlake, 0.45))),
+      );
       emitGrit(
         into,
         lerp(start, end, t),
         end.tangent,
-        width,
-        flake,
-        speck,
-        rows,
+        local,
+        localFlake,
+        localSpeck,
+        localRows,
         style,
         seed,
         pass,
@@ -334,6 +374,7 @@ export function crayonPasses(
   width: number,
   style: CrayonNumbers,
   seed: bigint,
+  profile?: ThicknessProfile,
 ): CrayonPass[] {
   if (width < 0.25) return [];
   const subs = crayonSamples(path);
@@ -342,6 +383,7 @@ export function crayonPasses(
   const core: PathOp[] = [];
   subs.forEach((sub, index) => {
     const serial = index * 20000;
+    const times = arcParameters(sub.samples);
     const softness = style.baseSoftness;
     const step = Math.max(0.4, width * 0.2);
     let traveled = 0;
@@ -355,23 +397,24 @@ export function crayonPasses(
       if (!(span > 0.01)) continue;
       while (next <= traveled + span && serialN < budget) {
         const t = Math.min(1, Math.max(0, (next - traveled) / span));
+        const local = waxWidth(profile, width, alongT(times, i, t), sub.closed);
         const point = lerp(start, end, t);
         const normal = end.tangent + Math.PI / 2;
         const swell = unit(seed, 0, serialN, 6) - 0.5;
         const wobble = 1 + style.widthVariation * swell * 0.22;
-        const drift = (unit(seed, 1, serialN, 8) - 0.5) * width * softness * 0.1;
+        const drift = (unit(seed, 1, serialN, 8) - 0.5) * local * softness * 0.1;
         const center = {
           x: point.x + Math.cos(normal) * drift,
           y: point.y + Math.sin(normal) * drift,
         };
-        const along = Math.max(step * 2.4, width * 0.9);
+        const along = Math.max(step * 2.4, local * 0.9);
         halo.push(
           ...ellipsePath(
             center.x,
             center.y,
             end.tangent,
             along,
-            width * (1.08 + softness * 0.28) * wobble,
+            local * (1.08 + softness * 0.28) * wobble,
           ),
         );
         core.push(
@@ -380,7 +423,7 @@ export function crayonPasses(
             center.y,
             end.tangent,
             along * 0.96,
-            width * (0.88 + softness * 0.06) * wobble,
+            local * (0.88 + softness * 0.06) * wobble,
           ),
         );
         serialN += 1;
@@ -406,6 +449,8 @@ export function crayonPasses(
         "grit",
         pass,
         index * 20000 + pass * 3000,
+        profile,
+        sub.closed,
       );
     });
     if (marks.length === 0) continue;

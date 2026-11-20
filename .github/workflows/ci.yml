@@ -25,6 +25,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm build
+      - run: node scripts/publish-dry-run.mjs
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm schemas:check
@@ -34,5 +35,11 @@ jobs:
           swift-version: "6.0.3"
       - run: pnpm fixtures:regen -- --check
       - run: pnpm smoke:exports
+      - run: node scripts/release-dry-run.mjs
       - run: pnpm size
       - run: pnpm docs:api
+      - name: actionlint
+        if: matrix.node == 22
+        run: |
+          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color

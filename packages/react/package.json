@@ -11,24 +11,52 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./canvas": {
+      "types": "./dist/canvas.d.ts",
+      "import": "./dist/canvas.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy-js/types": "workspace:*",
-    "@sketchy-js/scene": "workspace:*"
+    "@sketchy-js/animate": "workspace:*",
+    "@sketchy-js/scene": "workspace:*",
+    "@sketchy-js/svg-renderer": "workspace:*",
+    "@sketchy-js/types": "workspace:*"
   },
   "peerDependencies": {
+    "@sketchy-js/canvas-renderer": "workspace:*",
     "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "@sketchy-js/canvas-renderer": {
+      "optional": true
+    }
   },
   "license": "MIT",
   "engines": {
     "node": ">=22"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.1",
+    "react": "18.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sstradling/SketchyJS.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/sstradling/SketchyJS#readme",
+  "bugs": {
+    "url": "https://github.com/sstradling/SketchyJS/issues"
   }
 }

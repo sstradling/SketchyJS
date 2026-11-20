@@ -9,6 +9,7 @@ import type {
   SketchOptions,
 } from "@sketchy-js/types";
 import { assembleDrawing } from "./assemble.js";
+import { attachShades } from "./shades.js";
 import { applyCrayon, applyWatercolor, resolvedStyleSeed } from "./brush-host.js";
 import { PluginNotRegisteredError } from "./errors.js";
 import { createFillStage } from "./fill-stage.js";
@@ -40,6 +41,14 @@ function spacingPasses(o: SketchOptions): SketchOptions[] {
     fillSpacing: f(o.fillSpacing * multiplier),
     fillWeight: f(weight * f(1 + f(index * f(0.01)))),
   }));
+}
+
+/**
+ * Test-only switch read off the raw draw options before `resolveSketchOptions` drops
+ * unknown keys. It is not declared on `SketchOptions`.
+ */
+function keepInvisibleCrayon(raw: object): boolean {
+  return (raw as { keepInvisibleCrayonLayers?: boolean }).keepInvisibleCrayonLayers === true;
 }
 
 /** Crayon and watercolor run only when that brush plugin is registered. */
@@ -175,13 +184,14 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
         });
         continue;
       }
-      const assembled = assembleDrawing(generated, size);
+      const assembled = attachShades(assembleDrawing(generated, size), item.shape, options, size);
+      const keepInvisible = keepInvisibleCrayon(item.options);
       nodes.push({
         type: "drawing",
         drawing: watercolorPlugin
           ? applyWatercolor(assembled, watercolorPlugin, options)
           : crayonPlugin
-            ? applyCrayon(assembled, crayonPlugin, options)
+            ? applyCrayon(assembled, crayonPlugin, options, keepInvisible)
             : assembled,
       });
     }
