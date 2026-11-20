@@ -3,29 +3,40 @@ import Foundation
 import SwiftUI
 import UIKit
 
-/// Darwin sticker and group fixtures for Sketchy v1.5.0.
+/// Darwin fixtures for a pinned Sketchy commit.
 ///
 /// Route: `scripts/export.sh` archives that commit, compiles these sources with
 /// Sketchy in one module, and runs the binary in the iOS simulator.
-/// `group-torn` also records the part geometry, the pre-simplify union, and the
-/// offset ring that the private tear chop receives. Command generation is the
-/// same call as the other group cases.
+/// A single JSON path keeps the v1.5.0 phase 3 file. `--version-dir` writes a
+/// version directory: the same phase 3 cases, the v1.5.0 Darwin case list, and
+/// the v1.6.0 feature cases. `group-torn` also records the part geometry, the
+/// pre-simplify union, and the offset ring that the private tear chop receives.
 @main
 struct Phase3FixtureExporter {
     static func main() {
         let arguments = CommandLine.arguments
+        if arguments.count >= 2, arguments[1] == "--version-dir" {
+            exportVersionDirectory(arguments)
+            return
+        }
         guard arguments.count >= 8 else {
-            FileHandle.standardError.write(Data("usage: phase3-exporter <output.json> <weave.png> <xcode> <simulator> <runtime> <arch> <swift>\n".utf8))
+            FileHandle.standardError.write(Data(
+                "usage: phase3-exporter <output.json> <weave.png> <xcode> <simulator> <runtime> <arch> <swift>\n".utf8
+            ))
             exit(2)
         }
         let output = arguments[1]
         let weavePath = arguments[2]
         let provenance = Provenance(
+            tag: "v1.5.0",
+            commit: "fb17a6e7344f46da994ece07da1505be7d431b16",
             xcode: arguments[3],
             simulator: arguments[4],
             simulatorRuntime: arguments[5],
             arch: arguments[6],
-            swift: arguments[7]
+            swift: arguments[7],
+            sdkVersion: "26.0",
+            minimumOS: "17.0"
         )
         let weave = try? Data(contentsOf: URL(fileURLWithPath: weavePath))
         do {
@@ -40,26 +51,83 @@ struct Phase3FixtureExporter {
             exit(1)
         }
     }
+
+    /// `--version-dir <dir> <weave> <tag> <commit> <xcode> <simulator> <runtime> <arch> <swift> <sdkVersion> <minimumOS>`
+    private static func exportVersionDirectory(_ arguments: [String]) {
+        guard arguments.count >= 13 else {
+            FileHandle.standardError.write(Data(
+                "usage: phase3-exporter --version-dir <dir> <weave.png> <tag> <commit> <xcode> <simulator> <runtime> <arch> <swift> <sdkVersion> <minimumOS>\n".utf8
+            ))
+            exit(2)
+        }
+        let directory = arguments[2]
+        let weave = try? Data(contentsOf: URL(fileURLWithPath: arguments[3]))
+        let provenance = Provenance(
+            tag: arguments[4],
+            commit: arguments[5],
+            xcode: arguments[6],
+            simulator: arguments[7],
+            simulatorRuntime: arguments[8],
+            arch: arguments[9],
+            swift: arguments[10],
+            sdkVersion: arguments[11],
+            minimumOS: arguments[12]
+        )
+        do {
+            try MainActor.assumeIsolated {
+                try write(provenance.json(), to: "provenance.json", in: directory)
+                try write(exportPhase3(weaveData: weave, provenance: provenance), to: "stickers/phase3.json", in: directory)
+                let replay: [(String, J)] = [
+                    ("darwin/rng/splitmix64.json", exportSplitMix64()),
+                    ("darwin/rng/unit-float.json", exportUnitFloat()),
+                    ("darwin/options/defaults.json", exportDefaults()),
+                    ("darwin/options/clamps.json", exportClamps()),
+                    ("darwin/shapes/shapes.json", exportShapes()),
+                    ("darwin/fills/fills.json", exportFills()),
+                    ("darwin/fills/direct-fillers.json", exportDirectFillers()),
+                    ("darwin/fills/scribble.json", exportScribble()),
+                    ("darwin/svg/path-parse.json", exportSvgPaths()),
+                    ("strokes/outlines.json", exportStrokeOutlines()),
+                    ("brushes/crayon-watercolor.json", exportCrayonWatercolor()),
+                    ("stickers/contours.json", exportStickerContours()),
+                    ("stickers/image-placement.json", exportStickerImagePlacement(weaveData: weave)),
+                    ("animation/frames.json", exportAnimationFrames()),
+                    ("text/outlines.json", exportTextOutlines()),
+                ]
+                for (path, value) in replay {
+                    try write(value, to: path, in: directory)
+                }
+                try exportVersionFeatures(to: directory, provenance: provenance)
+            }
+        } catch {
+            FileHandle.standardError.write(Data("version export failed: \(error)\n".utf8))
+            exit(1)
+        }
+    }
 }
 
-private struct Provenance {
+struct Provenance {
+    var tag: String
+    var commit: String
     var xcode: String
     var simulator: String
     var simulatorRuntime: String
     var arch: String
     var swift: String
+    var sdkVersion: String
+    var minimumOS: String
 
     func json() -> J {
         .obj([
             "repo": .string("https://github.com/sstradling/Sketchy"),
-            "tag": .string("v1.5.0"),
-            "commit": .string("fb17a6e7344f46da994ece07da1505be7d431b16"),
+            "tag": .string(tag),
+            "commit": .string(commit),
             "platform": .string("darwin-\(arch)"),
             "os": .string("darwin"),
             "arch": .string(arch),
             "sdk": .string("iphonesimulator"),
-            "sdkVersion": .string("26.0"),
-            "minimumOS": .string("17.0"),
+            "sdkVersion": .string(sdkVersion),
+            "minimumOS": .string(minimumOS),
             "swift": .string(swift),
             "xcode": .string(xcode),
             "simulator": .string(simulator),
@@ -84,34 +152,6 @@ private func colorJSON(_ color: Color) -> J {
         "b": .double(Double(blue)), "a": .double(Double(alpha)),
     ])
 }
-
-private func pathElements(_ path: CGPath) -> J {
-    var operations: [J] = []
-    path.applyWithBlock { pointer in
-        let element = pointer.pointee
-        let point = { (index: Int) -> [J] in
-            let value = element.points[index]
-            return [.double(Double(value.x)), .double(Double(value.y))]
-        }
-        switch element.type {
-        case .moveToPoint:
-            operations.append(.array([.string("M")] + point(0)))
-        case .addLineToPoint:
-            operations.append(.array([.string("L")] + point(0)))
-        case .addQuadCurveToPoint:
-            operations.append(.array([.string("Q")] + point(0) + point(1)))
-        case .addCurveToPoint:
-            operations.append(.array([.string("C")] + point(0) + point(1) + point(2)))
-        case .closeSubpath:
-            operations.append(.array([.string("Z")]))
-        @unknown default:
-            operations.append(.array([.string("?")]))
-        }
-    }
-    return .array(operations)
-}
-
-private func pathElements(_ path: SwiftUI.Path) -> J { pathElements(path.cgPath) }
 
 private func commandJSON(_ command: RoughRenderCommand) -> J {
     switch command.style {

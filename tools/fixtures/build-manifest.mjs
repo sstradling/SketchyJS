@@ -1,4 +1,4 @@
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { acceptedReferences, classify, exporterDir, listFiles, pending, referenceDir, sha256File, sha256Text, statSync, upstream } from "./lib.mjs";
 
@@ -37,6 +37,70 @@ export function buildManifest(dir = referenceDir) {
     treeSha256,
     files: entries,
   };
+}
+
+/**
+ * Manifest for the Darwin v1.6.0 corpus. Versions come from `provenance.json`
+ * so the file records the machine that exported it.
+ */
+export function buildV16Manifest(dir) {
+  const provenance = JSON.parse(readFileSync(join(dir, "provenance.json"), "utf8"));
+  const platform = provenance.platform;
+  const files = listFiles(dir).filter((path) => path !== "manifest.json");
+  const entries = files.map((path) => {
+    const full = join(dir, path);
+    return { path, sha256: sha256File(full), bytes: statSync(full).size, ...classifyV16(path, platform) };
+  });
+  const treeSha256 = sha256Text(entries.map((entry) => `${entry.sha256}  ${entry.path}\n`).join(""));
+  return {
+    schema: 1,
+    source: {
+      repo: provenance.repo,
+      tag: provenance.tag,
+      commit: provenance.commit,
+    },
+    exporter: {
+      name: "swift-reference-exporter",
+      swift: provenance.swift,
+      platform,
+      sdk: provenance.sdk,
+      minimumOS: provenance.minimumOS,
+      note: "Pinned Sketchy sources compiled for the iOS simulator. The Linux shim exporter was not rerun. regression/changed.json is the case diff against v1.5.0.",
+    },
+    darwin: {
+      name: "swift-reference-exporter",
+      swift: provenance.swift,
+      platform,
+      arch: provenance.arch,
+      sdk: provenance.sdk,
+      sdkVersion: provenance.sdkVersion,
+      minimumOS: provenance.minimumOS,
+      xcode: provenance.xcode,
+      simulator: provenance.simulator,
+      simulatorRuntime: provenance.simulatorRuntime,
+      hashing: provenance.hashing,
+    },
+    pending: [],
+    accepted: [],
+    treeSha256,
+    files: entries,
+  };
+}
+
+function classifyV16(path, platform) {
+  if (path.endsWith(".png")) {
+    return { kind: "image", fidelity: "native-framework", platform, generator: "swift-reference-exporter" };
+  }
+  if (path === "regression/changed.json") {
+    return { kind: "data", fidelity: "comparison", platform, generator: "diff-v16" };
+  }
+  if (path === "provenance.json") {
+    return { kind: "data", fidelity: "provenance", platform, generator: "swift-reference-exporter" };
+  }
+  if (path.startsWith("darwin/rng/") || path === "darwin/options/clamps.json") {
+    return { kind: "data", fidelity: "verbatim-engine", platform, generator: "swift-reference-exporter" };
+  }
+  return { kind: "data", fidelity: "native-framework", platform, generator: "swift-reference-exporter" };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

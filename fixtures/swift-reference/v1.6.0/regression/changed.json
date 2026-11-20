@@ -1,0 +1,41 @@
+{
+  "baseline": "v1.5.0",
+  "candidate": "v1.6.0",
+  "unchanged": [
+    "darwin/rng/splitmix64.json",
+    "darwin/rng/unit-float.json",
+    "darwin/options/clamps.json",
+    "darwin/shapes/shapes.json",
+    "darwin/fills/fills.json",
+    "darwin/fills/direct-fillers.json",
+    "darwin/fills/scribble.json",
+    "darwin/svg/path-parse.json",
+    "strokes/outlines.json",
+    "brushes/crayon-watercolor.json",
+    "stickers/contours.json",
+    "stickers/image-placement.json",
+    "animation/frames.json",
+    "text/outlines.json"
+  ],
+  "provenanceOnly": [
+    "stickers/phase3.json"
+  ],
+  "changed": [
+    {
+      "path": "darwin/options/defaults.json",
+      "caseIds": [],
+      "keys": [
+        "options.contourDrift",
+        "options.contourEasing",
+        "options.contourFalloff",
+        "options.contourGradientAngle",
+        "options.contourGuide",
+        "options.contourIntensity",
+        "options.contourIntensityEnd",
+        "options.contourIntensityStart",
+        "options.interiorShades",
+        "options.washPasses"
+      ]
+    }
+  ]
+}

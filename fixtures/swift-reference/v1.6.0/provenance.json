@@ -1,0 +1,16 @@
+{
+  "arch": "x86_64",
+  "commit": "650763d8c2696daf5dc44d0f25286b64ba91fc13",
+  "hashing": "SWIFT_DETERMINISTIC_HASHING=1",
+  "minimumOS": "17.0",
+  "os": "darwin",
+  "platform": "darwin-x86_64",
+  "repo": "https://github.com/sstradling/Sketchy",
+  "sdk": "iphonesimulator",
+  "sdkVersion": "26.0",
+  "simulator": "iPhone 17 Pro",
+  "simulatorRuntime": "iOS 26.0 (23A343)",
+  "swift": "6.2 (swiftlang-6.2.0.19.9 clang-1700.3.19.1)",
+  "tag": "v1.6.0",
+  "xcode": "26.0.1 (17A400)"
+}
