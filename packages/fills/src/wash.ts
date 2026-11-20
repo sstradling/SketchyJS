@@ -192,7 +192,7 @@ function paint(
     .sort((a, b) => (a.width === b.width ? a.opacity - b.opacity : a.width - b.width))
     .map((bucket) => ({
       kind: "strokes" as const,
-      centerlines: bucket.paths,
+      centerlines: [bucket.paths.flat()],
       clip: "none" as const,
       strokeWidth: bucket.width,
       opacity: bucket.opacity,

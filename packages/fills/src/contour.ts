@@ -102,7 +102,7 @@ export const contour = /*#__PURE__*/ defineFill({
         return [
           {
             kind: "strokes" as const,
-            centerlines,
+            centerlines: [centerlines.flat()],
             clip: "none" as const,
             strokeWidth: width,
             opacity,
@@ -124,7 +124,7 @@ export const contour = /*#__PURE__*/ defineFill({
         if (band && band.paths.length > 0) {
           parts.push({
             kind: "strokes",
-            centerlines: band.paths,
+            centerlines: [band.paths.flat()],
             clip: "none",
             strokeScale: band.scale,
           });
@@ -136,7 +136,7 @@ export const contour = /*#__PURE__*/ defineFill({
     if (band && band.paths.length > 0) {
       parts.push({
         kind: "strokes",
-        centerlines: band.paths,
+        centerlines: [band.paths.flat()],
         clip: "none",
         strokeScale: band.scale,
       });

@@ -36,8 +36,11 @@ function context(seed: bigint, options: SketchOptions): PluginContext {
 }
 
 /**
- * Replaces stroke layers with the crayon plugin's wax passes. Fill strokes are left alone when
- * the fill is fully transparent, which is how a clear fill stays out of the wax.
+ * Replaces stroked layers with the crayon plugin's wax passes.
+ *
+ * A clear fill still produces wax. Sketchy emits those passes with a clear color, so the
+ * command list of a default-filled crayon ring includes them. Renderers multiply the color
+ * alpha, and the passes stay invisible.
  */
 export function applyCrayon(
   drawing: Drawing,
@@ -67,11 +70,6 @@ export function applyCrayon(
       continue;
     }
     const color = layer.paint.kind === "solid" ? layer.paint.color : options.strokeColor;
-    const colorAlpha = typeof color === "string" ? 1 : (color[3] ?? 1);
-    if (colorAlpha * (layer.paint.alpha ?? 1) === 0) {
-      layers.push(layer);
-      continue;
-    }
     for (const path of layer.paths) {
       const produced = generate(
         {
@@ -86,7 +84,9 @@ export function applyCrayon(
             miterLimit: options.strokeMiterLimit,
           },
           seed,
-          thickness: options.brushProfile.thicknessProfile,
+          // Fill strokes stay an even width. Only the outline uses the profile,
+          // including on a closed ring. Sketchy's fill-sketch crayon call omits it.
+          ...(layer.role === "stroke" ? { thickness: options.brushProfile.thicknessProfile } : {}),
         },
         plugin.options,
         ctx,

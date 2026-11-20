@@ -131,7 +131,10 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
         layers.push({
           role: "fill",
           paths: [transformPath(set.ops, matrix)],
-          fillRule: set.fillRule ?? "nonzero",
+          // A compound path (a hole) is even-odd, matching the SwiftUI fill of
+          // a path that contains more than one contour. A single contour stays
+          // nonzero; the two rules paint that shape the same.
+          fillRule: set.fillRule ?? (moveCount(set.ops) > 1 ? "evenodd" : "nonzero"),
           paint: { kind: "solid", color: o.fillColor, alpha: set.opacity ?? o.fillOpacity },
           ...(set.clip
             ? { clip: { paths: [transformPath(set.clip, matrix)], fillRule: "nonzero" as const } }
@@ -141,7 +144,12 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
       case "path2DFill": {
         if (set.path === undefined) break;
         const path = transformPath(svgPathToOps(set.path), matrix);
-        layers.push({ role: "fill", paths: [path], fillRule: "nonzero", paint: fillPaint });
+        layers.push({
+          role: "fill",
+          paths: [path],
+          fillRule: moveCount(path) > 1 ? "evenodd" : "nonzero",
+          paint: fillPaint,
+        });
         break;
       }
       case "path2DPattern": {
@@ -168,6 +176,13 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
  * Curved bevel, variable width, and calligraphic tips become filled outlines.
  * A varying opacity profile becomes one luminance-mask group.
  */
+/** Contours in one operation list. More than one means the path has a hole or a second island. */
+function moveCount(ops: readonly { op: string }[]): number {
+  let count = 0;
+  for (const op of ops) if (op.op === "M") count++;
+  return count;
+}
+
 function applyAdvancedStroke(drawing: Drawing, o: SketchOptions): Drawing {
   const profile = o.brushProfile;
   if (profile.crayon || profile.watercolor) return drawing;
