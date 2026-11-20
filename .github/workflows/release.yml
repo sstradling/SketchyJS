@@ -96,7 +96,11 @@ jobs:
           pnpm changeset version
           node scripts/release-dry-run.mjs --gate
           git add -A
-          git diff --cached --quiet && echo "version commit already present" || git commit -m "Version packages"
+          if git diff --cached --quiet; then
+            echo "version commit already present"
+          else
+            git commit -m "Version packages"
+          fi
           git push origin HEAD
           pnpm changeset publish
           version=$(node -p "require('./packages/core/package.json').version")
