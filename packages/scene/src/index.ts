@@ -10,3 +10,13 @@ export { assembleDrawing, alignFillStroke } from "./assemble.js";
 export { computeSvgTransform, transformPath, IDENTITY } from "./transform.js";
 export { createFillStage, toFillRegion, partsToSets } from "./fill-stage.js";
 export { resolvePluginOptions, bridgeShapeOptions } from "./options-resolve.js";
+export {
+  attachShades,
+  edgeShade,
+  halo,
+  innerShadow,
+  linearShade,
+  pitRecess,
+  pitShadow,
+  radialShade,
+} from "./shades.js";

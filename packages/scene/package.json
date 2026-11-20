@@ -19,6 +19,10 @@
       "types": "./dist/stickers.d.ts",
       "import": "./dist/stickers.js"
     },
+    "./silhouette": {
+      "types": "./dist/silhouette.d.ts",
+      "import": "./dist/silhouette.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

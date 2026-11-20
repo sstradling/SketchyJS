@@ -51,6 +51,23 @@ describe("brush tips and thickness", () => {
     expect(thicknessWidth({ kind: "stops", stops: [] }, 0.5, 6)).toBe(6);
   });
 
+  it("blends a closed ring back to the width at the start", () => {
+    const stops = {
+      kind: "stops" as const,
+      stops: [
+        { position: 0, width: 2 },
+        { position: 1, width: 10 },
+      ],
+    };
+    expect(thicknessWidth(stops, 0, 8, true)).toBeCloseTo(2, 5);
+    expect(thicknessWidth(stops, 1, 8, true)).toBeCloseTo(2, 5);
+    expect(thicknessWidth(stops, 0.5, 8, true)).toBeCloseTo(6, 5);
+    expect(thicknessWidth(stops, 1, 8, false)).toBeCloseTo(10, 5);
+    expect(thicknessWidth(stops, 0.03, 8, true)).toBeLessThan(
+      thicknessWidth(stops, 0.03, 8, false),
+    );
+  });
+
   it("varies width from a seed and repeats", () => {
     const width = {
       variation: 1,

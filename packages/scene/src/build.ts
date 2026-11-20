@@ -9,6 +9,7 @@ import type {
   SketchOptions,
 } from "@sketchy-js/types";
 import { assembleDrawing } from "./assemble.js";
+import { attachShades } from "./shades.js";
 import { applyCrayon, applyWatercolor, resolvedStyleSeed } from "./brush-host.js";
 import { PluginNotRegisteredError } from "./errors.js";
 import { createFillStage } from "./fill-stage.js";
@@ -175,7 +176,7 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
         });
         continue;
       }
-      const assembled = assembleDrawing(generated, size);
+      const assembled = attachShades(assembleDrawing(generated, size), item.shape, options, size);
       nodes.push({
         type: "drawing",
         drawing: watercolorPlugin

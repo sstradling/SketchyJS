@@ -67,7 +67,9 @@
             "dashed",
             "zigzagLine",
             "scribble",
-            "watercolor"
+            "watercolor",
+            "contour",
+            "wash"
           ],
           "default": "hachure"
         },
@@ -164,6 +166,61 @@
         },
         "stickerBacking": {
           "$ref": "#/definitions/StickerBacking"
+        },
+        "contourGuide": {
+          "$ref": "#/definitions/ContourGuide",
+          "description": "Guide for `.contour`. Omitted strokes are straight at `fillAngle`."
+        },
+        "contourIntensity": {
+          "type": "number",
+          "description": "How strongly a contour stroke follows the guide. `0` is a chord, `1` is the guide's bow.",
+          "default": 1
+        },
+        "contourIntensityStart": {
+          "type": "number",
+          "description": "Curvature at the low end of `contourGradientAngle`. Omitted uses `contourIntensity`."
+        },
+        "contourIntensityEnd": {
+          "type": "number",
+          "description": "Curvature at the high end of `contourGradientAngle`. Omitted uses `contourIntensity`."
+        },
+        "contourGradientAngle": {
+          "type": "number",
+          "description": "Direction the contour intensity ramps, in degrees. `90` runs top to bottom.",
+          "default": 90
+        },
+        "contourEasing": {
+          "enum": [
+            "linear",
+            "easeIn",
+            "easeOut",
+            "easeInOut"
+          ],
+          "default": "linear"
+        },
+        "contourFalloff": {
+          "type": "number",
+          "description": "How much contour spacing and stroke width shrink toward the guide. Clamped to 0...1.",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 1
+        },
+        "contourDrift": {
+          "$ref": "#/definitions/ContourDrift"
+        },
+        "washPasses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/WashPass"
+          },
+          "description": "Crayon-wash bands. `.wash` uses the sky recipe when this is omitted. On `.contour`, a non-empty list strokes each centerline with these bands."
+        },
+        "interiorShades": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/InteriorShade"
+          },
+          "description": "Shades painted after generation. They do not change the drawing or the seed. An empty list draws nothing."
         }
       },
       "required": [
@@ -193,7 +250,12 @@
         "scribbleCurvature",
         "scribbleUseBrushStroke",
         "svgFillStrokeAlignment",
-        "brushProfile"
+        "brushProfile",
+        "contourIntensity",
+        "contourGradientAngle",
+        "contourEasing",
+        "contourFalloff",
+        "interiorShades"
       ],
       "additionalProperties": false,
       "description": "All sketch options. Field names match Swift `Options`, except where noted: `seed` is `undefined` when unseeded (Swift uses `nil`), colors are `Color`, and `fillOffset` is a `Point` (Swift `CGSize`)."
@@ -252,7 +314,9 @@
         "dashed",
         "zigzagLine",
         "scribble",
-        "watercolor"
+        "watercolor",
+        "contour",
+        "wash"
       ],
       "description": "Fill styles. The names are camelCase here and map to Swift raw values at the fixture boundary: `crossHatch` is `cross-hatch`, `sunBurst` is `sunburst`, `starBurst` is `starburst` and `zigzagLine` is `zigzag-line`."
     },
@@ -977,6 +1041,308 @@
         "color"
       ],
       "additionalProperties": false
+    },
+    "ContourGuide": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "arc"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "radius": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "x",
+            "y",
+            "radius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "polyline"
+            },
+            "points": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Point"
+              }
+            },
+            "closed": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "kind",
+            "points",
+            "closed"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Guide curve for a contour fill. Coordinates match the shape, before an SVG fit."
+    },
+    "ContourEasing": {
+      "type": "string",
+      "enum": [
+        "linear",
+        "easeIn",
+        "easeOut",
+        "easeInOut"
+      ],
+      "description": "How contour intensity moves from the low end of the gradient to the high end."
+    },
+    "ContourDrift": {
+      "type": "object",
+      "properties": {
+        "speed": {
+          "type": "number"
+        },
+        "angle": {
+          "type": "number"
+        },
+        "phase": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "speed",
+        "angle",
+        "phase"
+      ],
+      "additionalProperties": false,
+      "description": "Scrolls a contour fill along `angle` without re-rolling wobble. `speed` is points per second. `phase` is the distance already traveled."
+    },
+    "WashPass": {
+      "type": "object",
+      "properties": {
+        "spacingMin": {
+          "type": "number"
+        },
+        "spacingSpan": {
+          "type": "number"
+        },
+        "widthMin": {
+          "type": "number"
+        },
+        "widthSpan": {
+          "type": "number"
+        },
+        "opacityMin": {
+          "type": "number"
+        },
+        "opacitySpan": {
+          "type": "number"
+        },
+        "trimMax": {
+          "type": "number"
+        },
+        "angleSpread": {
+          "type": "number"
+        },
+        "bow": {
+          "type": "number"
+        },
+        "minLength": {
+          "type": "number"
+        },
+        "roughness": {
+          "type": "number"
+        },
+        "bowing": {
+          "type": "number"
+        },
+        "randomness": {
+          "type": "number"
+        },
+        "seed": {
+          "$ref": "#/definitions/Seed"
+        }
+      },
+      "required": [
+        "spacingMin",
+        "spacingSpan",
+        "widthMin",
+        "widthSpan",
+        "opacityMin",
+        "opacitySpan",
+        "trimMax",
+        "angleSpread",
+        "bow",
+        "minLength",
+        "roughness",
+        "bowing",
+        "randomness",
+        "seed"
+      ],
+      "additionalProperties": false,
+      "description": "One crayon-wash band. Lengths are points. `skyWash` is the two-pass sky recipe."
+    },
+    "InteriorShade": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "innerShadow"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "x": {
+              "type": "number"
+            },
+            "y": {
+              "type": "number"
+            },
+            "blur": {
+              "type": "number"
+            },
+            "color": {
+              "$ref": "#/definitions/Color"
+            }
+          },
+          "required": [
+            "kind",
+            "opacity",
+            "x",
+            "y",
+            "blur",
+            "color"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "linear"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ShadeStop"
+              }
+            },
+            "angle": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "stops",
+            "angle"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "radial"
+            },
+            "stops": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ShadeStop"
+              }
+            },
+            "centerX": {
+              "type": "number"
+            },
+            "centerY": {
+              "type": "number"
+            },
+            "startRadius": {
+              "type": "number"
+            },
+            "endRadius": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "stops",
+            "centerX",
+            "centerY",
+            "startRadius",
+            "endRadius"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "type": "string",
+              "const": "halo"
+            },
+            "opacity": {
+              "type": "number"
+            },
+            "glow": {
+              "type": "number"
+            },
+            "width": {
+              "type": "number"
+            },
+            "blur": {
+              "type": "number"
+            },
+            "color": {
+              "$ref": "#/definitions/Color"
+            }
+          },
+          "required": [
+            "kind",
+            "opacity",
+            "glow",
+            "width",
+            "blur",
+            "color"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "A shade painted inside a closed shape, or a soft band just outside it. The generator ignores these, so the seed and any geometry cache stay put. Holes stay empty. `StickerShadow` is still the paper's outer drop shadow."
+    },
+    "ShadeStop": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "type": "number"
+        },
+        "color": {
+          "$ref": "#/definitions/Color"
+        },
+        "opacity": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "location",
+        "color",
+        "opacity"
+      ],
+      "additionalProperties": false,
+      "description": "One colour stop of an interior gradient. `location` and `opacity` are 0...1."
     },
     "SerializedSeed": {
       "description": "Deterministic seed: a non-negative safe integer, or a decimal string for values up to 2^64 - 1.",

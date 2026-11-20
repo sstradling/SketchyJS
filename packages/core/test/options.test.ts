@@ -149,12 +149,32 @@ describe("defaults against Swift Mirror dump", () => {
     const covered = new Set<string>([...Object.keys(SKETCH_OPTIONS), ...STRUCTURAL_SKETCH_KEYS]);
     const missing = Object.keys(sketch).filter((key) => !covered.has(key));
     expect(missing).toEqual([]);
-    const stale = [...covered].filter((key) => !(key in sketch));
+    // Sketchy 1.6.0 added these. The v1.5.0 mirror dump does not list them.
+    const addedIn16 = new Set([
+      "contourIntensity",
+      "contourGradientAngle",
+      "contourEasing",
+      "contourFalloff",
+      "contourGuide",
+      "contourIntensityStart",
+      "contourIntensityEnd",
+      "contourDrift",
+      "washPasses",
+      "interiorShades",
+    ]);
+    const stale = [...covered].filter((key) => !(key in sketch) && !addedIn16.has(key));
     expect(stale).toEqual([]);
   });
 
   it("scalar defaults equal Swift defaults", () => {
+    const addedIn16 = new Set([
+      "contourIntensity",
+      "contourGradientAngle",
+      "contourEasing",
+      "contourFalloff",
+    ]);
     for (const [key, rule] of Object.entries(SKETCH_OPTIONS) as [string, OptionRule][]) {
+      if (addedIn16.has(key)) continue;
       const swift = sketch[key];
       if (isNumeric(rule))
         expect(asFloat(rule, rule.default), key).toBe(asFloat(rule, swift as number));
@@ -254,7 +274,7 @@ describe("defaults against Swift Mirror dump", () => {
     const raw = defaults["fillStyleRawValues"] as Record<string, string>;
     const names = Object.keys(raw).sort();
     const fillStyle = SKETCH_OPTIONS.fillStyle.values;
-    expect([...fillStyle].sort()).toEqual(names);
+    expect([...fillStyle].sort()).toEqual([...names, "contour", "wash"].sort());
     expect(raw).toMatchObject({
       crossHatch: "cross-hatch",
       sunBurst: "sunburst",

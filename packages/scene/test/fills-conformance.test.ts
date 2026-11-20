@@ -17,6 +17,8 @@ const styles: FillStyle[] = [
   "sunBurst",
   "starBurst",
   "scribble",
+  "contour",
+  "wash",
 ];
 
 const rect = (x: number, y: number, w: number, h: number): Pt[] => [

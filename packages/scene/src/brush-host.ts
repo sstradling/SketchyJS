@@ -86,6 +86,7 @@ export function applyCrayon(
             miterLimit: options.strokeMiterLimit,
           },
           seed,
+          thickness: options.brushProfile.thicknessProfile,
         },
         plugin.options,
         ctx,

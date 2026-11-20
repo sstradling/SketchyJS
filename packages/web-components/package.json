@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@sketchy-js/types": "workspace:*",
-    "@sketchy-js/scene": "workspace:*"
+    "@sketchy-js/scene": "workspace:*",
+    "@sketchy-js/svg-renderer": "workspace:*",
+    "@sketchy-js/core": "workspace:*"
   },
   "license": "MIT",
   "engines": {

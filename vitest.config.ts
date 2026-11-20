@@ -22,6 +22,7 @@ export default defineConfig({
       { find: /^@sketchy-js\/plugin\/schema$/, replacement: src("plugin", "schema/index.ts") },
       { find: /^@sketchy-js\/scene\/basic$/, replacement: src("scene", "basic.ts") },
       { find: /^@sketchy-js\/scene\/stickers$/, replacement: src("scene", "stickers.ts") },
+      { find: /^@sketchy-js\/scene\/silhouette$/, replacement: src("scene", "silhouette.ts") },
       { find: /^@sketchy-js\/stickers\/image$/, replacement: src("stickers", "image/index.ts") },
       {
         find: /^@sketchy-js\/stickers\/clipper$/,

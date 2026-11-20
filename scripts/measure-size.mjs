@@ -24,9 +24,9 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
     ceiling: 18,
   },
   {
-    name: "fills: all nine (plan 7-12 KB)",
+    name: "fills: built-ins including contour and wash",
     code: `export { builtinFills } from "@sketchy-js/fills";`,
-    ceiling: 12,
+    ceiling: 16,
   },
   {
     name: "scene/basic only",
@@ -82,6 +82,31 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
     code: `export { clipperBackend } from "@sketchy-js/stickers/clipper";`,
     ceiling: 22,
   },
+  {
+    name: "fills/contour",
+    code: `export { contour } from "@sketchy-js/fills/contour";`,
+    ceiling: 8,
+  },
+  {
+    name: "fills/wash",
+    code: `export { wash } from "@sketchy-js/fills/wash";`,
+    ceiling: 8,
+  },
+  {
+    name: "react (SVG scene, no canvas)",
+    code: `export { Sketchy, useSketch } from "@sketchy-js/react";`,
+    ceiling: 42,
+  },
+  {
+    name: "web-components",
+    code: `export { registerSketchyElements, sceneFromAttributes } from "@sketchy-js/web-components";`,
+    ceiling: 42,
+  },
+  {
+    name: "scene/silhouette",
+    code: `export { treeShadow, footAnchor, silhouetteScene } from "@sketchy-js/scene/silhouette";`,
+    ceiling: 2,
+  },
 ];
 
 const alias = {
@@ -90,6 +115,8 @@ const alias = {
   "@sketchy-js/svg-renderer": dist("svg-renderer"),
   "@sketchy-js/core": dist("core"),
   "@sketchy-js/fills/hachure": dist("fills", "hachure.js"),
+  "@sketchy-js/fills/contour": dist("fills", "contour.js"),
+  "@sketchy-js/fills/wash": dist("fills", "wash.js"),
   "@sketchy-js/fills": dist("fills"),
   "@sketchy-js/plugin/schema": dist("plugin", "schema.js"),
   "@sketchy-js/plugin": dist("plugin"),
@@ -99,6 +126,9 @@ const alias = {
   "@sketchy-js/brushes/crayon": dist("brushes", "crayon.js"),
   "@sketchy-js/animate": dist("animate"),
   "@sketchy-js/scene/stickers": dist("scene", "stickers.js"),
+  "@sketchy-js/scene/silhouette": dist("scene", "silhouette.js"),
+  "@sketchy-js/react": dist("react"),
+  "@sketchy-js/web-components": dist("web-components"),
   "@sketchy-js/stickers": dist("stickers"),
   "@sketchy-js/stickers/image": dist("stickers", "image.js"),
   "@sketchy-js/stickers/clipper": dist("stickers", "clipper.js"),
@@ -117,6 +147,7 @@ for (const entry of entries) {
     write: false,
     logLevel: "error",
     alias,
+    external: ["react", "react/jsx-runtime", "react-dom"],
   });
   const bytes = result.outputFiles[0].contents;
   const gz = gzipSync(bytes, { level: 9 }).length;

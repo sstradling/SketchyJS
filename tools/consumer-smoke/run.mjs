@@ -53,7 +53,7 @@ for (const dir of packageDirs) {
 const files = readdirSync(tarballs).sort();
 const tarballFor = (name) => files.find((f) => f.startsWith(`sketchy-js-${name}-`));
 
-const dependencies = {};
+const dependencies = { react: "18.3.1" };
 for (const dir of packageDirs)
   dependencies[`@sketchy-js/${dir}`] = `file:${join(tarballs, tarballFor(dir))}`;
 writeFileSync(
@@ -135,8 +135,15 @@ const expectations = {
   },
   "@sketchy-js/stickers/clipper": { symbols: ["clipperBackend", "CLIPPER_SCALE"] },
   "@sketchy-js/scene/stickers": { symbols: ["SketchGroup", "SketchPart", "buildStickerScene"] },
+  "@sketchy-js/scene/silhouette": { symbols: ["treeShadow", "footAnchor", "silhouetteScene"] },
+  "@sketchy-js/fills/contour": { symbols: ["contour"] },
+  "@sketchy-js/fills/wash": { symbols: ["wash", "skyWash"] },
+  "@sketchy-js/react": { symbols: ["Sketchy", "SketchySvg", "useSketch", "useContourPhase"] },
+  "@sketchy-js/web-components": {
+    symbols: ["registerSketchyElements", "sceneFromAttributes", "paintSketchyElement"],
+  },
 };
-const skeletons = ["react", "web-components", "contrib"];
+const skeletons = ["contrib"];
 
 writeFileSync(
   join(consumer, "check.mjs"),
@@ -156,6 +163,21 @@ const { renderToSvgString } = await import("@sketchy-js/svg-renderer");
 const { rectangle } = await import("@sketchy-js/core");
 const svg = renderToSvgString(sketch(rectangle(10, 10, 80, 60), { width: 100, height: 80 }, { seed: 42n, fillStyle: "hachure" }));
 if (!svg.startsWith("<svg ") || !svg.includes("<path")) { console.error("end-to-end SVG render failed", svg.slice(0, 80)); bad++; }
+const { readFileSync: readManifest } = await import("node:fs");
+const reactManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/react/package.json", import.meta.url), "utf8"));
+const stickerManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/stickers/package.json", import.meta.url), "utf8"));
+const reactDeps = { ...reactManifest.dependencies, ...reactManifest.peerDependencies };
+if (reactDeps["@sketchy-js/canvas-renderer"]) { console.error("react depends on canvas"); bad++; }
+if (stickerManifest.dependencies?.["@sketchy-js/react"] || stickerManifest.peerDependencies?.["@sketchy-js/react"]) {
+  console.error("stickers depend on react"); bad++;
+}
+const { renderToCanvas } = await import("@sketchy-js/canvas-renderer");
+if (typeof renderToCanvas !== "function") { console.error("canvas renderer missing"); bad++; }
+const { stickerCommands } = await import("@sketchy-js/stickers");
+if (typeof stickerCommands !== "function") { console.error("stickers missing"); bad++; }
+const { sceneFromAttributes } = await import("@sketchy-js/web-components");
+const seeded = sceneFromAttributes({ shape: "rectangle", seed: "42", fill: "hachure" }, { width: 100, height: 80 });
+if (!seeded.nodes?.length) { console.error("seeded consumer scene empty"); bad++; }
 const { SplitMix64 } = await import("@sketchy-js/core");
 const rng = new SplitMix64(42n);
 const first = rng.nextU64();

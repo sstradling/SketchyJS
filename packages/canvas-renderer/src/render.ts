@@ -14,6 +14,8 @@ import type {
   CanvasSurfaceFactory,
   ImageDataLike,
 } from "./context.js";
+import { paintShade } from "./shades.js";
+import { paintSilhouette } from "./silhouette.js";
 
 /**
  * Paints a scene onto a Canvas 2D context.
@@ -340,6 +342,12 @@ function paintInverse(
 }
 
 function renderLayer(layer: DrawLayer, context: Canvas2D, options: CanvasRenderOptions): void {
+  if (layer.shade) {
+    context.save();
+    paintShade(layer, context);
+    context.restore();
+    return;
+  }
   const paint = paintOf(layer.paint, options.background, context);
   context.save();
   if (layer.stickerImage) {
@@ -520,6 +528,8 @@ function renderNode(node: SceneNode, context: Canvas2D, options: CanvasRenderOpt
   }
   if (node.type === "group") {
     for (const child of node.children) renderNode(child, context, options);
+  } else if (node.type === "silhouette") {
+    paintSilhouette(node.shadow, context, options);
   } else {
     renderLayers(node.drawing.layers, context, options);
   }

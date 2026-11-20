@@ -13,6 +13,8 @@ export default defineConfig({
     sunBurst: "src/sunBurst.ts",
     starBurst: "src/starBurst.ts",
     scribble: "src/scribble.ts",
+    contour: "src/contour.ts",
+    wash: "src/wash.ts",
   },
   format: ["esm"],
   dts: { compilerOptions: { composite: false } },

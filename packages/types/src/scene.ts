@@ -1,6 +1,6 @@
 import type { Color } from "./color.js";
-import type { Matrix2D, Rect, Size } from "./geometry.js";
-import type { BrushCap, BrushJoin, StickerImagePlacement } from "./options.js";
+import type { Matrix2D, Point, Rect, Size } from "./geometry.js";
+import type { BrushCap, BrushJoin, InteriorShade, StickerImagePlacement } from "./options.js";
 import type { FillRule, Path } from "./path.js";
 
 /** What a layer paints with. `stroke`, `fill` and `paper` refer to the owning shape's colors. */
@@ -19,6 +19,7 @@ export type LayerRole =
   | "fill"
   | "fill-pattern"
   | "stroke"
+  | "shade"
   | "mask";
 
 /** A clip applied to a layer. `path` is in the layer's coordinate space. */
@@ -75,6 +76,13 @@ export interface DrawLayer {
    * are painted faintest-first in opaque gray, then tinted once, so overlaps do not darken.
    */
   mask?: { group: number; opacity: number; blur?: number };
+  /**
+   * Interior shade painted from the clean silhouette, not the rough outline.
+   * The generator does not read it. Holes use `fillRule` even-odd.
+   */
+  shade?: InteriorShade;
+  /** Circle and ellipse shades use this oval instead of a polygon of `paths`. */
+  shadeEllipse?: { cx: number; cy: number; rx: number; ry: number };
 }
 
 /** Kinds of base shape. */
@@ -99,9 +107,33 @@ export interface Drawing {
 }
 
 /** A node in a built scene. */
+/**
+ * A tinted image drawn with an affine transform around an anchor.
+ * Painted directly: no seed and no drawing cache. Not a `StickerShadow`.
+ */
+export interface SilhouetteShadowDraw {
+  /** Caller-decoded image as a data URL, or any href the renderer already has. */
+  href: string;
+  width: number;
+  height: number;
+  color: Color;
+  /** Clamped to 0...1. Multiplied by the colour alpha. */
+  opacity: number;
+  /** `a b c d e f`, applied after subtracting `anchor` and before `position`. */
+  transform: readonly [number, number, number, number, number, number];
+  anchor: Point;
+  position: Point;
+  /**
+   * Live canvas or bitmap. `renderToCanvas` draws this when `images` has no
+   * entry for `href`. Not JSON-safe. Serializable scenes keep the pixels in `href`.
+   */
+  source?: unknown;
+}
+
 export type SceneNode =
   | { type: "drawing"; drawing: Drawing; transform?: Matrix2D }
-  | { type: "group"; children: readonly SceneNode[]; transform?: Matrix2D };
+  | { type: "group"; children: readonly SceneNode[]; transform?: Matrix2D }
+  | { type: "silhouette"; shadow: SilhouetteShadowDraw; transform?: Matrix2D };
 
 /** A non-fatal message produced while building a scene. `code` is a stable kebab-case string. */
 export interface Diagnostic {

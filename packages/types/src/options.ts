@@ -18,7 +18,9 @@ export type FillStyle =
   | "dashed"
   | "zigzagLine"
   | "scribble"
-  | "watercolor";
+  | "watercolor"
+  | "contour"
+  | "wash";
 
 /** How consecutive rough passes of one outline are joined. */
 export type StrokeContinuity = "continuous" | "legacy";
@@ -138,6 +140,81 @@ export interface StickerTexture {
   seed?: Seed;
 }
 
+/** How contour intensity moves from the low end of the gradient to the high end. */
+export type ContourEasing = "linear" | "easeIn" | "easeOut" | "easeInOut";
+
+/** Guide curve for a contour fill. Coordinates match the shape, before an SVG fit. */
+export type ContourGuide =
+  | { kind: "arc"; x: number; y: number; radius: number }
+  | { kind: "polyline"; points: readonly Point[]; closed: boolean };
+
+/**
+ * Scrolls a contour fill along `angle` without re-rolling wobble.
+ * `speed` is points per second. `phase` is the distance already traveled.
+ */
+export interface ContourDrift {
+  speed: number;
+  angle: number;
+  phase: number;
+}
+
+/** One crayon-wash band. Lengths are points. `skyWash` is the two-pass sky recipe. */
+export interface WashPass {
+  spacingMin: number;
+  spacingSpan: number;
+  widthMin: number;
+  widthSpan: number;
+  opacityMin: number;
+  opacitySpan: number;
+  trimMax: number;
+  angleSpread: number;
+  bow: number;
+  minLength: number;
+  roughness: number;
+  bowing: number;
+  randomness: number;
+  seed: Seed;
+}
+
+/** One colour stop of an interior gradient. `location` and `opacity` are 0...1. */
+export interface ShadeStop {
+  location: number;
+  color: Color;
+  opacity: number;
+}
+
+/**
+ * A shade painted inside a closed shape, or a soft band just outside it.
+ * The generator ignores these, so the seed and any geometry cache stay put.
+ * Holes stay empty. `StickerShadow` is still the paper's outer drop shadow.
+ */
+export type InteriorShade =
+  | {
+      kind: "innerShadow";
+      opacity: number;
+      x: number;
+      y: number;
+      blur: number;
+      color: Color;
+    }
+  | { kind: "linear"; stops: readonly ShadeStop[]; angle: number }
+  | {
+      kind: "radial";
+      stops: readonly ShadeStop[];
+      centerX: number;
+      centerY: number;
+      startRadius: number;
+      endRadius: number;
+    }
+  | {
+      kind: "halo";
+      opacity: number;
+      glow: number;
+      width: number;
+      blur: number;
+      color: Color;
+    };
+
 /** Image-masked sticker texture (Sketchy v1.5.0). `source` is an opaque, already-decoded handle. */
 export interface StickerImage {
   source: unknown;
@@ -199,6 +276,31 @@ export interface SketchOptions {
 
   brushProfile: BrushProfile;
   stickerBacking?: StickerBacking;
+
+  /** Guide for `.contour`. Omitted strokes are straight at `fillAngle`. */
+  contourGuide?: ContourGuide;
+  /** How strongly a contour stroke follows the guide. `0` is a chord, `1` is the guide's bow. */
+  contourIntensity: number;
+  /** Curvature at the low end of `contourGradientAngle`. Omitted uses `contourIntensity`. */
+  contourIntensityStart?: number;
+  /** Curvature at the high end of `contourGradientAngle`. Omitted uses `contourIntensity`. */
+  contourIntensityEnd?: number;
+  /** Direction the contour intensity ramps, in degrees. `90` runs top to bottom. */
+  contourGradientAngle: number;
+  contourEasing: ContourEasing;
+  /** How much contour spacing and stroke width shrink toward the guide. Clamped to 0...1. */
+  contourFalloff: number;
+  contourDrift?: ContourDrift;
+  /**
+   * Crayon-wash bands. `.wash` uses the sky recipe when this is omitted.
+   * On `.contour`, a non-empty list strokes each centerline with these bands.
+   */
+  washPasses?: readonly WashPass[];
+  /**
+   * Shades painted after generation. They do not change the drawing or the seed.
+   * An empty list draws nothing.
+   */
+  interiorShades: readonly InteriorShade[];
 }
 
 /** Fixed canvas size used when a drawing is built. */

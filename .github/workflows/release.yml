@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Publish nothing and create no tags
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm test
+      - run: pnpm size
+      - run: node scripts/release-dry-run.mjs
+      - name: Fresh consumer tarball install
+        run: pnpm smoke:exports
+      - name: Publish with provenance, tag, and GitHub release
+        if: ${{ inputs.dry_run == false }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./packages/core/package.json').version")
+          test "$version" = "1.6.0"
+          pnpm -r publish --access public --provenance --no-git-checks
+          git tag -a "v$version" -m "SketchyJS $version"
+          git push origin "v$version"
+          gh release create "v$version" --title "SketchyJS $version" --generate-notes

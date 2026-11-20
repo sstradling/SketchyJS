@@ -21,8 +21,17 @@ export interface OperationSet {
   readonly clip?: Path;
   /** Per-path opacity for a fill that paints several glazes. Falls back to the shape fill opacity. */
   readonly opacity?: number;
-  /** Fill rule for this set. Omitted means nonzero. */
+  /** Fill rule for this set. Omitted means nonzero. On a pattern fill it is the clip rule. */
   readonly fillRule?: FillRule;
+  /**
+   * Multiplier of the fill weight for this band. Contour falloff uses it.
+   * The assembler clamps it to 0.05...4. Sketchy's `fillLineScale`.
+   */
+  readonly fillLineScale?: number;
+  /** Absolute fill-stroke width. When set, it replaces weight times scale. */
+  readonly fillLineWidth?: number;
+  /** Multiplier of the fill opacity. Sketchy's `opacityScale`. */
+  readonly opacityScale?: number;
 }
 
 /** Generated geometry for one shape before layer assembly (`Drawing`). */

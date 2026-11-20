@@ -70,6 +70,7 @@ export function varyPath(path: Path, step: number, config: VarianceConfig): Path
 }
 
 function varyNode(node: SceneNode, step: number, config: VarianceConfig): SceneNode {
+  if (node.type === "silhouette") return node;
   if (node.type === "group") {
     return {
       ...node,

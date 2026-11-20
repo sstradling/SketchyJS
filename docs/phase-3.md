@@ -148,7 +148,7 @@ Seth's decisions, as implemented:
 
 ## Known gaps
 
-- Package versions are `0.0.0`. The Phase 1 and Phase 2 changesets that would have published `0.1.0` are gone. The publishable packages are one Changesets `fixed` group. The release PR sets `1.5.0` explicitly.
+- Package versions were `0.0.0` in this phase. The first stable release is now **1.6.0**, not 1.5.0. See [versioning.md](versioning.md).
 - Plugin API examples in `docs/plugins.md` use `version: "1.0.0"` for a **plugin**, not for the package. That is the plugin API line and stays.
 - A torn group's tear can differ from a given Swift export. Swift's start vertex is `Dictionary` hash order and varies unless deterministic hashing is on. SketchyJS starts at the minimum point. Given that same start vertex, the outline matches.
 - A worker or Node has no synchronous PNG encode for a bare bitmap. `OffscreenCanvas` has no `toDataURL`. Pass a data URL with width and height, or wait for an async path.

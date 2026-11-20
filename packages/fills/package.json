@@ -51,6 +51,14 @@
       "types": "./dist/scribble.d.ts",
       "import": "./dist/scribble.js"
     },
+    "./contour": {
+      "types": "./dist/contour.d.ts",
+      "import": "./dist/contour.js"
+    },
+    "./wash": {
+      "types": "./dist/wash.d.ts",
+      "import": "./dist/wash.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [

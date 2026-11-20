@@ -63,11 +63,13 @@ export const crayon = /*#__PURE__*/ defineBrush({
   generate(input, options): readonly BrushLayer[] {
     const style = options as unknown as CrayonNumbers;
     const seed = input.seed ?? 1n;
-    return crayonPasses(input.path, input.stroke.width, style, seed).map((pass) => ({
-      role: "stroke" as const,
-      paths: [pass.path],
-      paint: { kind: "stroke" as const, alpha: pass.opacity * input.stroke.opacity },
-      fillRule: "nonzero" as const,
-    }));
+    return crayonPasses(input.path, input.stroke.width, style, seed, input.thickness).map(
+      (pass) => ({
+        role: "stroke" as const,
+        paths: [pass.path],
+        paint: { kind: "stroke" as const, alpha: pass.opacity * input.stroke.opacity },
+        fillRule: "nonzero" as const,
+      }),
+    );
   },
 });

@@ -71,6 +71,23 @@ export interface FillRegion {
  * exact draw order. They exist so Swift-parity fills (`stream: "shared"`) can emit the
  * same operations as Sketchy without owning the rough-line math.
  */
+/** Roughness knobs a wash pass substitutes for the shape's own values. */
+export interface RoughPatch {
+  readonly roughness?: number;
+  readonly bowing?: number;
+  readonly maxRandomnessOffset?: number;
+}
+
+/**
+ * A fresh SplitMix64 stream. Contour and wash use one per stroke so a scroll
+ * does not re-roll wobble. `unit` is Swift `Float.random(in: 0...1)`.
+ */
+export interface RoughStream {
+  unit(): number;
+  /** Sketchy `RoughMath.curveOps` on this stream. */
+  curve(points: readonly Point[]): Path;
+}
+
 export interface RoughKit {
   /** Sketchy `RoughMath.doubleLineOps`: two jittered passes, `M C M C`. */
   line(a: Point, b: Point): Path;
@@ -82,6 +99,13 @@ export interface RoughKit {
   solidPolygon(points: readonly Point[]): Path;
   /** Sketchy `RoughMath.solidEllipseStroke`: one closed, jittered ellipse path for a solid fill. */
   solidEllipse(center: Point, rx: number, ry: number): Path;
+  /** Sketchy `RoughMath.curveOps` on the shape's stream. */
+  curve(points: readonly Point[]): Path;
+  /**
+   * Sketchy `RoughRandom.isolated`. The shape's stream does not advance.
+   * `patch` replaces roughness, bowing, and the randomness offset for that stream only.
+   */
+  isolated(seed: bigint, patch?: RoughPatch): RoughStream;
 }
 
 /** Pure geometry helpers; the only geometry a plugin may use. */

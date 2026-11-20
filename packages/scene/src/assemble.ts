@@ -83,18 +83,25 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
   const layers: DrawLayer[] = [];
 
   const fillStrokes = (
+    set: OperationSet,
     paths: Path[],
     role: "fill" | "fill-pattern",
     clip: ClipDescriptor | undefined,
-  ): DrawLayer => ({
-    role,
-    paths,
-    fillRule: "nonzero",
-    paint: fillPaint,
-    strokeWidth: aligned.width,
-    ...strokeStyle(o),
-    ...(clip ? { clip } : {}),
-  });
+  ): DrawLayer => {
+    const scale =
+      set.fillLineScale !== undefined ? Math.min(4, Math.max(0.05, set.fillLineScale)) : 1;
+    const width = set.fillLineWidth ?? aligned.width * scale;
+    const alpha = Math.min(1, Math.max(0, (fillPaint.alpha ?? 1) * (set.opacityScale ?? 1)));
+    return {
+      role,
+      paths,
+      fillRule: "nonzero",
+      paint: { ...fillPaint, alpha },
+      strokeWidth: width,
+      ...strokeStyle(o),
+      ...(clip ? { clip } : {}),
+    };
+  };
 
   for (const set of drawing.sets) {
     switch (set.type) {
@@ -116,7 +123,7 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
           ? { paths: [transformPath(set.clip, matrix)], fillRule: "nonzero" as const }
           : undefined;
         layers.push(
-          fillStrokes([transformPath(set.ops, matrix)], "fill", scribbleClip ?? aligned.clip),
+          fillStrokes(set, [transformPath(set.ops, matrix)], "fill", scribbleClip ?? aligned.clip),
         );
         break;
       }
@@ -141,10 +148,13 @@ export function assembleDrawing(drawing: SketchDrawing, size: Size, fitSvg = tru
         if (set.path === undefined) break;
         const shape = transformPath(svgPathToOps(set.path), matrix);
         if (set.ops.length > 0) {
-          const clip: ClipDescriptor = { paths: [shape], fillRule: "nonzero" };
-          layers.push(fillStrokes([transformPath(set.ops, matrix)], "fill-pattern", clip));
+          const clip: ClipDescriptor = {
+            paths: [shape],
+            fillRule: set.fillRule ?? "nonzero",
+          };
+          layers.push(fillStrokes(set, [transformPath(set.ops, matrix)], "fill-pattern", clip));
         } else {
-          layers.push(fillStrokes([shape], "fill-pattern", aligned.clip));
+          layers.push(fillStrokes(set, [shape], "fill-pattern", aligned.clip));
         }
         break;
       }

@@ -219,10 +219,28 @@ export function thicknessMultiplier(profile: ThicknessProfile, t: number): numbe
   }
 }
 
-/** Stroke width in points at `t`. Non-empty stops ignore `strokeWidth`. */
-export function thicknessWidth(profile: ThicknessProfile, t: number, strokeWidth: number): number {
+/** Stroke width in points at `t`, before the closed-join blend. Non-empty stops ignore `strokeWidth`. */
+function rawThickness(profile: ThicknessProfile, t: number, strokeWidth: number): number {
   if (profile.kind === "stops") return widthAtStops(profile.stops, t) ?? strokeWidth;
   return thicknessMultiplier(profile, t) * strokeWidth;
+}
+
+/**
+ * Stroke width in points at `t`.
+ *
+ * Open strokes match the profile directly. A closed contour blends the first
+ * and last 6% of the loop toward the width at `t = 0`, so the join meets.
+ * A uniform profile is unchanged. Sketchy's `ThicknessProfile.width(at:strokeWidth:closed:)`.
+ */
+export function thicknessWidth(
+  profile: ThicknessProfile,
+  t: number,
+  strokeWidth: number,
+  closed = false,
+): number {
+  const raw = rawThickness(profile, t, strokeWidth);
+  if (!closed || !thicknessVaries(profile)) return raw;
+  return seamBlend(raw, rawThickness(profile, 0, strokeWidth), clamp01(t), 0.06);
 }
 
 /** True when an open stroke should vary its width. */
