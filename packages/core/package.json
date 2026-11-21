@@ -1,6 +1,6 @@
 {
   "name": "@sketchy-js/core",
-  "version": "0.0.0",
+  "version": "1.6.0",
   "description": "SketchyJS core package.",
   "type": "module",
   "sideEffects": false,

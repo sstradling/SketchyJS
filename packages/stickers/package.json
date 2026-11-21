@@ -1,6 +1,6 @@
 {
   "name": "@sketchy-js/stickers",
-  "version": "0.0.0",
+  "version": "1.6.0",
   "description": "SketchyJS stickers package.",
   "type": "module",
   "sideEffects": false,
@@ -24,7 +24,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD_PARTY_NOTICES"
   ],
   "scripts": {
     "build": "tsup",

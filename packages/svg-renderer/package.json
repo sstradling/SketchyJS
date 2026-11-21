@@ -1,6 +1,6 @@
 {
   "name": "@sketchy-js/svg-renderer",
-  "version": "0.0.0",
+  "version": "1.6.0",
   "description": "SketchyJS svg-renderer package.",
   "type": "module",
   "sideEffects": false,

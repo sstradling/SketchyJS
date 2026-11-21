@@ -8,9 +8,7 @@ Seeded shape construction and stroke outlines. This package has no browser, Canv
 pnpm add @sketchy-js/core
 ```
 
-`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
-
-Packages stay at `0.0.0` until the v1.6.0 release. Inside this repo, depend on `workspace:*`.
+`pnpm add @sketchy-js/core@1.6.0` resolves the package after the release workflow publishes it. Until then, depend on it from this repo with `workspace:*`.
 
 ## Usage
 

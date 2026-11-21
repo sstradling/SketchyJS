@@ -8,9 +8,9 @@ SketchyJS package versions match the Swift Sketchy library.
 - Git tags are **`v`-prefixed** (`v1.6.0`). Do not tag feature branches.
 - The plugin API version (currently **1.0**) is a different number. It describes `defineBrush` / `defineFill` / `defineTexture` / `defineStickerEdge` and does not follow the package version. Additive fields on that contract (`RoughKit.curve`, `RoughKit.isolated`, contour and wash inputs, stroke scale on fill parts, `BrushInput.thickness`) stay on 1.0 because nothing has been published.
 
-Nothing in this repository has been published. `package.json` versions are still `0.0.0` until the release PR. Feature PRs add changesets and do not edit those versions. The release PR runs `pnpm changeset version`. That command consumes the pending changesets, writes each `CHANGELOG.md`, and sets every package in the fixed group to the same version.
+The 13 publishable packages are **1.6.0**. Nothing has been published to npm yet. Publishing is the release workflow on master, with the version input `1.6.0`. It does not run `changeset version` again. Feature PRs add changesets and do not edit package versions.
 
-The first release cannot start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. The release PR sets all 13 packages to `1.5.0`, adds one minor changeset that names them, and then runs `pnpm changeset version`. That bumps every package to `1.6.0` and heads each changelog with `## 1.6.0`. A scratch copy of that sequence produced `1.6.0` for all 13 packages and a `## 1.6.0` heading in each `CHANGELOG.md`. Later releases take the version the command produces from the version already on the branch.
+The first release could not start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. This release set all 13 packages to `1.5.0`, added one minor changeset that names them, and ran `pnpm changeset version`. That bumped every package to `1.6.0` and headed each changelog with `## 1.6.0`. Later releases take the version the command produces from the version already on the branch.
 
 The publish workflow takes the resulting version as a required input, including when the dispatch is a dry run. It does not run `changeset version` again, and it refuses to publish while a changeset is still pending. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 

@@ -37,4 +37,4 @@ Coordinates that Sketchy stores as `Float` are `Math.fround` values. Seeds are `
 
 ## Version line
 
-The first published line will be 1.6.0. Until that release PR, every package is `0.0.0`. See [versioning.md](versioning.md).
+The publishable packages are 1.6.0. They are not on npm until the release workflow runs. See [versioning.md](versioning.md).

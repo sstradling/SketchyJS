@@ -1,6 +1,6 @@
 # Phase 4 status: bindings, 1.6.0 parity, and release hardening
 
-Scope: the Phase 4 section of [plan.md](plan.md), plus Sketchy 1.6.0 (commit `650763d8c2696daf5dc44d0f25286b64ba91fc13`). Phase 3 remains the sticker work at `46676c6`. Package versions stay `0.0.0`. The first stable release is **v1.6.0**, not 1.5.0. See [versioning.md](versioning.md).
+Scope: the Phase 4 section of [plan.md](plan.md), plus Sketchy 1.6.0 (commit `650763d8c2696daf5dc44d0f25286b64ba91fc13`). Phase 3 remains the sticker work at `46676c6`. Package versions stayed `0.0.0` in that phase. The first stable release is **v1.6.0**, not 1.5.0. See [versioning.md](versioning.md).
 
 Plugin API stays **1.0**. `RoughKit.curve`, `RoughKit.isolated`, contour and wash fields on `FillInput`, stroke scale on fill parts, and `BrushInput.thickness` are additive and unpublished.
 
@@ -127,7 +127,7 @@ This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that numb
 - A silhouette with no data URL and no live canvas draws nothing in SVG. Canvas can paint a live source.
 - `SketchyCanvas` is `@sketchy-js/react/canvas`. The main React entry stays SVG.
 - No WebGL, no worker renderer. Generation and paint are timed separately in `tools/worker-bench`.
-- Versions are `0.0.0`. One fixed Changesets group will move together to 1.6.0. The release that sets that version is a later PR.
+- The release PR sets the fixed group to 1.6.0. Publishing is the release workflow, not this status note.
 - `strokes/closed-width-z.json` holds the explicit-`Z` cases (ring stops, variable, crayon ring, same seed, rounded rect, crayon fill). They pass at 1e-4. The parity file fails if a new id appears in either closed-width file.
 - There is no Swift arc-contour fixture. Arc contours emit one unscaled stroke set, matching `fillArc`, and that remains a known gap.
 
