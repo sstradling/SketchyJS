@@ -3,9 +3,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * `npm pack` and `pnpm pack` include LICENSE only when that file is in the
- * package directory. Neither copies the repo-root LICENSE. Each publishable
- * package keeps its own copy, and this check fails when a copy drifts.
+ * `pnpm pack` copies the repo-root LICENSE into a package tarball. `npm pack`
+ * and other pack tools do not. Each publishable package keeps its own copy so
+ * the package is self-contained, and this check fails when a copy drifts.
  */
 
 const root = fileURLToPath(new URL("../", import.meta.url));

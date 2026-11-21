@@ -1,6 +1,7 @@
+import { createRequire } from "node:module";
 import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
@@ -10,6 +11,9 @@ import ts from "typescript";
  */
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+const reactRequire = createRequire(join(root, "packages/react/package.json"));
+const reactTypes = dirname(reactRequire.resolve("@types/react/package.json"));
+const fromRoot = (file) => relative(root, file);
 const base = ts.readConfigFile(join(root, "tsconfig.base.json"), ts.sys.readFile).config;
 const scratch = join(tmpdir(), "sketchy-readme-types");
 rmSync(scratch, { recursive: true, force: true });
@@ -51,8 +55,8 @@ const options = {
     "@sketchy-js/brushes/crayon": ["packages/brushes/src/crayon.ts"],
     "@sketchy-js/brushes/watercolor": ["packages/brushes/src/watercolor.ts"],
     "@sketchy-js/react/canvas": ["packages/react/src/canvas.ts"],
-    react: ["packages/react/node_modules/@types/react/index.d.ts"],
-    "react/jsx-runtime": ["packages/react/node_modules/@types/react/jsx-runtime.d.ts"],
+    react: [fromRoot(join(reactTypes, "index.d.ts"))],
+    "react/jsx-runtime": [fromRoot(join(reactTypes, "jsx-runtime.d.ts"))],
   },
 };
 const parsed = ts.convertCompilerOptionsFromJson(options, root, "readme");

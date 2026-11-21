@@ -8,7 +8,7 @@ Thanks for helping. SketchyJS is a TypeScript port of the Swift library [Sketchy
 
 | You want to | Start here |
 | --- | --- |
-| Add or improve a brush, fill, texture, or sticker edge | [docs/contributing-plugins.md](docs/contributing-plugins.md) and `pnpm new` |
+| Add or improve a brush, fill, texture, or sticker edge | [docs/contributing-plugins.md](docs/contributing-plugins.md). Add the plugin by hand with `defineFill`, `defineBrush`, `defineTexture`, or `defineStickerEdge`. There is no scaffold script |
 | Fix a bug or improve core geometry, renderers, scene, stickers | Open an issue first for anything larger than a small fix |
 | Improve docs or examples | A PR is welcome; no issue needed |
 | Report a rendering difference from Swift Sketchy | Issue with the shape, options, seed, and the Swift output |
@@ -24,25 +24,27 @@ cd SketchyJS
 corepack enable
 pnpm install --frozen-lockfile
 pnpm build        # builds all packages in dependency order (Turborepo)
-pnpm test         # unit, property, and plugin conformance tests
-pnpm dev          # playground with live plugin controls
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm size
 ```
 
 ### Commands
 
 | Command | What it does |
 | --- | --- |
-| `pnpm dev` | Playground app with SVG and Canvas toggle |
 | `pnpm build` | Build every package (ESM and `.d.ts`) |
-| `pnpm test [filter]` | Vitest; includes the plugin conformance suite |
-| `pnpm test:visual [filter]` | Playwright screenshots and SVG vs Canvas parity (installs browsers on first run) |
-| `pnpm lint` / `pnpm format` | ESLint (type-aware) and Prettier |
-| `pnpm typecheck` | TypeScript project-reference build, no emit |
+| `pnpm test` | Vitest, including pixel comparisons and plugin conformance |
+| `pnpm lint` | ESLint, package boundaries, LICENSE copies, and README typecheck |
+| `pnpm format` / `pnpm format:check` | Prettier |
+| `pnpm typecheck` | `tsc --noEmit` for every workspace package, including `tools/release` |
 | `pnpm size` | Bundle-size budgets |
-| `pnpm new <brush\|fill\|texture\|edge> <name>` | Scaffold a plugin |
-| `pnpm check [plugin]` | Lint, types, tests, and size, the same as CI; optionally for one plugin |
-| `pnpm docs:plugins` | Regenerate plugin option tables |
+| `pnpm docs:api` | TypeDoc API docs |
+| `pnpm examples:svg` | Rewrite the committed SVG example sheets |
 | `pnpm changeset` | Record a release note and version intent |
+
+There is no `pnpm new`, `pnpm dev`, `pnpm check`, `pnpm test:visual`, or `pnpm docs:plugins`. Before pushing, run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm size`. CI runs those plus the schema check, fixture verify, export smoke, and size budget. Preview PNGs are rewritten with `UPDATE_EXAMPLES=1`, and `UPDATE_EXAMPLES_ONLY` limits that to named files.
 
 ## Repository layout
 
@@ -62,8 +64,8 @@ Package boundaries are part of the design: `core` has no browser, renderer, or p
 
 1. **Branch** from the default branch: `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, or `plugin/<name>`. Do not push tags; releases are created by the release workflow only, with `v`-prefixed tags. The first stable tag is `v1.6.0` (see [docs/versioning.md](docs/versioning.md)).
 2. **Commit** with [Conventional Commits](https://www.conventionalcommits.org/) (`feat(brushes): ...`, `fix(core): ...`, `docs: ...`). Keep commits logical; do not mix refactors with behavior changes.
-3. **Add a changeset** (`pnpm changeset`) for any change that affects a published package. Say whether seeded output changes; that is a breaking change for stable plugins and built-ins. Do not edit `package.json` versions in that PR. The release PR is the one that runs `pnpm changeset version`, which consumes the pending files and writes the versions. The first release is special: a bump from `0.0.0` would be `0.0.1`, `0.1.0`, or `1.0.0`, so that PR corrects the generated version to `1.6.0` after `changeset version` (see [docs/versioning.md](docs/versioning.md)). The publish job refuses to run while a changeset is still pending.
-4. **Run `pnpm check`** before pushing. CI runs the same steps plus visual tests and the bundle-size budget.
+3. **Add a changeset** (`pnpm changeset`) for any change that affects a published package. Say whether seeded output changes; that is a breaking change for stable plugins and built-ins. Do not edit `package.json` versions in that PR. The release PR sets all 13 packages to `1.5.0`, adds one minor changeset, and runs `pnpm changeset version`. That writes `1.6.0` and a `## 1.6.0` heading in each changelog. A minor bump from `0.0.0` would have written `## 0.1.0` instead. See [docs/versioning.md](docs/versioning.md). The publish job refuses to run while a changeset is still pending.
+4. **Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm size`** before pushing. CI runs those plus the schema check, fixture verify, and export smoke.
 5. **Open a pull request** using the template. Draft PRs are welcome for early feedback.
 6. **Review.** One maintainer approval is required; changes to `core`, `types`, `plugin`, or the RNG need two. Address feedback with new commits; maintainers squash on merge.
 

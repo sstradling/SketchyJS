@@ -62,6 +62,12 @@ describe("release dry run", () => {
     expect(bad.stderr).toMatch(/strict semver/);
   });
 
+  it("refuses an explicit 0.0.0 expected version", () => {
+    const explicit = run(tree("0.0.0"), ["--gate", "--expect", "0.0.0"]);
+    expect(explicit.status).not.toBe(0);
+    expect(explicit.stderr).toMatch(/versions are still 0\.0\.0/);
+  });
+
   it("accepts 1.6.0 when that is the expected version and nothing is pending", () => {
     const result = run(tree("1.6.0"), ["--gate", "--expect", "1.6.0"]);
     expect(result.status, result.stderr).toBe(0);
