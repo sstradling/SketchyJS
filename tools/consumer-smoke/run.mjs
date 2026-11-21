@@ -345,12 +345,16 @@ for (const dir of packageDirs) {
     (p) =>
       !(
         p === "package.json" ||
+        p === "CHANGELOG.md" ||
+        p === "THIRD_PARTY_NOTICES" ||
         p.startsWith("dist/") ||
         (dir === "types" && p.startsWith("schemas/")) ||
         /^(README|LICENSE)/i.test(p)
       ),
   );
   if (unexpected.length > 0) fail(`${dir}: unexpected files in tarball: ${unexpected.join(", ")}`);
+  if (dir === "stickers" && !entries.includes("THIRD_PARTY_NOTICES"))
+    fail("stickers: tarball is missing THIRD_PARTY_NOTICES");
   for (const required of ["README.md", "LICENSE"]) {
     if (!entries.includes(required)) fail(`${dir}: tarball is missing ${required}`);
   }
