@@ -10,7 +10,7 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "vitest run",
-    "lint": "eslint . && node scripts/check-boundaries.mjs",
+    "lint": "eslint . && node scripts/check-boundaries.mjs && node scripts/check-licenses.mjs && node scripts/check-readme-types.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "boundaries": "node scripts/check-boundaries.mjs",

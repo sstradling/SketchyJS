@@ -223,6 +223,8 @@ importers:
         specifier: ^0.15.7
         version: 0.15.7
 
+  tools/release: {}
+
   tools/schemas: {}
 
   tools/worker-bench:

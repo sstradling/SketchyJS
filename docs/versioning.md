@@ -8,7 +8,11 @@ SketchyJS package versions match the Swift Sketchy library.
 - Git tags are **`v`-prefixed** (`v1.6.0`). Do not tag feature branches.
 - The plugin API version (currently **1.0**) is a different number. It describes `defineBrush` / `defineFill` / `defineTexture` / `defineStickerEdge` and does not follow the package version. Additive fields on that contract (`RoughKit.curve`, `RoughKit.isolated`, contour and wash inputs, stroke scale on fill parts, `BrushInput.thickness`) stay on 1.0 because nothing has been published.
 
-Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.6.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy. The release PR sets `1.6.0` explicitly. This phase wires the workflow and leaves the versions at `0.0.0`.
+Nothing in this repository has been published. `package.json` versions are still `0.0.0` until the release PR. Feature PRs add changesets and do not edit those versions. The release PR runs `pnpm changeset version`. That command consumes the pending changesets, writes each `CHANGELOG.md`, and sets every package in the fixed group to the same version.
+
+The first release cannot start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. The release PR sets all 13 packages to `1.5.0`, adds one minor changeset that names them, and then runs `pnpm changeset version`. That bumps every package to `1.6.0` and heads each changelog with `## 1.6.0`. A scratch copy of that sequence produced `1.6.0` for all 13 packages and a `## 1.6.0` heading in each `CHANGELOG.md`. Later releases take the version the command produces from the version already on the branch.
+
+The publish workflow takes the resulting version as a required input, including when the dispatch is a dry run. It does not run `changeset version` again, and it refuses to publish while a changeset is still pending. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 `.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, `animate`, `react`, `web-components`, and `contrib`.
 

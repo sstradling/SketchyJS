@@ -8,7 +8,7 @@ Geometry and pixels are different checks. A parity fixture compares operations: 
 - A change to blur, gradients, clips, or image tint.
 - A closed-stroke change that alters the ribbon.
 
-The picture lives in `docs/examples/phase-N/` as a PNG under 10 MB. The test that writes it compares SVG and Canvas and only rewrites the file when `UPDATE_EXAMPLES=1`. Reviewers look at the PNG in the PR. They do not treat it as a Swift screenshot.
+The picture lives in `docs/examples/phase-N/` as a PNG under 10 MB. The test that writes it compares SVG and Canvas and only rewrites the file when `UPDATE_EXAMPLES=1`. Set `UPDATE_EXAMPLES_ONLY` to a comma-separated list of file names (for example `wash.png,interior-shades.png`) to rewrite those previews and leave the others. Reviewers look at the PNG in the PR. They do not treat it as a Swift screenshot.
 
 ## Channel limits
 
@@ -20,7 +20,7 @@ A pixel counts as different when any RGBA channel differs by more than the delta
 | Watercolor and crayon | 4 | 2% | A faint glaze must stay visible to the check |
 | Scribble | 24 | 3% | Dense crossings rasterize differently |
 | Contour and wash previews | 24 | 8–12% | Many thin strokes. The paths match; the coverage of a 1 px wobble does not |
-| Interior shades and halo | 12 | 6% | SVG `stdDeviation = blur`. Canvas `shadowBlur = 2 * blur` because canvas sigma is about `shadowBlur / 2`. Half or double that blur fails a 3% check on the pit shadow |
+| Interior shades and halo | 12 | 6% | SVG `stdDeviation = blur`. Canvas `shadowBlur = 2 * blur` because canvas sigma is about `shadowBlur / 2`. Half or double the pit-shadow blur fails a 3% check at delta 12. The halo check scores only the pixels that blur moves: the chosen blur stays at or under 52% disagreement with the Swift PNG there, and half or double is over that |
 | Silhouette tint | 12 | 6% | SVG filter versus Canvas `source-in`. The exported cards fit this |
 
 Do not raise a limit to hide a wrong path. If the operations differ, fix the geometry. The pixel limit is only for antialiasing and the documented filter gap.

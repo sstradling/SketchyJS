@@ -97,6 +97,30 @@ describe("React bindings", () => {
     expect(sketchValueKey({ seed: 4n })).not.toBe(sketchValueKey({ seed: 5n }));
   });
 
+  it("memoizes useSketchAnimation when the config values do not change", () => {
+    const scene = sketch(shape, size, { seed: 2n });
+    const seen: unknown[] = [];
+    function Probe({ variance }: { variance: number }) {
+      seen.push(useSketchAnimation(scene, { steps: 4, variance, seed: 2n, intervalMs: 60_000 }));
+      return null;
+    }
+    installDom();
+    const root = createRoot(document.body);
+    act(() => {
+      root.render(createElement(Probe, { variance: 0.05 }));
+    });
+    const first = seen[0];
+    act(() => {
+      root.render(createElement(Probe, { variance: 0.05 }));
+    });
+    expect(seen.at(-1)).toBe(first);
+    act(() => {
+      root.render(createElement(Probe, { variance: 0.2 }));
+    });
+    expect(seen.at(-1)).not.toBe(first);
+    root.unmount();
+  });
+
   it("returns a different animation frame after the interval", async () => {
     const frames: string[] = [];
     function Probe() {

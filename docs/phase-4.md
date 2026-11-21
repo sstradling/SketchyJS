@@ -115,7 +115,7 @@ Generation is the expensive part. Painting in a worker is slower than painting o
 
 ## Release
 
-The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master and a green CI run for that commit. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run refuses `0.0.0`, a version other than `1.6.0`, and pending changesets with `scripts/release-dry-run.mjs --gate` before `changeset publish`. The release PR already carries `1.6.0`, so the workflow does not run `changeset version` and does not create a version commit. It publishes with provenance, and only then pushes the annotated `v` tag and creates the GitHub release. This PR does not publish.
+The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master, a green CI run for that commit, and a `version` input. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run and a dry run both call `scripts/release-dry-run.mjs --gate --expect <version>` with the version passed in the environment, and the script rejects anything that is not strict semver. The gate refuses `0.0.0`, versions that disagree, a version other than the input, and pending changesets. The release PR sets the packages to `1.5.0`, adds a minor changeset, and runs `changeset version`, which writes `1.6.0` (see [versioning.md](versioning.md)). The publish job does not version again. It publishes with provenance. A rerun keeps an existing `v` tag only when that tag already points at `HEAD`, and it skips an existing GitHub Release. A `changeset publish` that exits non-zero continues only when every package version is already on the registry. This PR does not publish.
 
 This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that number would publish `0.1.0` and is refused.
 
@@ -137,4 +137,4 @@ This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that numb
 2. `ContourGuide.path` stays unported.
 3. SVG shade sigma is `stdDeviation = blur`. Canvas `shadowBlur` is `2 * blur` (canvas sigma is about `shadowBlur / 2`). Sticker shadows stay at `radius / 2`.
 4. The 42 KB basic-scene ceiling stays. Contour and wash are subpath imports.
-5. One fixed version group, every package at 1.6.0, for the release PR.
+5. One fixed version group. The first release sets `1.5.0`, adds a minor changeset, and runs `changeset version`, which lands on `1.6.0`. The publish job takes that version as an input.

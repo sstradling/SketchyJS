@@ -7,6 +7,10 @@ on:
         description: Publish nothing and create no tags
         type: boolean
         default: true
+      version:
+        description: Package version already on this commit, for example 1.6.0
+        required: true
+        type: string
   workflow_run:
     workflows: ["CI"]
     types: [completed]
@@ -57,6 +61,11 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      - name: Validate the version input
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: node scripts/release-dry-run.mjs --gate --expect "$RELEASE_VERSION"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm test
@@ -87,17 +96,56 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           test "$(git rev-parse --abbrev-ref HEAD)" = "master"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The release PR already sets every package to 1.6.0. `changeset version`
-          # exits 1 when nothing is pending, so this job does not run it or commit.
-          node scripts/release-dry-run.mjs --gate
-          pnpm changeset publish
+          # The release PR ran `changeset version`. This job does not version again.
+          node scripts/release-dry-run.mjs --gate --expect "$RELEASE_VERSION"
+          publish_status=0
+          pnpm changeset publish || publish_status=$?
+          if [ "$publish_status" -ne 0 ]; then
+            missing=0
+            for manifest in packages/*/package.json; do
+              private=$(node -p "require('./$manifest').private === true")
+              if [ "$private" = "true" ]; then
+                continue
+              fi
+              name=$(node -p "require('./$manifest').name")
+              ver=$(node -p "require('./$manifest').version")
+              if ! npm view "${name}@${ver}" version >/dev/null 2>&1; then
+                echo "$name@$ver is not on the registry"
+                missing=1
+              fi
+            done
+            if [ "$missing" -ne 0 ]; then
+              exit "$publish_status"
+            fi
+            echo "changeset publish exited $publish_status; every package version is already published"
+          fi
           version=$(node -p "require('./packages/core/package.json').version")
-          test "$version" = "1.6.0"
-          git tag -a "v$version" -m "SketchyJS $version"
-          git push origin "v$version"
-          gh release create "v$version" --title "SketchyJS $version" --generate-notes
+          test "$version" = "$RELEASE_VERSION"
+          tag="v${version}"
+          peeled=$(git ls-remote origin "refs/tags/${tag}^{}")
+          if [ -z "$peeled" ]; then
+            peeled=$(git ls-remote origin "refs/tags/${tag}")
+          fi
+          if [ -n "$peeled" ]; then
+            tag_commit=$(printf '%s\n' "$peeled" | awk 'NR==1 { print $1 }')
+            head=$(git rev-parse HEAD)
+            if [ "$tag_commit" != "$head" ]; then
+              echo "tag ${tag} points at ${tag_commit}, not ${head}"
+              exit 1
+            fi
+            echo "tag ${tag} already points at HEAD"
+          else
+            git tag -a "$tag" -m "SketchyJS $version"
+            git push origin "refs/tags/${tag}"
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "GitHub Release ${tag} already exists"
+          else
+            gh release create "$tag" --title "SketchyJS $version" --generate-notes
+          fi

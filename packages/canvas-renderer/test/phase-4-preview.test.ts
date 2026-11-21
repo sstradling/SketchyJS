@@ -198,14 +198,20 @@ describe("phase 4 previews", () => {
       const { png, fraction } = renderPng(scene);
       expect(fraction, name).toBeLessThan(limit);
       expect(png.byteLength, name).toBeGreaterThan(500);
-      if (process.env.UPDATE_EXAMPLES === "1") writeFileSync(new URL(name, dir), png);
+      const only = process.env.UPDATE_EXAMPLES_ONLY?.split(",").filter(Boolean);
+      if (process.env.UPDATE_EXAMPLES === "1" && (!only || only.includes(name)))
+        writeFileSync(new URL(name, dir), png);
       const file = statSync(new URL(name, dir));
       expect(file.size, name).toBeGreaterThan(500);
       expect(file.size, name).toBeLessThan(10 * 1024 * 1024);
     }
     const shadowPng = renderPng(shadow, { [image.href]: image.canvas });
     expect(shadowPng.fraction).toBeLessThan(0.2);
-    if (process.env.UPDATE_EXAMPLES === "1")
+    const shadowOnly = process.env.UPDATE_EXAMPLES_ONLY?.split(",").filter(Boolean);
+    if (
+      process.env.UPDATE_EXAMPLES === "1" &&
+      (!shadowOnly || shadowOnly.includes("tree-shadow.png"))
+    )
       writeFileSync(new URL("tree-shadow.png", dir), shadowPng.png);
     expect(statSync(new URL("tree-shadow.png", dir)).size).toBeLessThan(10 * 1024 * 1024);
   });
