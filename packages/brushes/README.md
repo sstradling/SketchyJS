@@ -8,6 +8,8 @@ Crayon and watercolor brush plugins.
 pnpm add @sketchy-js/brushes
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

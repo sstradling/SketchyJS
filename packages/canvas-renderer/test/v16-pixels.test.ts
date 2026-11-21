@@ -186,21 +186,56 @@ describe("v1.6.0 shade and silhouette pixels", () => {
   it("rejects a halo at half or double the chosen sigma", async () => {
     const ref = await reference("images/shades/shade-halo.png");
     const scene = shadeScene("shade-halo");
-    // Delta 12 hides the glow: the stroke dominates, and half or double still
-    // fit 6%. Delta 4 is where the chosen blur stays under 8.1% and both
-    // neighbors exceed it, on Canvas and on SVG.
+    // The full card at delta 12 is mostly the stroke, so half and double blur
+    // still fit 6%. Score only the pixels the wrong blur moves. On that glow,
+    // the chosen blur stays under 52% disagreement with the Swift PNG and both
+    // neighbors are over it, with about ten points of room on each side.
     const delta = 4;
-    const gate = 0.081;
-    const canvasAt = (factor: number) =>
-      fractionAt(paint(scaleBlur(scene, factor), beige), ref.data, delta);
-    const svgAt = (factor: number) =>
-      fractionAt(svgPixels(scaleBlur(scene, factor), beige), ref.data, delta);
-    expect(canvasAt(1)).toBeLessThanOrEqual(gate);
-    expect(canvasAt(0.5)).toBeGreaterThan(gate);
-    expect(canvasAt(2)).toBeGreaterThan(gate);
-    expect(svgAt(1)).toBeLessThanOrEqual(gate);
-    expect(svgAt(0.5)).toBeGreaterThan(gate);
-    expect(svgAt(2)).toBeGreaterThan(gate);
+    const gate = 0.52;
+    const misses = (actual: Uint8ClampedArray, index: number) => {
+      const o = index * 4;
+      return (
+        Math.abs((actual[o] ?? 0) - (ref.data[o] ?? 0)) > delta ||
+        Math.abs((actual[o + 1] ?? 0) - (ref.data[o + 1] ?? 0)) > delta ||
+        Math.abs((actual[o + 2] ?? 0) - (ref.data[o + 2] ?? 0)) > delta ||
+        Math.abs((actual[o + 3] ?? 0) - (ref.data[o + 3] ?? 0)) > delta
+      );
+    };
+    const moved = (left: Uint8ClampedArray, right: Uint8ClampedArray, index: number) => {
+      const o = index * 4;
+      return (
+        Math.abs((left[o] ?? 0) - (right[o] ?? 0)) > delta ||
+        Math.abs((left[o + 1] ?? 0) - (right[o + 1] ?? 0)) > delta ||
+        Math.abs((left[o + 2] ?? 0) - (right[o + 2] ?? 0)) > delta ||
+        Math.abs((left[o + 3] ?? 0) - (right[o + 3] ?? 0)) > delta
+      );
+    };
+    const glow = (chosen: Uint8ClampedArray, other: Uint8ClampedArray) => {
+      const pixels = Math.min(chosen.length, other.length, ref.data.length) / 4;
+      let sensitive = 0;
+      let chosenBad = 0;
+      let otherBad = 0;
+      for (let i = 0; i < pixels; i++) {
+        if (!moved(chosen, other, i)) continue;
+        sensitive++;
+        if (misses(chosen, i)) chosenBad++;
+        if (misses(other, i)) otherBad++;
+      }
+      return {
+        sensitive,
+        chosen: chosenBad / sensitive,
+        other: otherBad / sensitive,
+      };
+    };
+    for (const render of [paint, svgPixels] as const) {
+      const chosen = render(scaleBlur(scene, 1), beige);
+      for (const factor of [0.5, 2]) {
+        const score = glow(chosen, render(scaleBlur(scene, factor), beige));
+        expect(score.sensitive).toBeGreaterThan(100);
+        expect(score.chosen).toBeLessThanOrEqual(gate);
+        expect(score.other).toBeGreaterThan(gate);
+      }
+    }
   });
 
   it("pins the tree on the foot and matches both tinted cards", async () => {

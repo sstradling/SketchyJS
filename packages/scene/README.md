@@ -8,6 +8,8 @@ Turns shapes, fills, and brushes into a `Scene`. Renderers consume that scene; t
 pnpm add @sketchy-js/scene @sketchy-js/core
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

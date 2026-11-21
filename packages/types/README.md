@@ -8,6 +8,8 @@ Shared TypeScript types for scenes, paths, colors, and options. The package has 
 pnpm add @sketchy-js/types
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

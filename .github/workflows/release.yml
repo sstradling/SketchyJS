@@ -61,6 +61,11 @@ jobs:
           node-version: ${{ matrix.node }}
           cache: pnpm
           registry-url: https://registry.npmjs.org
+      - name: Validate the version input
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: node scripts/release-dry-run.mjs --gate --expect "$RELEASE_VERSION"
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm test
@@ -91,16 +96,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
+          RELEASE_VERSION: ${{ inputs.version }}
         run: |
           set -euo pipefail
           test "$(git rev-parse --abbrev-ref HEAD)" = "master"
-          expected="${{ inputs.version }}"
-          test -n "$expected"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The release PR already ran `changeset version`, so this commit carries
-          # the version and has no pending changesets. This job does not version again.
-          node scripts/release-dry-run.mjs --gate --expect "$expected"
+          # The release PR ran `changeset version`. This job does not version again.
+          node scripts/release-dry-run.mjs --gate --expect "$RELEASE_VERSION"
           publish_status=0
           pnpm changeset publish || publish_status=$?
           if [ "$publish_status" -ne 0 ]; then
@@ -123,15 +126,26 @@ jobs:
             echo "changeset publish exited $publish_status; every package version is already published"
           fi
           version=$(node -p "require('./packages/core/package.json').version")
-          test "$version" = "$expected"
-          if git ls-remote --tags origin "refs/tags/v${version}" | grep -q "refs/tags/v${version}$"; then
-            echo "tag v$version already exists"
-          else
-            git tag -a "v$version" -m "SketchyJS $version"
-            git push origin "refs/tags/v$version"
+          test "$version" = "$RELEASE_VERSION"
+          tag="v${version}"
+          peeled=$(git ls-remote origin "refs/tags/${tag}^{}")
+          if [ -z "$peeled" ]; then
+            peeled=$(git ls-remote origin "refs/tags/${tag}")
           fi
-          if gh release view "v$version" >/dev/null 2>&1; then
-            echo "GitHub Release v$version already exists"
+          if [ -n "$peeled" ]; then
+            tag_commit=$(printf '%s\n' "$peeled" | awk 'NR==1 { print $1 }')
+            head=$(git rev-parse HEAD)
+            if [ "$tag_commit" != "$head" ]; then
+              echo "tag ${tag} points at ${tag_commit}, not ${head}"
+              exit 1
+            fi
+            echo "tag ${tag} already points at HEAD"
           else
-            gh release create "v$version" --title "SketchyJS $version" --generate-notes
+            git tag -a "$tag" -m "SketchyJS $version"
+            git push origin "refs/tags/${tag}"
+          fi
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "GitHub Release ${tag} already exists"
+          else
+            gh release create "$tag" --title "SketchyJS $version" --generate-notes
           fi

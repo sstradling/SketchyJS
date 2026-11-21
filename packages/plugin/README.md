@@ -8,6 +8,8 @@ The plugin contract: `defineFill`, `defineBrush`, `defineTexture`, and `defineSt
 pnpm add @sketchy-js/plugin
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

@@ -207,7 +207,11 @@ describe("phase 4 previews", () => {
     }
     const shadowPng = renderPng(shadow, { [image.href]: image.canvas });
     expect(shadowPng.fraction).toBeLessThan(0.2);
-    if (process.env.UPDATE_EXAMPLES === "1")
+    const shadowOnly = process.env.UPDATE_EXAMPLES_ONLY?.split(",").filter(Boolean);
+    if (
+      process.env.UPDATE_EXAMPLES === "1" &&
+      (!shadowOnly || shadowOnly.includes("tree-shadow.png"))
+    )
       writeFileSync(new URL("tree-shadow.png", dir), shadowPng.png);
     expect(statSync(new URL("tree-shadow.png", dir)).size).toBeLessThan(10 * 1024 * 1024);
   });

@@ -8,6 +8,8 @@ SVG React bindings. This entry does not import the canvas renderer, so an app ca
 pnpm add @sketchy-js/react react
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 `react` is a peer dependency. `@sketchy-js/canvas-renderer` is an optional peer, used only by the canvas subpath.
 
 ## Usage

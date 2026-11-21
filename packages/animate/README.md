@@ -8,6 +8,8 @@ Seeded frame-to-frame variance. It does not start a timer; callers advance the f
 pnpm add @sketchy-js/animate @sketchy-js/scene
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

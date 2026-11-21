@@ -1,0 +1,10 @@
+{
+  "name": "@sketchy-js/release-tools",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "Typecheck for the release-gate tests.",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  }
+}

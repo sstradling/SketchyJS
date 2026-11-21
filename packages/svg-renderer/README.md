@@ -8,6 +8,8 @@ Paints a `Scene` to an SVG document string. It does not import Canvas or React.
 pnpm add @sketchy-js/svg-renderer @sketchy-js/scene
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

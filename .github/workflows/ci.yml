@@ -43,5 +43,6 @@ jobs:
         run: |
           version=1.7.12
           curl -sSfL -o /tmp/actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${version}/actionlint_${version}_linux_amd64.tar.gz"
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  /tmp/actionlint.tar.gz" | sha256sum -c -
           tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
           /tmp/actionlint -color

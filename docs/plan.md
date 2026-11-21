@@ -413,7 +413,7 @@ On merge to `main`/`master`, rerun the same immutable build, publish preview art
 The release workflow must:
 
 1. verify a clean checkout and complete CI;
-2. publish the versions the release PR already set (`pnpm changeset version` runs in that PR, not in the publish job) with npm provenance;
+2. publish the versions `pnpm changeset version` wrote in the release PR (that command runs in the PR, not in the publish job; the first release corrects the automatic bump from `0.0.0` to `1.6.0`) with npm provenance;
 3. create one annotated, **v-prefixed** repository tag for that release line, the first one being `v1.6.0`, and skip the tag and GitHub Release when they already exist;
 4. publish the docs version and GitHub release notes from the same commit;
 5. verify package tarballs in a fresh consumer install.

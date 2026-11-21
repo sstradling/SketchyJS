@@ -8,9 +8,11 @@ SketchyJS package versions match the Swift Sketchy library.
 - Git tags are **`v`-prefixed** (`v1.6.0`). Do not tag feature branches.
 - The plugin API version (currently **1.0**) is a different number. It describes `defineBrush` / `defineFill` / `defineTexture` / `defineStickerEdge` and does not follow the package version. Additive fields on that contract (`RoughKit.curve`, `RoughKit.isolated`, contour and wash inputs, stroke scale on fill parts, `BrushInput.thickness`) stay on 1.0 because nothing has been published.
 
-Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.6.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy. The release PR sets the version explicitly, then runs `pnpm changeset version` so the changelog is written and no changeset files are still pending. The publish workflow takes that version as a required input. It does not run `changeset version` again.
+Nothing in this repository has been published. `package.json` versions are still `0.0.0` until the release PR. Feature PRs add changesets and do not edit those versions. The release PR runs `pnpm changeset version`. That command consumes the pending changesets, writes the changelog, and sets every package in the fixed group to the same version. Do not set the versions by hand and then run `changeset version`.
 
-Feature PRs add a changeset. The publish job refuses to run while one is still pending, because the release commit is supposed to already contain the version. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+The first release is a special case. A Changesets bump from `0.0.0` is `0.0.1` (patch), `0.1.0` (minor), or `1.0.0` (major). None of those is the Sketchy 1.6.0 line, and publishing `0.1.0` would break this policy. That release PR still runs `changeset version`, then corrects the generated version to `1.6.0` in the same pull request. Later releases take the version the command produces.
+
+The publish workflow takes the resulting version as a required input, including when the dispatch is a dry run. It does not run `changeset version` again, and it refuses to publish while a changeset is still pending. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 `.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, `animate`, `react`, `web-components`, and `contrib`.
 

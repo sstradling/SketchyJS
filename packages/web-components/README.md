@@ -8,12 +8,21 @@ A custom element that draws a seeded sketch as SVG. Importing the module does no
 pnpm add @sketchy-js/web-components
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts
 import { defineSketchyElement } from "@sketchy-js/web-components";
 
 defineSketchyElement();
+
+// Node, with happy-dom or jsdom. The third argument is that realm's HTMLElement.
+const registry = {
+  get: (_name: string): undefined => undefined,
+  define: (_name: string, _constructor: never): void => undefined,
+};
+defineSketchyElement("sketchy-shape", registry, HTMLElement);
 ```
 
 ```html

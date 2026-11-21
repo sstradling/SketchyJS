@@ -8,12 +8,25 @@ import { fileURLToPath } from "node:url";
  * It does not run `npm publish`, `git tag`, or `gh release create`.
  *
  * A real release is `.github/workflows/release.yml` with the dry-run input off.
- * `--gate --expect <version>` refuses 0.0.0, a mismatch, a version other than
- * the one the workflow was given, and any pending changeset. The release PR
- * runs `changeset version` first, so nothing is pending when this gate runs.
+ * `--gate --expect <version>` refuses a non-semver expect, 0.0.0, a mismatch,
+ * a version other than the one the workflow was given, and any pending
+ * changeset. The release PR runs `changeset version` first, so nothing is
+ * pending when this gate runs.
  */
 
-const root = fileURLToPath(new URL("../", import.meta.url));
+/** Strict semver, including a prerelease or build, and not a `v` prefix. */
+const SEMVER =
+  /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+
+function flagValue(flag) {
+  const index = process.argv.indexOf(flag);
+  if (index === -1) return undefined;
+  const value = process.argv[index + 1];
+  if (value === undefined || value.startsWith("--")) return undefined;
+  return value;
+}
+
+const root = flagValue("--root") ?? fileURLToPath(new URL("../", import.meta.url));
 const packages = readdirSync(join(root, "packages")).sort();
 const versions = new Map();
 for (const dir of packages) {
@@ -27,8 +40,11 @@ if (unique.length !== 1) {
 }
 const version = unique[0];
 const gate = process.argv.includes("--gate");
-const expectIndex = process.argv.indexOf("--expect");
-const expected = expectIndex === -1 ? undefined : process.argv[expectIndex + 1];
+const expected = flagValue("--expect");
+if (process.argv.includes("--expect") && (expected === undefined || !SEMVER.test(expected))) {
+  console.error("refusing to publish: --expect must be strict semver, for example 1.6.0");
+  process.exit(1);
+}
 const pending = readdirSync(join(root, ".changeset")).filter(
   (name) => name.endsWith(".md") && name !== "README.md",
 );

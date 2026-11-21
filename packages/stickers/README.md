@@ -8,6 +8,8 @@ Paper sheets, torn and smooth edges, and group unions. This package does not imp
 pnpm add @sketchy-js/stickers
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts

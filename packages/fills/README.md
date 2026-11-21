@@ -8,6 +8,8 @@ Built-in fill plugins. The main import is the basic set. Contour and wash stay o
 pnpm add @sketchy-js/fills
 ```
 
+`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
+
 ## Usage
 
 ```ts
