@@ -198,7 +198,9 @@ describe("phase 4 previews", () => {
       const { png, fraction } = renderPng(scene);
       expect(fraction, name).toBeLessThan(limit);
       expect(png.byteLength, name).toBeGreaterThan(500);
-      if (process.env.UPDATE_EXAMPLES === "1") writeFileSync(new URL(name, dir), png);
+      const only = process.env.UPDATE_EXAMPLES_ONLY?.split(",").filter(Boolean);
+      if (process.env.UPDATE_EXAMPLES === "1" && (!only || only.includes(name)))
+        writeFileSync(new URL(name, dir), png);
       const file = statSync(new URL(name, dir));
       expect(file.size, name).toBeGreaterThan(500);
       expect(file.size, name).toBeLessThan(10 * 1024 * 1024);

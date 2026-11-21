@@ -20,7 +20,7 @@ A pixel counts as different when any RGBA channel differs by more than the delta
 | Watercolor and crayon | 4 | 2% | A faint glaze must stay visible to the check |
 | Scribble | 24 | 3% | Dense crossings rasterize differently |
 | Contour and wash previews | 24 | 8–12% | Many thin strokes. The paths match; the coverage of a 1 px wobble does not |
-| Interior shades and halo | 12 | 6% | SVG `stdDeviation = blur`. Canvas `shadowBlur = 2 * blur` because canvas sigma is about `shadowBlur / 2`. Half or double that blur fails a 3% check on the pit shadow |
+| Interior shades and halo | 12 | 6% | SVG `stdDeviation = blur`. Canvas `shadowBlur = 2 * blur` because canvas sigma is about `shadowBlur / 2`. Half or double that blur fails a 3% check on the pit shadow at delta 12, and an 8.1% check on the halo at delta 4 |
 | Silhouette tint | 12 | 6% | SVG filter versus Canvas `source-in`. The exported cards fit this |
 
 Do not raise a limit to hide a wrong path. If the operations differ, fix the geometry. The pixel limit is only for antialiasing and the documented filter gap.

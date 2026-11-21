@@ -41,5 +41,7 @@ jobs:
       - name: actionlint
         if: matrix.node == 22
         run: |
-          bash <(curl -sSfL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color
+          version=1.7.12
+          curl -sSfL -o /tmp/actionlint.tar.gz "https://github.com/rhysd/actionlint/releases/download/v${version}/actionlint_${version}_linux_amd64.tar.gz"
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          /tmp/actionlint -color

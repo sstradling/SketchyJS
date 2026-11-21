@@ -7,6 +7,10 @@ on:
         description: Publish nothing and create no tags
         type: boolean
         default: true
+      version:
+        description: Package version already on this commit, for example 1.6.0
+        required: true
+        type: string
   workflow_run:
     workflows: ["CI"]
     types: [completed]
@@ -90,14 +94,44 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse --abbrev-ref HEAD)" = "master"
+          expected="${{ inputs.version }}"
+          test -n "$expected"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The release PR already sets every package to 1.6.0. `changeset version`
-          # exits 1 when nothing is pending, so this job does not run it or commit.
-          node scripts/release-dry-run.mjs --gate
-          pnpm changeset publish
+          # The release PR already ran `changeset version`, so this commit carries
+          # the version and has no pending changesets. This job does not version again.
+          node scripts/release-dry-run.mjs --gate --expect "$expected"
+          publish_status=0
+          pnpm changeset publish || publish_status=$?
+          if [ "$publish_status" -ne 0 ]; then
+            missing=0
+            for manifest in packages/*/package.json; do
+              private=$(node -p "require('./$manifest').private === true")
+              if [ "$private" = "true" ]; then
+                continue
+              fi
+              name=$(node -p "require('./$manifest').name")
+              ver=$(node -p "require('./$manifest').version")
+              if ! npm view "${name}@${ver}" version >/dev/null 2>&1; then
+                echo "$name@$ver is not on the registry"
+                missing=1
+              fi
+            done
+            if [ "$missing" -ne 0 ]; then
+              exit "$publish_status"
+            fi
+            echo "changeset publish exited $publish_status; every package version is already published"
+          fi
           version=$(node -p "require('./packages/core/package.json').version")
-          test "$version" = "1.6.0"
-          git tag -a "v$version" -m "SketchyJS $version"
-          git push origin "v$version"
-          gh release create "v$version" --title "SketchyJS $version" --generate-notes
+          test "$version" = "$expected"
+          if git ls-remote --tags origin "refs/tags/v${version}" | grep -q "refs/tags/v${version}$"; then
+            echo "tag v$version already exists"
+          else
+            git tag -a "v$version" -m "SketchyJS $version"
+            git push origin "refs/tags/v$version"
+          fi
+          if gh release view "v$version" >/dev/null 2>&1; then
+            echo "GitHub Release v$version already exists"
+          else
+            gh release create "v$version" --title "SketchyJS $version" --generate-notes
+          fi

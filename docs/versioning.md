@@ -8,7 +8,9 @@ SketchyJS package versions match the Swift Sketchy library.
 - Git tags are **`v`-prefixed** (`v1.6.0`). Do not tag feature branches.
 - The plugin API version (currently **1.0**) is a different number. It describes `defineBrush` / `defineFill` / `defineTexture` / `defineStickerEdge` and does not follow the package version. Additive fields on that contract (`RoughKit.curve`, `RoughKit.isolated`, contour and wash inputs, stroke scale on fill parts, `BrushInput.thickness`) stay on 1.0 because nothing has been published.
 
-Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.6.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy. The release PR sets `1.6.0` explicitly. This phase wires the workflow and leaves the versions at `0.0.0`.
+Nothing in this repository has been published. `package.json` versions are still `0.0.0` on purpose until the release that sets 1.6.0. Do not treat a Changesets minor bump from `0.0.0` as that release: it would publish `0.1.0`, which breaks this policy. The release PR sets the version explicitly, then runs `pnpm changeset version` so the changelog is written and no changeset files are still pending. The publish workflow takes that version as a required input. It does not run `changeset version` again.
+
+Feature PRs add a changeset. The publish job refuses to run while one is still pending, because the release commit is supposed to already contain the version. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 `.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, `animate`, `react`, `web-components`, and `contrib`.
 

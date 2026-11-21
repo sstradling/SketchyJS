@@ -51,19 +51,23 @@ async function reference(
   };
 }
 
-function fraction(actual: Uint8ClampedArray, expected: Uint8ClampedArray): number {
+function fractionAt(actual: Uint8ClampedArray, expected: Uint8ClampedArray, delta: number): number {
   const pixels = Math.min(actual.length, expected.length) / 4;
   let bad = 0;
   for (let i = 0; i < pixels; i++) {
     const o = i * 4;
     const differs =
-      Math.abs((actual[o] ?? 0) - (expected[o] ?? 0)) > DELTA ||
-      Math.abs((actual[o + 1] ?? 0) - (expected[o + 1] ?? 0)) > DELTA ||
-      Math.abs((actual[o + 2] ?? 0) - (expected[o + 2] ?? 0)) > DELTA ||
-      Math.abs((actual[o + 3] ?? 0) - (expected[o + 3] ?? 0)) > DELTA;
+      Math.abs((actual[o] ?? 0) - (expected[o] ?? 0)) > delta ||
+      Math.abs((actual[o + 1] ?? 0) - (expected[o + 1] ?? 0)) > delta ||
+      Math.abs((actual[o + 2] ?? 0) - (expected[o + 2] ?? 0)) > delta ||
+      Math.abs((actual[o + 3] ?? 0) - (expected[o + 3] ?? 0)) > delta;
     if (differs) bad++;
   }
   return bad / pixels;
+}
+
+function fraction(actual: Uint8ClampedArray, expected: Uint8ClampedArray): number {
+  return fractionAt(actual, expected, DELTA);
 }
 
 function paint(
@@ -171,6 +175,26 @@ describe("v1.6.0 shade and silhouette pixels", () => {
     const canvasAt = (factor: number) => fraction(paint(scaleBlur(scene, factor), beige), ref.data);
     const svgAt = (factor: number) =>
       fraction(svgPixels(scaleBlur(scene, factor), beige), ref.data);
+    expect(canvasAt(1)).toBeLessThanOrEqual(gate);
+    expect(canvasAt(0.5)).toBeGreaterThan(gate);
+    expect(canvasAt(2)).toBeGreaterThan(gate);
+    expect(svgAt(1)).toBeLessThanOrEqual(gate);
+    expect(svgAt(0.5)).toBeGreaterThan(gate);
+    expect(svgAt(2)).toBeGreaterThan(gate);
+  });
+
+  it("rejects a halo at half or double the chosen sigma", async () => {
+    const ref = await reference("images/shades/shade-halo.png");
+    const scene = shadeScene("shade-halo");
+    // Delta 12 hides the glow: the stroke dominates, and half or double still
+    // fit 6%. Delta 4 is where the chosen blur stays under 8.1% and both
+    // neighbors exceed it, on Canvas and on SVG.
+    const delta = 4;
+    const gate = 0.081;
+    const canvasAt = (factor: number) =>
+      fractionAt(paint(scaleBlur(scene, factor), beige), ref.data, delta);
+    const svgAt = (factor: number) =>
+      fractionAt(svgPixels(scaleBlur(scene, factor), beige), ref.data, delta);
     expect(canvasAt(1)).toBeLessThanOrEqual(gate);
     expect(canvasAt(0.5)).toBeGreaterThan(gate);
     expect(canvasAt(2)).toBeGreaterThan(gate);

@@ -26,6 +26,7 @@ const root = fileURLToPath(new URL("../../", import.meta.url));
 const keep = process.argv.includes("--keep");
 const failures = [];
 const report = [];
+let hashesUpdated = false;
 
 const fail = (message) => {
   failures.push(message);
@@ -94,7 +95,11 @@ if (!install.ok) {
     const hashFile = fileURLToPath(new URL("./hashes.json", import.meta.url));
     if (process.env.UPDATE_SMOKE_HASHES === "1") {
       writeFileSync(hashFile, `${JSON.stringify(actual, null, 2)}\n`);
-      console.log("wrote smoke hashes", actual);
+      hashesUpdated = true;
+      console.log(
+        "wrote smoke hashes; comparison skipped until the next run without UPDATE_SMOKE_HASHES",
+      );
+      console.log(actual);
     } else {
       const expected = JSON.parse(readFileSync(hashFile, "utf8"));
       const keys = ["react", "element", "canvas", "stickers", "canvasComponent", "animation"];
@@ -422,5 +427,9 @@ if (failures.length > 0) {
   console.error(`\n${failures.length} smoke failure(s)`);
   process.exit(1);
 }
-console.log("seeded render hashes match");
-console.log("export smoke tests passed");
+if (hashesUpdated) {
+  console.log("export smoke checks passed; render hashes were written and not compared");
+} else {
+  console.log("seeded render hashes match");
+  console.log("export smoke tests passed");
+}
