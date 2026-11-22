@@ -8,8 +8,6 @@ Seeded hand-drawn graphics. One package holds the geometry, fills, brushes, stic
 pnpm add @sketchy-js/sketchy
 ```
 
-`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
-
 ## Usage
 
 ```ts
@@ -30,7 +28,7 @@ Canvas is `@sketchy-js/sketchy/canvas`. Clipper is `@sketchy-js/sketchy/stickers
 
 | Import | What it is |
 | --- | --- |
-| `@sketchy-js/sketchy` | shapes and `sketch` only, so an unbundled import does not load a renderer |
+| `@sketchy-js/sketchy` | shapes, `sketch`, `basicSketchy`, `RoughView`, and `ViewOptions`. An unbundled import does not load a renderer |
 | `@sketchy-js/sketchy/core` | shapes, RNG, outlines |
 | `@sketchy-js/sketchy/core/options` | option defaults and rules |
 | `@sketchy-js/sketchy/fills` and `/fills/<name>` | fill plugins. Contour and wash are subpaths |

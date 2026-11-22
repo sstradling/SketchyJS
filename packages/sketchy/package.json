@@ -1,6 +1,6 @@
 {
   "name": "@sketchy-js/sketchy",
-  "version": "0.0.0",
+  "version": "1.6.0",
   "description": "Seeded hand-drawn graphics: geometry, fills, brushes, stickers, and SVG and Canvas renderers.",
   "type": "module",
   "sideEffects": false,
@@ -157,6 +157,9 @@
     "clipper2-ts": "2.0.1-19"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22"
   },

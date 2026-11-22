@@ -81,7 +81,7 @@ importers:
   packages/react:
     dependencies:
       '@sketchy-js/sketchy':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../sketchy
     devDependencies:
       '@types/react':

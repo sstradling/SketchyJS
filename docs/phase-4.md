@@ -2,7 +2,7 @@
 
 > **Package layout.** This note was written when each area was its own npm package. The published layout is two packages, [ADR 0002](adr/0002-two-packages.md). Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>` (schemas are `packages/sketchy/schemas`).
 
-Scope: the Phase 4 section of [plan.md](plan.md), plus Sketchy 1.6.0 (commit `650763d8c2696daf5dc44d0f25286b64ba91fc13`). Phase 3 remains the sticker work at `46676c6`. Package versions stay `0.0.0`. The first stable release is **v1.6.0**, not 1.5.0. See [versioning.md](versioning.md).
+Scope: the Phase 4 section of [plan.md](plan.md), plus Sketchy 1.6.0 (commit `650763d8c2696daf5dc44d0f25286b64ba91fc13`). Phase 3 remains the sticker work at `46676c6`. Package versions stayed `0.0.0` in that phase. The first stable release is **v1.6.0**, not 1.5.0. See [versioning.md](versioning.md).
 
 Plugin API stays **1.0**. `RoughKit.curve`, `RoughKit.isolated`, contour and wash fields on `FillInput`, stroke scale on fill parts, and `BrushInput.thickness` are additive and unpublished.
 
@@ -117,9 +117,9 @@ Generation is the expensive part. Painting in a worker is slower than painting o
 
 ## Release
 
-The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master, a green CI run for that commit, and a `version` input. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run and a dry run both call `scripts/release-dry-run.mjs --gate --expect <version>` with the version passed in the environment, and the script rejects anything that is not strict semver. The gate refuses `0.0.0`, versions that disagree, a version other than the input, and pending changesets. The release PR sets the packages to `1.5.0`, adds a minor changeset, and runs `changeset version`, which writes `1.6.0` (see [versioning.md](versioning.md)). The publish job does not version again. It publishes with provenance. A rerun keeps an existing `v` tag only when that tag already points at `HEAD`, and it skips an existing GitHub Release. A `changeset publish` that exits non-zero continues only when every package version is already on the registry. This PR does not publish.
+The workflow is `.github/workflows/release.yml`. A `workflow_run` release requires a successful CI `push` on this repository's master. A manual run requires master, a green CI run for that commit, and a `version` input. Node 22 and 24 both verify. Job permissions stay at read except the publish job, which has `contents: write` and `id-token: write`. A dry run is the default and does not upload or tag. A real run and a dry run both call `scripts/release-dry-run.mjs --gate --expect <version>` with the version passed in the environment, and the script rejects anything that is not strict semver. The gate refuses `0.0.0`, versions that disagree, a version other than the input, and pending changesets. The release PR sets `@sketchy-js/sketchy` and `@sketchy-js/react` to `1.5.0`, adds a minor changeset, and runs `changeset version`, which writes `1.6.0` (see [versioning.md](versioning.md)). The publish job does not version again. It publishes with provenance, and it runs in the `npm-publish` environment. Create that environment with a required reviewer before the first real publish. A rerun keeps an existing `v` tag only when that tag already points at `HEAD`, and it skips an existing GitHub Release. A `changeset publish` that exits non-zero continues only when every package version is already on the registry. This PR does not publish.
 
-This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that number would publish `0.1.0` and is refused.
+Phase 4 left every `package.json` at `0.0.0`. A Changesets bump from that number would publish `0.1.0` and is refused, which is why the release starts the two packages at `1.5.0`.
 
 ## Known gaps
 
@@ -129,7 +129,7 @@ This PR leaves every `package.json` at `0.0.0`. A Changesets bump from that numb
 - A silhouette with no data URL and no live canvas draws nothing in SVG. Canvas can paint a live source.
 - `SketchyCanvas` is `@sketchy-js/react/canvas`. The main React entry stays SVG.
 - No WebGL, no worker renderer. Generation and paint are timed separately in `tools/worker-bench`.
-- Versions are `0.0.0`. One fixed Changesets group will move together to 1.6.0. The release that sets that version is a later PR.
+- `@sketchy-js/sketchy` and `@sketchy-js/react` are the fixed Changesets group at 1.6.0. Publishing is the release workflow, not this status note.
 - `strokes/closed-width-z.json` holds the explicit-`Z` cases (ring stops, variable, crayon ring, same seed, rounded rect, crayon fill). They pass at 1e-4. The parity file fails if a new id appears in either closed-width file.
 - There is no Swift arc-contour fixture. Arc contours emit one unscaled stroke set, matching `fillArc`, and that remains a known gap.
 

@@ -8,8 +8,6 @@ SVG React bindings. This entry does not import the canvas renderer, so an app ca
 pnpm add @sketchy-js/react react
 ```
 
-`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
-
 `react` is the only peer dependency. The package depends on `@sketchy-js/sketchy`, which includes Canvas. `@sketchy-js/react/canvas` is the Canvas binding.
 
 The published tarball contains `LICENSE` and no `THIRD_PARTY_NOTICES`. This package does not vendor third-party code. Clipper's BSL-1.0 notice ships with `@sketchy-js/sketchy`, the package that depends on `clipper2-ts`.
