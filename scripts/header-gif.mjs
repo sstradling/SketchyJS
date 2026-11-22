@@ -119,9 +119,9 @@ const styles = {
     stroke: "#6e5907",
     fill: "#b7950b",
     fillStyle: "hachure",
-    hachureAngle: 90,
-    hachureGap: 4.5,
-    fillWeight: 1.8,
+    fillAngle: 0,
+    fillSpacing: 0.92,
+    fillWeight: 0.9,
     roughness: 1.8,
     strokeWidth: 2.2,
     bowing: 2,
@@ -134,7 +134,7 @@ const sticker = {
   smoothness: 1,
   edge: "smooth",
   color: "#ffffff",
-  shadow: { opacity: 0.2, x: 0, y: 2.5, radius: 6, color: "#000000" },
+  shadow: { opacity: 0.7, x: 1, y: 5, radius: 16, color: "#000000" },
 };
 const bangSeeds = [1414n, 1616n, 1818n, 2019n, 1818n, 1616n];
 
@@ -193,8 +193,8 @@ function viewOptions(style, seed, withSticker) {
     fillStyle: style.fillStyle,
     fillColor: style.fill,
     fillWeight: style.fillWeight,
-    fillSpacing: gap / style.fillWeight,
-    fillAngle: (style.hachureAngle ?? 0) - 90,
+    fillSpacing: style.fillSpacing ?? gap / style.fillWeight,
+    fillAngle: style.fillAngle ?? (style.hachureAngle ?? 0) - 90,
     ...(style.dashOffset !== undefined ? { dashOffset: style.dashOffset } : {}),
     ...(style.dashGap !== undefined ? { dashGap: style.dashGap } : {}),
     ...(style.zigzagOffset !== undefined ? { zigzagOffset: style.zigzagOffset } : {}),
@@ -241,6 +241,17 @@ function keepOneStickerSheet(scene) {
       if (layer === keep) return true;
       return layer.role === "sheet-shadow" && index === keepAt - 1;
     });
+    if (keep) {
+      node.drawing.layers.push({
+        role: "stroke",
+        paths: keep.paths,
+        fillRule: "nonzero",
+        paint: { kind: "solid", color: "#3f3a34" },
+        strokeWidth: 2.4,
+        cap: "round",
+        join: "round",
+      });
+    }
   }
 }
 
@@ -332,7 +343,21 @@ function raster(bangSeed) {
   paint.imageSmoothingEnabled = true;
   paint.imageSmoothingQuality = "high";
   paint.drawImage(big, 0, 0, OUT_W, OUT_H);
-  return paint.getImageData(0, 0, OUT_W, OUT_H).data;
+  return unpremultiply(paint.getImageData(0, 0, OUT_W, OUT_H).data);
+}
+
+/** Downscaling blends edge pixels with transparent black. Divide the color back out. */
+function unpremultiply(data) {
+  const out = new Uint8ClampedArray(data.length);
+  for (let i = 0; i < data.length; i += 4) {
+    const alpha = data[i + 3];
+    out[i + 3] = alpha;
+    if (alpha === 0) continue;
+    out[i] = Math.min(255, Math.round((data[i] * 255) / alpha));
+    out[i + 1] = Math.min(255, Math.round((data[i + 1] * 255) / alpha));
+    out[i + 2] = Math.min(255, Math.round((data[i + 2] * 255) / alpha));
+  }
+  return out;
 }
 
 function medianCut(samples, count) {
@@ -396,10 +421,10 @@ function widest(box) {
   return channel;
 }
 
-function nearest(palette, r, g, b) {
-  let best = 0;
+function nearest(palette, r, g, b, start = 0) {
+  let best = start;
   let bestD = Infinity;
-  for (let index = 0; index < palette.length; index++) {
+  for (let index = start; index < palette.length; index++) {
     const color = palette[index];
     const d = (color[0] - r) ** 2 + (color[1] - g) ** 2 + (color[2] - b) ** 2;
     if (d < bestD) {
@@ -412,10 +437,11 @@ function nearest(palette, r, g, b) {
 
 function dither(data, palette) {
   const px = new Float32Array(data.length);
-  for (let i = 0; i < data.length; i++) px[i] = data[i];
+  px.set(data);
   const out = new Uint8Array(OUT_W * OUT_H);
   const spill = (x, y, er, eg, eb, amount) => {
     if (x < 0 || y < 0 || x >= OUT_W || y >= OUT_H) return;
+    if (data[(y * OUT_W + x) * 4 + 3] < 128) return;
     const i = (y * OUT_W + x) * 4;
     px[i] += er * amount;
     px[i + 1] += eg * amount;
@@ -424,19 +450,20 @@ function dither(data, palette) {
   for (let y = 0; y < OUT_H; y++) {
     for (let x = 0; x < OUT_W; x++) {
       const i = (y * OUT_W + x) * 4;
+      if (data[i + 3] < 128) {
+        out[y * OUT_W + x] = 0;
+        continue;
+      }
       const r = Math.max(0, Math.min(255, px[i]));
       const g = Math.max(0, Math.min(255, px[i + 1]));
       const b = Math.max(0, Math.min(255, px[i + 2]));
-      const index = nearest(palette, r, g, b);
+      const index = nearest(palette, r, g, b, 1);
       out[y * OUT_W + x] = index;
       const color = palette[index];
-      const er = r - color[0];
-      const eg = g - color[1];
-      const eb = b - color[2];
-      spill(x + 1, y, er, eg, eb, 7 / 16);
-      spill(x - 1, y + 1, er, eg, eb, 3 / 16);
-      spill(x, y + 1, er, eg, eb, 5 / 16);
-      spill(x + 1, y + 1, er, eg, eb, 1 / 16);
+      spill(x + 1, y, r - color[0], g - color[1], b - color[2], 7 / 16);
+      spill(x - 1, y + 1, r - color[0], g - color[1], b - color[2], 3 / 16);
+      spill(x, y + 1, r - color[0], g - color[1], b - color[2], 5 / 16);
+      spill(x + 1, y + 1, r - color[0], g - color[1], b - color[2], 1 / 16);
     }
   }
   return out;
@@ -520,8 +547,8 @@ function gif(frames, colors) {
       0x21,
       0xf9,
       0x04,
-      0x04,
-      12,
+      0x09,
+      10,
       0,
       0,
       0,
@@ -554,6 +581,7 @@ function hashColumn(data, x0, x1) {
 }
 
 const rendered = bangSeeds.map((seed) => raster(seed));
+if (rendered[0][3] !== 0) throw new Error("the GIF corner is not transparent");
 const sBox = [Math.round(OUT_W * 0.12), Math.round(OUT_W * 0.24)];
 const bangBox = [Math.round(OUT_W * 0.78), Math.round(OUT_W * 0.9)];
 if (hashColumn(rendered[0], sBox[0], sBox[1]) !== hashColumn(rendered[2], sBox[0], sBox[1]))
@@ -566,9 +594,12 @@ if (
 
 const samples = [];
 for (const data of rendered) {
-  for (let i = 0; i < data.length; i += 48) samples.push([data[i], data[i + 1], data[i + 2]]);
+  for (let i = 0; i < data.length; i += 48) {
+    if (data[i + 3] < 128) continue;
+    samples.push([data[i], data[i + 1], data[i + 2]]);
+  }
 }
-const palette = medianCut(samples, 128);
+const palette = [[0, 0, 0], ...medianCut(samples, 127)];
 while (palette.length < 256) palette.push(palette[palette.length - 1] ?? [0, 0, 0]);
 const encoded = gif(
   rendered.map((frame) => dither(frame, palette)),
@@ -588,12 +619,23 @@ const reference = await loadImage(
     "https://raw.githubusercontent.com/sstradling/Sketchy/master/docs/images/header.png",
   ),
 );
-const side = createCanvas(reference.width + OUT_W + 16, Math.max(reference.height, OUT_H));
+function comparisonRow(background) {
+  const row = createCanvas(reference.width + OUT_W + 24, Math.max(reference.height, OUT_H));
+  const paint = row.getContext("2d");
+  paint.fillStyle = background;
+  paint.fillRect(0, 0, row.width, row.height);
+  paint.drawImage(reference, 0, 0);
+  paint.drawImage(still, reference.width + 24, 0);
+  return row;
+}
+const light = comparisonRow("#ffffff");
+const dark = comparisonRow("#0d1117");
+const side = createCanvas(light.width, light.height + dark.height + 16);
 const ctx = side.getContext("2d");
-ctx.fillStyle = "#ffffff";
+ctx.fillStyle = "#808080";
 ctx.fillRect(0, 0, side.width, side.height);
-ctx.drawImage(reference, 0, 0);
-ctx.drawImage(still, reference.width + 16, 0);
+ctx.drawImage(light, 0, 0);
+ctx.drawImage(dark, 0, light.height + 16);
 const artifacts = "/opt/cursor/artifacts";
 mkdirSync(artifacts, { recursive: true });
 writeFileSync(`${artifacts}/header-side-by-side.png`, side.toBuffer("image/png"));
