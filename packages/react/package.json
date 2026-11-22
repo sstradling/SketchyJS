@@ -1,6 +1,6 @@
 {
   "name": "@sketchy-js/react",
-  "version": "0.0.0",
+  "version": "1.6.0",
   "description": "React bindings for SketchyJS. SVG by default; Canvas is a subpath.",
   "type": "module",
   "sideEffects": false,

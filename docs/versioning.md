@@ -8,12 +8,12 @@ SketchyJS package versions match the Swift Sketchy library.
 - Git tags are **`v`-prefixed** (`v1.6.0`). Do not tag feature branches.
 - The plugin API version (currently **1.0**) is a different number. It describes `defineBrush` / `defineFill` / `defineTexture` / `defineStickerEdge` and does not follow the package version. Additive fields on that contract (`RoughKit.curve`, `RoughKit.isolated`, contour and wash inputs, stroke scale on fill parts, `BrushInput.thickness`) stay on 1.0 because nothing has been published.
 
-Nothing in this repository has been published. `package.json` versions are still `0.0.0` until the release PR. Feature PRs add changesets and do not edit those versions. The release PR runs `pnpm changeset version`. That command consumes the pending changesets, writes each `CHANGELOG.md`, and sets every package in the fixed group to the same version.
+`@sketchy-js/sketchy` and `@sketchy-js/react` are **1.6.0**. Nothing has been published to npm yet. Publishing is the release workflow on master, with the version input `1.6.0`. It does not run `changeset version` again. Feature PRs add changesets and do not edit package versions.
 
-The first release cannot start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. The release PR sets `@sketchy-js/sketchy` and `@sketchy-js/react` to `1.5.0`, adds one minor changeset that names them, and then runs `pnpm changeset version`. That bumps both packages to `1.6.0` and heads each changelog with `## 1.6.0`. Later releases take the version the command produces from the version already on the branch.
+The first release could not start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. This release set both packages to `1.5.0`, added one minor changeset that names them, and ran `pnpm changeset version`. That bumped both to `1.6.0` and headed each changelog with `## 1.6.0`. Later releases take the version the command produces from the version already on the branch.
 
 The publish workflow takes the resulting version as a required input, including when the dispatch is a dry run. It does not run `changeset version` again, and it refuses to publish while a changeset is still pending. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-`.changeset/config.json` puts the two publishable packages in one `fixed` group so they always share a version: `@sketchy-js/sketchy` and `@sketchy-js/react`. The first release sets both to `1.5.0`, adds one minor changeset, and runs `changeset version`, which writes `1.6.0`.
+`.changeset/config.json` puts the two publishable packages in one `fixed` group so they always share a version: `@sketchy-js/sketchy` and `@sketchy-js/react`. This release set both to `1.5.0`, added one minor changeset, and ran `changeset version`, which wrote `1.6.0`.
 
 `v1.4.2` appears in [plan.md](plan.md) only as the old Sketchy pin this plan was first written against. It is not a SketchyJS version. `v1.5.0` in the fixture tree is the Sketchy pin those files were exported from. It is not the SketchyJS release tag.

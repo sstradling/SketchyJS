@@ -21,4 +21,4 @@ Folder rules replace the old package dependency list. Pure-geometry folders (`ty
 
 ## Consequences
 
-Versions move together in one Changesets fixed group of two. The first release still sets both to `1.5.0`, adds a minor changeset, and runs `changeset version` so the changelogs say `1.6.0`. Import paths change; the geometry and the fixtures do not.
+Versions move together in one Changesets fixed group of two. The first release set both to `1.5.0`, added a minor changeset, and ran `changeset version` so the changelogs say `1.6.0`. Import paths change; the geometry and the fixtures do not.
