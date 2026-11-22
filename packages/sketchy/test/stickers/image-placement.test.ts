@@ -275,6 +275,7 @@ describe("resolveImagePlacement", () => {
     expect(reads).toBe(1);
   });
 
+  // CI runs `pnpm build` before `pnpm test`, so dist exists. A source-only run fails this one test on purpose.
   it("keeps the image class out of the main entry", () => {
     const index = new URL("../../dist/stickers.js", import.meta.url);
     const image = new URL("../../dist/stickers/image.js", import.meta.url);

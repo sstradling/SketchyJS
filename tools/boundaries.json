@@ -1,5 +1,5 @@
 {
-  "$comment": "Folder rules inside @sketchy-js/sketchy, plus the two publishable packages. Pure-geometry folders still cannot touch DOM globals.",
+  "$comment": "Folder rules inside @sketchy-js/sketchy, plus the two publishable packages. Every area gets the DOM-global ban unless it is listed in domAreas.",
   "packages": {
     "sketchy": { "dependencies": [] },
     "react": { "dependencies": ["sketchy"], "externalPeers": ["react"] }
@@ -16,9 +16,9 @@
     "canvas": ["types"],
     "animate": ["types", "core"],
     "web-components": ["types", "scene", "svg", "core"],
-    "root": ["core", "scene", "svg"]
+    "root": ["core", "scene"]
   },
-  "pureGeometryAreas": ["types", "plugin", "core", "fills", "brushes", "stickers"],
+  "domAreas": ["svg", "canvas", "web-components"],
   "bannedInPureGeometry": {
     "globals": [
       "window",

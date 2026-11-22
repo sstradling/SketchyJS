@@ -1,5 +1,7 @@
 # SketchyJS implementation plan
 
+> **Package layout.** The names in this plan are the original per-area packages. [ADR 0002](adr/0002-two-packages.md) publishes two packages. Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>`.
+
 > Companion docs: [plugin architecture](plugins.md) and [contributing plugins](contributing-plugins.md).
 
 ## Scope and baseline

@@ -30,7 +30,7 @@ Canvas is `@sketchy-js/sketchy/canvas`. Clipper is `@sketchy-js/sketchy/stickers
 
 | Import | What it is |
 | --- | --- |
-| `@sketchy-js/sketchy` | shapes, `sketch`, and SVG |
+| `@sketchy-js/sketchy` | shapes and `sketch` only, so an unbundled import does not load a renderer |
 | `@sketchy-js/sketchy/core` | shapes, RNG, outlines |
 | `@sketchy-js/sketchy/core/options` | option defaults and rules |
 | `@sketchy-js/sketchy/fills` and `/fills/<name>` | fill plugins. Contour and wash are subpaths |
@@ -44,6 +44,8 @@ Canvas is `@sketchy-js/sketchy/canvas`. Clipper is `@sketchy-js/sketchy/stickers
 | `@sketchy-js/sketchy/plugin` and `/plugin/schema` | plugin contract |
 | `@sketchy-js/sketchy/types` | shared types |
 | `@sketchy-js/sketchy/schemas/*` | JSON schemas |
+
+`THIRD_PARTY_NOTICES` in this package names `clipper2-ts` (BSL-1.0) and the Sketchy and rough.js code the geometry is ported from. It does not repeat development-only tools. The full list stays at the repository root. `@sketchy-js/react` ships `LICENSE` only, because it vendors no third-party code.
 
 ## Docs
 

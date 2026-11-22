@@ -1,5 +1,7 @@
 # Phase 3 status: stickers and groups
 
+> **Package layout.** This note was written when each area was its own npm package. The published layout is two packages, [ADR 0002](adr/0002-two-packages.md). Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>` (schemas are `packages/sketchy/schemas`).
+
 Scope: the Phase 3 section of [plan.md](plan.md), plus the pixel-test tightening Seth asked for before sticker work. Reference: Sketchy v1.5.0 (`fb17a6e`). Darwin output is canonical. Sticker and group contours are the accepted fixtures in `fixtures/swift-reference/v1.5.0/stickers/`. They were not regenerated.
 
 Plugin API stays **1.0**. Package versions stay `0.0.0` in this PR. The version policy is [versioning.md](versioning.md).

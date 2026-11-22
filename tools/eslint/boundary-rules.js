@@ -18,7 +18,6 @@ export function importRestrictions(area) {
     `@sketchy-js/sketchy/${name}`,
     `@sketchy-js/sketchy/${name}/*`,
   ]);
-  patterns.push("@sketchy-js/svg-renderer", "@sketchy-js/svg-renderer/*");
   return {
     "no-restricted-imports": [
       "error",
@@ -60,10 +59,10 @@ export function determinismRules() {
 /** Folder-level ESLint overrides derived from tools/boundaries.json. */
 export function packageOverrides() {
   return areas.map((area) => {
-    const pure = boundaries.pureGeometryAreas.includes(area);
+    const dom = (boundaries.domAreas ?? []).includes(area);
     return {
       files: [`packages/sketchy/src/${area}/**/*.ts`],
-      rules: { ...importRestrictions(area), ...(pure ? determinismRules() : {}) },
+      rules: { ...importRestrictions(area), ...(dom ? {} : determinismRules()) },
     };
   });
 }

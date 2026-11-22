@@ -12,6 +12,8 @@ pnpm add @sketchy-js/react react
 
 `react` is the only peer dependency. The package depends on `@sketchy-js/sketchy`, which includes Canvas. `@sketchy-js/react/canvas` is the Canvas binding.
 
+The published tarball contains `LICENSE` and no `THIRD_PARTY_NOTICES`. This package does not vendor third-party code. Clipper's BSL-1.0 notice ships with `@sketchy-js/sketchy`, the package that depends on `clipper2-ts`.
+
 ## Usage
 
 ```tsx

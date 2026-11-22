@@ -1,5 +1,7 @@
 # Phase 4 status: bindings, 1.6.0 parity, and release hardening
 
+> **Package layout.** This note was written when each area was its own npm package. The published layout is two packages, [ADR 0002](adr/0002-two-packages.md). Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>` (schemas are `packages/sketchy/schemas`).
+
 Scope: the Phase 4 section of [plan.md](plan.md), plus Sketchy 1.6.0 (commit `650763d8c2696daf5dc44d0f25286b64ba91fc13`). Phase 3 remains the sticker work at `46676c6`. Package versions stay `0.0.0`. The first stable release is **v1.6.0**, not 1.5.0. See [versioning.md](versioning.md).
 
 Plugin API stays **1.0**. `RoughKit.curve`, `RoughKit.isolated`, contour and wash fields on `FillInput`, stroke scale on fill parts, and `BrushInput.thickness` are additive and unpublished.

@@ -1,5 +1,7 @@
 # Phase 0 status: contracts and reference corpus
 
+> **Package layout.** This note was written when each area was its own npm package. The published layout is two packages, [ADR 0002](adr/0002-two-packages.md). Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>` (schemas are `packages/sketchy/schemas`).
+
 Scope is `docs/plan.md`, "Phase 0". Nothing from Phase 1 is implemented: the 13 packages other than `types`, `plugin`, and `core` are empty skeletons, and `@sketchy-js/core` contains only the RNG and the option tables.
 
 ## Exit criteria

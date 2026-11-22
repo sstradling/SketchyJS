@@ -12,7 +12,7 @@ Both renderers consume the same `Scene`. Geometry is decided before either one r
 | Interior shades | filters and gradients | `shadowBlur` and canvas gradients | See the blur row |
 | Halo | mask + `feGaussianBlur` | inverse clip + `shadowBlur` | Outside half of a double-width stroke |
 | Sticker sheet, torn edge, paper, image mask | yes | yes | Not in the basic import |
-| Silhouette shadow | `feFlood` + `feComposite`, needs a data URL | `source-in` on an offscreen surface, or a live canvas | `@sketchy-js/scene/silhouette` |
+| Silhouette shadow | `feFlood` + `feComposite`, needs a data URL | `source-in` on an offscreen surface, or a live canvas | `@sketchy-js/sketchy/scene/silhouette` |
 | Clips, inverse clips | `clipPath` or mask | `clip` or a luminance mask | |
 | Nested transforms | `transform` attribute | `context.transform` | Not multiplied into stroke width |
 | Text | supplied outlines | supplied outlines | Browser text is not a parity path |
@@ -31,4 +31,4 @@ Shade blur uses SVG `stdDeviation = blur`. Canvas `shadowBlur` is `2 * blur` bec
 
 ## What the basic import pays for
 
-`@sketchy-js/scene/basic` registers the built-in fills except contour and wash. Those two are `@sketchy-js/fills/contour` and `@sketchy-js/fills/wash`, then `registry.use(...)`. The basic import does not include stickers, the silhouette helper, React, or the canvas renderer. Stickers do not import React. The React entry does not import Canvas; `SketchyCanvas` is `@sketchy-js/react/canvas`.
+`@sketchy-js/sketchy/scene/basic` registers the built-in fills except contour and wash. Those two are `@sketchy-js/sketchy/fills/contour` and `@sketchy-js/sketchy/fills/wash`, then `registry.use(...)`. The basic import does not include stickers, the silhouette helper, React, or the canvas renderer. Stickers do not import React. The React entry does not import Canvas; `SketchyCanvas` is `@sketchy-js/react/canvas`.

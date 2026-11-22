@@ -119,7 +119,7 @@ if (!install.ok) {
 
 /** Public entry points and one symbol each must expose. Skeleton packages export nothing yet. */
 const expectations = {
-  "@sketchy-js/sketchy": { symbols: ["rectangle", "sketch", "renderToSvgString"] },
+  "@sketchy-js/sketchy": { symbols: ["rectangle", "sketch"] },
   "@sketchy-js/sketchy/types": { symbols: [], skeleton: false, note: "types only" },
   "@sketchy-js/sketchy/plugin": {
     symbols: [
@@ -202,20 +202,35 @@ const expectations = {
     ],
   },
 };
-const skeletons = [];
+
+/** JS entry points. `package.json` and wildcard keys are not symbol imports. */
+function jsSpecifiers(pkgName, exportsMap) {
+  return Object.keys(exportsMap)
+    .filter((key) => key !== "./package.json" && !key.includes("*"))
+    .map((key) => (key === "." ? pkgName : `${pkgName}${key.slice(1)}`))
+    .sort();
+}
+
+for (const dir of ["sketchy", "react"]) {
+  const manifest = JSON.parse(readFileSync(join(root, "packages", dir, "package.json"), "utf8"));
+  const declared = jsSpecifiers(manifest.name, manifest.exports);
+  const covered = Object.keys(expectations)
+    .filter((key) => key === manifest.name || key.startsWith(`${manifest.name}/`))
+    .sort();
+  if (declared.join("\n") !== covered.join("\n")) {
+    fail(
+      `${manifest.name}: smoke expectations do not match package exports\nexpected ${declared.join(", ")}\nactual ${covered.join(", ")}`,
+    );
+  }
+}
 
 writeFileSync(
   join(consumer, "check.mjs"),
   `const expectations = ${JSON.stringify(expectations)};
-const skeletons = ${JSON.stringify(skeletons.map((s) => `@sketchy-js/${s}`))};
 let bad = 0;
 for (const [specifier, { symbols }] of Object.entries(expectations)) {
   const mod = await import(specifier);
   for (const symbol of symbols) if (!(symbol in mod)) { console.error("missing export", specifier, symbol); bad++; }
-}
-for (const specifier of skeletons) {
-  const mod = await import(specifier);
-  if (Object.keys(mod).length !== 0) { console.error("skeleton package now has exports; update the smoke test:", specifier); bad++; }
 }
 const { sketch } = await import("@sketchy-js/sketchy/scene/basic");
 const { renderToSvgString } = await import("@sketchy-js/sketchy/svg");

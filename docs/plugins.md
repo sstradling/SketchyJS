@@ -8,18 +8,18 @@ Related docs: [implementation plan](plan.md), [contributing plugins](contributin
 
 ## Implementation status
 
-Verified against the code on this branch (`packages/plugin`, `packages/fills`, `packages/scene`).
+Verified against the code on this branch (`packages/sketchy/src/plugin`, `packages/sketchy/src/fills`, `packages/sketchy/src/scene`).
 
 | Area | State |
 | --- | --- |
-| Contract types for all four kinds, option schema builders (`s`), `PLUGIN_API_VERSION = { major: 1, minor: 0 }` | Implemented (`@sketchy-js/plugin`). This is the version that will be published |
+| Contract types for all four kinds, option schema builders (`s`), `PLUGIN_API_VERSION = { major: 1, minor: 0 }` | Implemented (`@sketchy-js/sketchy/plugin`). This is the version that will be published |
 | `defineBrush`, `defineFill`, `defineTexture`, `defineStickerEdge` (brand, deep freeze, `with()`, development-only shape and default validation) | Implemented |
-| `@sketchy-js/plugin/schema`: `resolveOptions`, `validateSchema`, `validateDefinition`, `toJsonSchema`, `hashOptions`, `checkPluginApi`/`assertPluginApi`, `PluginOptionError`, `PluginApiError` | Implemented. The registry calls `assertPluginApi` at `use()` and when a plugin object is resolved, so a major mismatch or a newer minor is rejected |
-| Conformance helpers in `@sketchy-js/plugin`: `withRandomGuard`, `assertDeterministic`, `assertInputImmutable`, `assertInterleavingStable`, `assertWithinBudget`, `countOps` | Implemented; see [section 3](#3-the-purity-contract-and-how-it-is-enforced) for exactly what each checks |
-| `createSketchy()` registry (immutable `use`, `replace`, `alias`, `has`, `list`, `resolve`, `view()`), `PluginRegistrationError`, `PluginNotRegisteredError` | Implemented for all kinds as data, in `@sketchy-js/scene` |
-| Fill hosting: `ctx.rng` (shared or forked), `ctx.geom` including `ctx.geom.rough`, `ctx.warn` to scene diagnostics, part conversion, non-finite and op-budget handling | Implemented (`scene/src/fill-stage.ts`). Nine built-in fills ship in `@sketchy-js/fills` as `defineFill` plugins |
+| `@sketchy-js/sketchy/plugin/schema`: `resolveOptions`, `validateSchema`, `validateDefinition`, `toJsonSchema`, `hashOptions`, `checkPluginApi`/`assertPluginApi`, `PluginOptionError`, `PluginApiError` | Implemented. The registry calls `assertPluginApi` at `use()` and when a plugin object is resolved, so a major mismatch or a newer minor is rejected |
+| Conformance helpers in `@sketchy-js/sketchy/plugin`: `withRandomGuard`, `assertDeterministic`, `assertInputImmutable`, `assertInterleavingStable`, `assertWithinBudget`, `countOps` | Implemented; see [section 3](#3-the-purity-contract-and-how-it-is-enforced) for exactly what each checks |
+| `createSketchy()` registry (immutable `use`, `replace`, `alias`, `has`, `list`, `resolve`, `view()`), `PluginRegistrationError`, `PluginNotRegisteredError` | Implemented for all kinds as data, in `@sketchy-js/sketchy/scene` |
+| Fill hosting: `ctx.rng` (shared or forked), `ctx.geom` including `ctx.geom.rough`, `ctx.warn` to scene diagnostics, part conversion, non-finite and op-budget handling | Implemented (`packages/sketchy/src/scene/fill-stage.ts`). Nine built-in fills ship in `@sketchy-js/sketchy/fills` as `defineFill` plugins |
 | Brush hosting for `crayon` | Implemented. The scene calls a registered `crayon` brush and replaces stroke layers with its wax passes. Texture and edge hosting, and `PluginBudgetError`, are still planned |
-| `@sketchy-js/testkit` (`describePlugin`, `runX` helpers, `defineDemo`), `pnpm new`, `pnpm docs:plugins`, ESLint preset `plugin`, `@sketchy-js/contrib`, `@sketchy-js/scene/compat` | Planned |
+| `@sketchy-js/testkit` (`describePlugin`, `runX` helpers, `defineDemo`), `pnpm new`, `pnpm docs:plugins`, ESLint preset `plugin`, `@sketchy-js/sketchy/scene/compat` | Planned. The in-repo contrib package was removed ([ADR 0002](adr/0002-two-packages.md)) |
 
 ## Contents
 
@@ -103,7 +103,7 @@ A plugin is a pure function of `(input, resolvedOptions, ctx)`:
 2. **Randomness only from `ctx.rng`.** `Math.random`, `Date.now`, `performance.now`, `crypto.getRandomValues`, and `new Date()` are forbidden. Every draw must come from the injected seeded RNG.
 3. **No platform access.** No DOM, Canvas, `Path2D`, `OffscreenCanvas`, `fetch`, `window`, `document`, `globalThis` reads, or Node built-ins.
 4. **No input mutation, no output aliasing.** Inputs are deep-frozen by the conformance helper `assertInputImmutable`. Returned arrays are fresh. (The host does not freeze inputs at runtime today.)
-5. **No cross-plugin calls and no host internals.** The only runtime import allowed in a plugin module is `@sketchy-js/plugin`. Geometry helpers arrive through `ctx.geom`.
+5. **No cross-plugin calls and no host internals.** The only runtime import allowed in a plugin module is `@sketchy-js/sketchy/plugin`. Geometry helpers arrive through `ctx.geom`.
 6. **Total functions.** Degenerate geometry (empty path, zero length, collapsed region) returns valid output, possibly `[]`. It never throws and never returns `NaN` or `Infinity`.
 7. **Bounded work.** Output size must stay within `ctx.maxOps` (default 200,000 operations per fill). The fill host does not throw: it drops the offending part and reports a `fill-max-ops` diagnostic (`PluginBudgetError` is planned). Non-finite numbers are likewise dropped with `fill-non-finite`.
 
@@ -112,7 +112,7 @@ JavaScript cannot prove purity, so enforcement is layered. The *State* column sa
 | Layer | What it catches | State |
 | --- | --- | --- |
 | Type surface | Plugin packages compile with `lib: ["ES2022"]` and `types: []`, so DOM and Node globals do not type-check | Convention; the built-in fills package does this under `tsc` |
-| ESLint preset `plugin` from `@sketchy-js/eslint-plugin` (dev-only): banned identifiers, banned imports (anything but `@sketchy-js/plugin` and relative files), top-level mutable state, missing `/*#__PURE__*/` | Planned. The repository ESLint config bans `Math.random` in source, but there is no plugin preset |
+| ESLint preset `plugin` from `@sketchy-js/eslint-plugin` (dev-only): banned identifiers, banned imports (anything but `@sketchy-js/sketchy/plugin` and relative files), top-level mutable state, missing `/*#__PURE__*/` | Planned. The repository ESLint config bans `Math.random` in source, but there is no plugin preset |
 | Hermetic runtime | `withRandomGuard` replaces `Math.random`, `Date.now`, `performance.now`, `crypto.getRandomValues`, and `crypto.randomUUID` with throwing functions while a callback runs; `assertInputImmutable` runs `generate` on a deep-frozen copy and rejects output that aliases input objects | Implemented for those globals. **Not covered:** `new Date()` with no arguments, DOM and Canvas globals (`document`, `window`, `Path2D`, `OffscreenCanvas`), `fetch`, and the module import graph |
 | Differential runs | `assertDeterministic` (same call twice gives identical JSON) and `assertInterleavingStable` (A, B, A gives the same A twice) | Implemented as helpers. Planned: fresh-module re-import, call-counting RNG, seed sensitivity, option-order independence, dead-option detection |
 | Output validation | `assertWithinBudget` (operation count against `maxOps`, finite numbers) as a helper; the fill host drops non-finite and over-budget parts with diagnostics | Implemented for fills. Full validation of layers, roles, and malformed paths is planned with brush, texture, and edge hosting |
@@ -125,15 +125,15 @@ Where the code lives. These are additions to the package list in the plan:
 
 | Package | Role | Runtime cost for plugin authors |
 | --- | --- | --- |
-| `@sketchy-js/plugin` (tiny, depends only on `@sketchy-js/types`) | Contract types, `defineBrush`/`defineFill`/`defineTexture`/`defineStickerEdge`, the `s` schema builders, `PLUGIN_API_VERSION`, the conformance helpers | About 1 KB gzip; the only import a plugin needs |
-| `@sketchy-js/plugin/schema` | `resolveOptions`, `validateSchema`, `toJsonSchema`, `hashOptions`. Used by the host and tools, never bundled into a plugin | None |
-| `@sketchy-js/scene` | The host: `createSketchy()` registry and the fill stage. The `GeometryKit` and `RoughKit` implementations live in `@sketchy-js/core` (`createGeometryKit`, `createRoughKit`) and `Rng` is `core`'s `Rng` | None (peer of the app) |
+| `@sketchy-js/sketchy/plugin` (tiny, depends only on `@sketchy-js/sketchy/types`) | Contract types, `defineBrush`/`defineFill`/`defineTexture`/`defineStickerEdge`, the `s` schema builders, `PLUGIN_API_VERSION`, the conformance helpers | About 1 KB gzip; the only import a plugin needs |
+| `@sketchy-js/sketchy/plugin/schema` | `resolveOptions`, `validateSchema`, `toJsonSchema`, `hashOptions`. Used by the host and tools, never bundled into a plugin | None |
+| `@sketchy-js/sketchy/scene` | The host: `createSketchy()` registry and the fill stage. The `GeometryKit` and `RoughKit` implementations live in `@sketchy-js/sketchy/core` (`createGeometryKit`, `createRoughKit`) and `Rng` is `core`'s `Rng` | None (peer of the app) |
 | `@sketchy-js/testkit` (**planned**, not in the repository) | `describePlugin` conformance suite, fixtures, `runBrush`/`runFill`/`runTexture`/`runEdge` helpers, `defineDemo` | dev dependency |
-| `packages/contrib` (**planned**, published as `@sketchy-js/contrib`) | Community plugins with per-plugin subpath exports | per plugin |
+| community package (**removed**, [ADR 0002](adr/0002-two-packages.md)) | There is no in-repo contrib package. Publish a plugin separately and import only `@sketchy-js/sketchy/plugin` | per plugin |
 
 ### 4.1 Shared value types
 
-Re-exported from `@sketchy-js/types`; shown here because every contract builds on them.
+Re-exported from `@sketchy-js/sketchy/types`; shown here because every contract builds on them.
 
 ```ts
 export interface Point { x: number; y: number }
@@ -418,7 +418,7 @@ export declare function defineStickerEdge<const S extends OptionSchema, const Id
   def: Definition<S, Id, EdgeInput, readonly EdgeOutRing[]>): EdgePlugin<S, Id>;
 ```
 
-`defineX` does four things and nothing else: it attaches `kind` and the `"~sketchy"` brand, deep-freezes the definition, adds the `with()` helper, and (when `NODE_ENV` is not `"production"`) validates the definition shape and option defaults. It does not check the `api` string's value (`assertPluginApi` does, and the registry calls it) and does not validate `stream`, `paints`, or id namespaces. It has no side effects outside the returned object. The brand is a plain string property rather than a `Symbol`, so detection survives duplicate copies of `@sketchy-js/plugin` in a dependency tree without touching the global symbol registry.
+`defineX` does four things and nothing else: it attaches `kind` and the `"~sketchy"` brand, deep-freezes the definition, adds the `with()` helper, and (when `NODE_ENV` is not `"production"`) validates the definition shape and option defaults. It does not check the `api` string's value (`assertPluginApi` does, and the registry calls it) and does not validate `stream`, `paints`, or id namespaces. It has no side effects outside the returned object. The brand is a plain string property rather than a `Symbol`, so detection survives duplicate copies of `@sketchy-js/sketchy/plugin` in a dependency tree without touching the global symbol registry.
 
 Optional metadata:
 
@@ -454,7 +454,7 @@ export interface Sketchy<R extends RegistryShape> {
 export declare function createSketchy(): Sketchy<{ brush: {}; fill: {}; texture: {}; edge: {} }>;
 ```
 
-`view()` is defined in `@sketchy-js/scene`, not in the plugin contract. It returns a `RoughView` whose spec types come from the registry and whose string specs resolve through it.
+`view()` is defined in `@sketchy-js/sketchy/scene`, not in the plugin contract. It returns a `RoughView` whose spec types come from the registry and whose string specs resolve through it.
 
 ## 5. Option schema
 
@@ -505,7 +505,7 @@ Lenient clamping mirrors Sketchy, which clamps most options silently (for exampl
 ```ts
 import { RoughView } from "@sketchy-js/sketchy/scene/basic";
 import { crayon } from "@sketchy-js/sketchy/brushes/crayon";
-import { charcoal } from "@sketchy-js/contrib/brushes/charcoal";
+import { charcoal } from "@acme/charcoal";
 
 const view = new RoughView()
   .with({ brush: crayon })                               // plugin object, defaults
@@ -517,7 +517,7 @@ const view = new RoughView()
 ```ts
 import { createSketchy } from "@sketchy-js/sketchy/scene";
 import { crayon } from "@sketchy-js/sketchy/brushes/crayon";
-import { charcoal } from "@sketchy-js/contrib/brushes/charcoal";
+import { charcoal } from "@acme/charcoal";
 
 const sketchy = createSketchy().use(crayon).use(charcoal);   // returns a NEW instance
 
@@ -534,7 +534,7 @@ Rules both styles share:
 - **No global registry and no import-time registration.** Nothing in the library calls `use` for you. There is no default singleton.
 - **Direct plugin objects work without a registry.** The scene builder keeps a build-local resolution table; it never leaks between builds.
 - **Collisions throw.** Registering a different object with an existing `(kind, id)` throws `PluginRegistrationError` unless `{ replace: true }` is passed, which is intended for tests and deliberate overrides. Registering the identical object twice is a no-op.
-- **Ids are namespaced.** The registry accepts `^(?:[a-z][a-z0-9-]*/)?[a-zA-Z][a-zA-Z0-9-]*$` (the built-in fills are camel-case: `crossHatch`, `sunBurst`); the target pattern for new plugins is `^(?:[a-z][a-z0-9-]*/)?[a-z][a-z0-9-]*$`, which is not enforced yet. Un-namespaced ids (`crayon`) are reserved for built-ins, `contrib/` for `packages/contrib`, and third parties use their npm scope or org name without `@` (`acme/chalk`).
+- **Ids are namespaced.** The registry accepts `^(?:[a-z][a-z0-9-]*/)?[a-zA-Z][a-zA-Z0-9-]*$` (the built-in fills are camel-case: `crossHatch`, `sunBurst`); the target pattern for new plugins is `^(?:[a-z][a-z0-9-]*/)?[a-z][a-z0-9-]*$`, which is not enforced yet. Un-namespaced ids (`crayon`) are reserved for built-ins. The in-repo contrib package was removed ([ADR 0002](adr/0002-two-packages.md)); third parties use their npm scope or org name without `@` (`acme/chalk`).
 - **Aliases for graduation.** `use(plugin, { alias: "charcoal" })` registers an extra id so documents saved with an old id keep working after a plugin moves from `contrib/` into core ([graduation](contributing-plugins.md#5-graduation-from-contrib-to-core)).
 
 ### 6.2 Scene data and plugins
@@ -546,7 +546,7 @@ There are two serializable artifacts:
 
 ### 6.3 Keeping it tree-shakeable
 
-- One plugin per module, exported by name and as default, with a subpath export: `@sketchy-js/contrib/brushes/charcoal`. A barrel file is allowed for convenience but is never the documented import.
+- One plugin per module, exported by name and as default. A community plugin is its own package (for example `@acme/charcoal`). The in-repo contrib package was removed ([ADR 0002](adr/0002-two-packages.md)). A barrel file is allowed for convenience but is never the documented import.
 - Every package sets `"sideEffects": false`.
 - Every `defineX(...)` call carries a `/*#__PURE__*/` annotation, because a top-level call expression is otherwise retained by Rollup and esbuild even when its export is unused. The ESLint preset autofixes this and the generator emits it.
 - Plugin modules have no top-level statements other than imports, helper function declarations, and the exported `defineX` call.
@@ -563,7 +563,7 @@ Two independent version numbers:
 | Plugin API version | The host (`PLUGIN_API_VERSION`) | `major.minor` | The shape of the contracts in section 4 and the semantics of `ctx` |
 | Plugin version | The plugin author | semver in `version` | The plugin's own behavior and output |
 
-**Current state.** `PLUGIN_API_VERSION` is `{ major: 1, minor: 0 }`. The published API is 1.0. It includes `FillRegion.shape` (ellipse, arc, and exact `path`), `GeometryKit.rough`, `FillBase.strokeWidth`, `FillBase.pattern`, `PluginMeta.paints`, `BrushInput.seed`, and area-fill `clipPath`. Built-in fills, scribble, crayon, and watercolor declare `api: "1.0"`. The registry rejects a plugin whose `api` is not compatible (`assertPluginApi`). There is no `@sketchy-js/scene/compat` layer yet.
+**Current state.** `PLUGIN_API_VERSION` is `{ major: 1, minor: 0 }`. The published API is 1.0. It includes `FillRegion.shape` (ellipse, arc, and exact `path`), `GeometryKit.rough`, `FillBase.strokeWidth`, `FillBase.pattern`, `PluginMeta.paints`, `BrushInput.seed`, and area-fill `clipPath`. Built-in fills, scribble, crayon, and watercolor declare `api: "1.0"`. The registry rejects a plugin whose `api` is not compatible (`assertPluginApi`). There is no `@sketchy-js/sketchy/scene/compat` layer yet.
 
 **Declaring and checking (target behavior).** A plugin declares `api: "1.0"`, the lowest API it needs. At `use()` or direct-use time the host checks:
 
@@ -583,30 +583,30 @@ Two independent version numbers:
 - Changing the semantics of existing fields: coordinate conventions, ring winding, defaulting or clamping rules, layer role meanings, paint order.
 - Changing the RNG algorithm, how `fork(label)` derives streams, or how the host derives `ctx.rng` from seeds. These silently change every seeded output, so they are treated as breaking even though no types change.
 
-**Support window.** The host supports its own major and the previous major at the same time through adapters in `@sketchy-js/scene/compat`. A plugin built for the previous major keeps working and the host emits a one-time `plugin-api-deprecated` diagnostic per plugin id. A major is dropped only after a newer major has shipped, never in the same release that introduces its successor.
+**Support window.** The host supports its own major and the previous major at the same time through adapters in `@sketchy-js/sketchy/scene/compat`. A plugin built for the previous major keeps working and the host emits a one-time `plugin-api-deprecated` diagnostic per plugin id. A major is dropped only after a newer major has shipped, never in the same release that introduces its successor.
 
 **Plugin output stability.** Users commit seeded art and snapshots, so for a plugin at `>= 1.0.0` any change to output for the same `(input, options, seed)` is a **major** version bump of the plugin, even if it is a visual improvement. To ship an improvement without breaking people, add a `variant`/`algorithm` choice option that defaults to the old behavior, or publish a new id (`crayon-2`). Plugins below `1.0.0` bump the minor for output changes. Built-in plugins are additionally pinned by Swift reference fixtures. Every conformance snapshot update must be explained in the PR.
 
-**Dependencies.** A plugin package declares `@sketchy-js/plugin` as a **peer** dependency (`^1`), so one copy resolves per app. Because the brand is a plain property, a duplicated copy degrades to a version-skew warning instead of rejecting valid plugins.
+**Dependencies.** A plugin package declares `@sketchy-js/sketchy/plugin` as a **peer** dependency (`^1`), so one copy resolves per app. Because the brand is a plain property, a duplicated copy degrades to a version-skew warning instead of rejecting valid plugins.
 
 **Recording.** Every built `Scene` records `{ id, version, api }` per plugin used, so a bug report or a stored scene says exactly which plugin versions produced it.
 
 ## 8. Dogfooding: built-ins are plugins
 
-Rule: **every shipped brush, fill, texture, and edge is created by `defineX` and reaches the host through `use()` or a direct reference.** Crayon and watercolor are still dispatched by id in `scene/src/build.ts`. That is temporary until a general `defineBrush` host runs whatever brush is registered.
+Rule: **every shipped brush, fill, texture, and edge is created by `defineX` and reaches the host through `use()` or a direct reference.** Crayon and watercolor are still dispatched by id in `packages/sketchy/src/scene/build.ts`. That is temporary until a general `defineBrush` host runs whatever brush is registered.
 
 Status: the fill rows through `scribble`, plus the crayon brush, the watercolor brush and fill, the paper texture, and the smooth, fully smooth, and torn edges, are implemented (`api: "1.0"`). Area fills may set `clipPath` when the clip is the generated outline rather than the input region; watercolor fill does this.
 
 | Today's Sketchy feature | Plugin | Package and subpath |
 | --- | --- | --- |
-| Crayon | `defineBrush` id `crayon` | `@sketchy-js/brushes/crayon` |
-| Watercolor stroke | `defineBrush` id `watercolor` | `@sketchy-js/brushes/watercolor` |
-| Watercolor fill | `defineFill` id `watercolor` | `@sketchy-js/brushes/watercolor` (shares `wash.ts` with the brush) |
-| Marker (variable width) | `defineBrush` id `marker` | `@sketchy-js/brushes/marker` |
-| solid, hachure, zigzag, crossHatch, dots, sunBurst, starBurst, dashed, zigzagLine, scribble | one `defineFill` each | `@sketchy-js/fills/<name>` |
-| `StickerTexture.paper` | `defineTexture` id `paper` | `@sketchy-js/stickers` (`paper`) |
-| `.smooth`, `.fullySmooth`, `.torn` | `defineStickerEdge` ids `smooth`, `fullySmooth`, `torn` | `@sketchy-js/stickers` (`smoothEdge`, `fullySmoothEdge`, `tornEdge`) |
-| image-masked texture | not a plugin; placement and decode | `@sketchy-js/stickers/image` |
+| Crayon | `defineBrush` id `crayon` | `@sketchy-js/sketchy/brushes/crayon` |
+| Watercolor stroke | `defineBrush` id `watercolor` | `@sketchy-js/sketchy/brushes/watercolor` |
+| Watercolor fill | `defineFill` id `watercolor` | `@sketchy-js/sketchy/brushes/watercolor` (shares `wash.ts` with the brush) |
+| Marker (variable width) | `defineBrush` id `marker` | `@sketchy-js/sketchy/brushes/marker` |
+| solid, hachure, zigzag, crossHatch, dots, sunBurst, starBurst, dashed, zigzagLine, scribble | one `defineFill` each | `@sketchy-js/sketchy/fills/<name>` |
+| `StickerTexture.paper` | `defineTexture` id `paper` | `@sketchy-js/sketchy/stickers` (`paper`) |
+| `.smooth`, `.fullySmooth`, `.torn` | `defineStickerEdge` ids `smooth`, `fullySmooth`, `torn` | `@sketchy-js/sketchy/stickers` (`smoothEdge`, `fullySmoothEdge`, `tornEdge`) |
+| image-masked texture | not a plugin; placement and decode | `@sketchy-js/sketchy/stickers/image` |
 
 Uniform strokes drawn natively by SVG or Canvas, thickness and opacity profiles, joins, caps, and the sticker silhouette union are host features, not plugins. They are renderer-sensitive or need global geometry.
 
@@ -615,7 +615,7 @@ Uniform strokes drawn natively by SVG or Canvas, thickness and opacity profiles,
 Option names and defaults come from Sketchy `CrayonStyle`. The pass structure (halo, core, grit passes, flakes) stays in `crayon/passes.ts`; the plugin file is the contract and orchestration.
 
 ```ts
-// packages/brushes/src/crayon/options.ts
+// packages/sketchy/src/brushes/crayon/options.ts
 import { s, type Resolved } from "@sketchy-js/sketchy/plugin";
 
 export const crayonOptions = {
@@ -633,7 +633,7 @@ export type CrayonOptions = Resolved<typeof crayonOptions>;
 ```
 
 ```ts
-// packages/brushes/src/crayon/crayon.ts
+// packages/sketchy/src/brushes/crayon/crayon.ts
 import { defineBrush } from "@sketchy-js/sketchy/plugin";
 import { crayonOptions } from "./options";
 import { baseLayers, gritLayers } from "./passes"; // internal helpers, not part of the API
@@ -694,7 +694,7 @@ export const hachure = /*#__PURE__*/ defineFill({
 });
 ```
 
-This is a simplified sketch written against API 1.0 types (it uses `rng.normal` and `clipSegments`, which the shipped fill does not). The shipped `packages/fills/src/hachure.ts` declares `api: "1.0"` and `stream: "shared"`, reads `region.shape` for ellipses and arcs, uses `fill.strokeWidth`, and draws every line through `ctx.geom.rough.line`, so roughness, bowing, and Swift's jitter consume `SplitMix64` in Swift's order ([section 8.3](#83-seeds-and-the-shared-stream-exception)). `hachure` returns centerlines, not painted marks. If the shape's fill brush is `crayon`, the host passes those centerlines through the crayon plugin ("thin fill lines still receive grit", as in Sketchy). Neither plugin knows about the other.
+This is a simplified sketch written against API 1.0 types (it uses `rng.normal` and `clipSegments`, which the shipped fill does not). The shipped `packages/sketchy/src/fills/hachure.ts` declares `api: "1.0"` and `stream: "shared"`, reads `region.shape` for ellipses and arcs, uses `fill.strokeWidth`, and draws every line through `ctx.geom.rough.line`, so roughness, bowing, and Swift's jitter consume `SplitMix64` in Swift's order ([section 8.3](#83-seeds-and-the-shared-stream-exception)). `hachure` returns centerlines, not painted marks. If the shape's fill brush is `crayon`, the host passes those centerlines through the crayon plugin ("thin fill lines still receive grit", as in Sketchy). Neither plugin knows about the other.
 
 ### 8.3 Seeds and the shared stream exception
 
@@ -709,7 +709,7 @@ Effective seed for isolated plugins: an explicit `seed` override on the plugin s
 
 Sketchy v1.5.0's `StickerImage` masks a caller-supplied, already decoded image to the sheet with `.tile`, `.stretch`, or `.fill` placement, plus `scale` and `opacity`. It is painted after the shadow and the paper color, so it casts no shadow, and paper fibers draw on top.
 
-It stays a built-in feature of `@sketchy-js/stickers/image` because:
+It stays a built-in feature of `@sketchy-js/sketchy/stickers/image` because:
 
 - It needs pixels, and the plugin contract forbids pixel access and renderer-specific work.
 - Its geometry (tile size, 4 px floor, roughly 900-repeat cap, fit rectangles) is already a pure function in the plan, `resolveImagePlacement`; the renderers do the drawing. There is nothing for a plugin to vary.
@@ -720,12 +720,12 @@ Plugins that want a patterned look use `defineTexture` with vector marks. If ras
 ### 8.5 Enforcing dogfooding
 
 - A fixture app registers built-ins only through `use()`; removing one must cause `PluginNotRegisteredError`, proving there is no hardcoded path.
-- Lint forbids built-in packages from importing anything but `@sketchy-js/plugin` (plus relative internal files), and forbids built-in ids as string literals inside `packages/scene`.
-- Built-ins run the same conformance suite as contributions. Their size budgets sit in the same `budgets.json`, so a "special" plugin cannot hide in the package totals. Today the nine built-in fills are covered by `packages/scene/test/fills-conformance.test.ts` (edge regions, angles, determinism with the `Math.random` guard, extreme gaps, metadata), and bundle sizes are measured by `pnpm size`; `budgets.json` is planned.
+- Lint forbids built-in packages from importing anything but `@sketchy-js/sketchy/plugin` (plus relative internal files), and forbids built-in ids as string literals inside `packages/sketchy/src/scene`.
+- Built-ins run the same conformance suite as contributions. Their size budgets sit in the same `budgets.json`, so a "special" plugin cannot hide in the package totals. Today the nine built-in fills are covered by `packages/sketchy/test/scene/fills-conformance.test.ts` (edge regions, angles, determinism with the `Math.random` guard, extreme gaps, metadata), and bundle sizes are measured by `pnpm size`; `budgets.json` is planned.
 
 ## 9. Worked example: a charcoal brush
 
-> **Planned workflow.** `pnpm new`, `@sketchy-js/contrib`, `@sketchy-js/testkit`, demos, generated docs, and brush hosting do not exist yet; this section shows the target authoring flow. The `defineBrush` contract it relies on is implemented.
+> **Planned workflow, and the contrib package is removed.** [ADR 0002](adr/0002-two-packages.md) dropped the in-repo contrib package. `pnpm new`, `@sketchy-js/testkit`, demos, and generated docs were not built. This section shows the target authoring flow for a separate package. The `defineBrush` contract it relies on is implemented.
 
 A community-style brush, end to end: scaffold, implementation, tests, demo, docs, registration, and what the host does with it. Charcoal is a good example because it uses variable width, seeded randomness, closed and open paths, and a degenerate case.
 
@@ -738,17 +738,15 @@ pnpm new brush charcoal
 creates (see [contributing-plugins.md](contributing-plugins.md#2-the-pnpm-new-generator)):
 
 ```text
-packages/contrib/src/brushes/charcoal/
-  charcoal.ts          plugin (default + named export)
-  charcoal.test.ts     plugin-specific unit tests
-  charcoal.demo.ts     demo samples for playground and gallery
-  charcoal.doc.md      prose for the docs page (option table is generated)
-  __snapshots__/       created on first run
-  index.ts             re-export for the subpath export
-.changeset/<random>.md
+charcoal/
+  src/charcoal.ts      plugin (default + named export)
+  src/charcoal.test.ts plugin-specific unit tests
+  src/charcoal.demo.ts demo samples for playground and gallery
+  src/charcoal.doc.md  prose for the docs page (option table is generated)
+  package.json         depends on @sketchy-js/sketchy, peer of the plugin subpath
 ```
 
-and adds `"./brushes/charcoal"` to `packages/contrib/package.json` `exports`. Using the id `contrib/charcoal` marks it as a contrib plugin.
+The old `packages/contrib` tree was not shipped ([ADR 0002](adr/0002-two-packages.md)). The id `acme/charcoal` marks it as a third-party plugin.
 
 ### 9.2 Implementation
 
@@ -885,7 +883,7 @@ How it works, in terms of the contract:
 ### 9.3 Usage
 
 ```ts
-import { charcoal } from "@sketchy-js/contrib/brushes/charcoal";
+import { charcoal } from "@acme/charcoal";
 
 // 1. Direct object, no registry
 view.with({ brush: charcoal });
@@ -1000,10 +998,10 @@ Things this example does not do and a reviewer should still ask about: it treats
 
 ## 10. Risks and open questions
 
-- **`GeometryKit` surface growth.** Every helper added to `ctx.geom` becomes API. Policy: add helpers only when two plugins need them, and mark new ones with the minor that introduced them. Alternative considered: letting plugins import pure helpers from `@sketchy-js/core` directly. Rejected because it ties plugin bundles to a core version range and weakens the "one import" rule, but it would shrink `ctx`.
+- **`GeometryKit` surface growth.** Every helper added to `ctx.geom` becomes API. Policy: add helpers only when two plugins need them, and mark new ones with the minor that introduced them. Alternative considered: letting plugins import pure helpers from `@sketchy-js/sketchy/core` directly. Rejected because it ties plugin bundles to a core version range and weakens the "one import" rule, but it would shrink `ctx`.
 - **Purity is conventional in JavaScript.** The layers in section 3 catch honest mistakes, not malicious code. If untrusted plugins become a requirement, run `generate` in a worker or realm and keep the same contract.
 - **Cross-engine numeric differences.** `Math.sin`, `Math.exp`, and similar are not bit-identical across V8, JavaScriptCore, and SpiderMonkey. Determinism is exact within one engine and build. Cross-engine comparisons use a tolerance (see the conformance suite). Plugins must not use values near hard thresholds as branch conditions where one-ULP differences flip a decision (for example `if (Math.sin(x) === 0)`).
 - **Host-owned compositing limits expressiveness.** Plugins cannot request blend modes, filters, or blur. That is intentional (parity between SVG and Canvas) but rules out some looks. `PaintRef` and layer `composite` can gain fields in minor releases once both renderers can honor them identically.
 - **Shared-stream exception.** `stream: "shared"` is a leak in the abstraction required for Swift parity. It is restricted by id namespace and lint, and the plan is to retire it if the reference fixtures are ever regenerated with isolated streams.
-- **Plan deltas.** This design adds `@sketchy-js/plugin`, `@sketchy-js/testkit`, and `packages/contrib` to the plan's package list, and adds `fillRule`, a `sticker-image` role, and `PaintRef` to the IR sketches. The plan should absorb these when Phase 0 contracts are written.
-- **Where `createSketchy` lives.** Whether `createSketchy` lives in `@sketchy-js/scene` or `@sketchy-js/scene/basic` affects the size target for basic scenes; decide with the Phase 0 bundle measurements.
+- **Plan deltas.** This design added the plugin contract, which now lives at `@sketchy-js/sketchy/plugin`. `@sketchy-js/testkit` was not built. The in-repo contrib package was removed ([ADR 0002](adr/0002-two-packages.md)). It also adds `fillRule`, a `sticker-image` role, and `PaintRef` to the IR sketches.
+- **Where `createSketchy` lives.** Whether `createSketchy` lives in `@sketchy-js/sketchy/scene` or `@sketchy-js/sketchy/scene/basic` affects the size target for basic scenes; decide with the Phase 0 bundle measurements.

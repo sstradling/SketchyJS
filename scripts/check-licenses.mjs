@@ -22,10 +22,26 @@ for (const dir of readdirSync(join(root, "packages")).sort()) {
     problems.push(`${dir}: LICENSE differs from the repo root`);
 }
 const notices = readFileSync(join(root, "THIRD_PARTY_NOTICES"), "utf8");
-const shipped = join(root, "packages", "sketchy", "THIRD_PARTY_NOTICES");
-if (!existsSync(shipped)) problems.push("sketchy: missing THIRD_PARTY_NOTICES");
-else if (readFileSync(shipped, "utf8") !== notices)
-  problems.push("sketchy: THIRD_PARTY_NOTICES differs from the repo root");
+if (!notices.includes("@resvg/resvg-js") || !notices.includes("fixtures/swift-reference"))
+  problems.push("root THIRD_PARTY_NOTICES no longer records the dev-only notices");
+const shippedPath = join(root, "packages", "sketchy", "THIRD_PARTY_NOTICES");
+if (!existsSync(shippedPath)) problems.push("sketchy: missing THIRD_PARTY_NOTICES");
+else {
+  const shipped = readFileSync(shippedPath, "utf8");
+  for (const required of ["Boost Software License", "Khoa Pham", "Preet Shihn", "clipper2-ts"]) {
+    if (!shipped.includes(required))
+      problems.push(`sketchy: THIRD_PARTY_NOTICES is missing ${required}`);
+  }
+  for (const dropped of ["@resvg/resvg-js", "clipper2-wasm", "fixtures/"]) {
+    if (shipped.includes(dropped))
+      problems.push(
+        `sketchy: THIRD_PARTY_NOTICES still mentions ${dropped}, which is not in the tarball`,
+      );
+  }
+}
+const reactNotices = join(root, "packages", "react", "THIRD_PARTY_NOTICES");
+if (existsSync(reactNotices))
+  problems.push("react: ships no third-party code, so it must not include THIRD_PARTY_NOTICES");
 if (problems.length > 0) {
   console.error(problems.join("\n"));
   process.exit(1);

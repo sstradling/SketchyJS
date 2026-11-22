@@ -10,8 +10,8 @@ Marks: **same** (same drawing semantics), **web** (same idea, web types or names
 | `seed`, roughness, bowing, fill angle in degrees | same fields | same |
 | Hachure, solid, zigzag, cross-hatch, dots, dashed, zigzag-line, sunburst, starburst | fill plugins | same |
 | Scribble | `scribble` fill | same |
-| Watercolor fill and brush | `@sketchy-js/brushes` | same |
-| Crayon | `@sketchy-js/brushes` | same |
+| Watercolor fill and brush | `@sketchy-js/sketchy/brushes` | same |
+| Crayon | `@sketchy-js/sketchy/brushes` | same |
 | `.widthStops`, `.variable`, caps and joins | `brushProfile` | same |
 | Closed contour keeps stops and `.variable`, 6% join blend | `thicknessWidth(..., closed)` | same |
 | Winding fill so two rough passes union | `fillRule: "nonzero"` on those outlines | same |
@@ -23,10 +23,10 @@ Marks: **same** (same drawing semantics), **web** (same idea, web types or names
 | `.fillStyle(.wash)`, `WashPass.sky` | `fillStyle: "wash"`, `skyWash` | same |
 | `.interiorShades`, pit, recess, edge, halo | `interiorShades` and the preset functions | same |
 | Shade blur kernel | SVG and Canvas approximations | web |
-| `SilhouetteShadow`, `.tree(image:at:)` | `@sketchy-js/scene/silhouette` | web |
+| `SilhouetteShadow`, `.tree(image:at:)` | `@sketchy-js/sketchy/scene/silhouette` | web |
 | `StickerShadow` | sheet shadow on the sticker backing | same |
-| `StickerBacking`, edges, paper, groups | `@sketchy-js/stickers`, `@sketchy-js/scene/stickers` | same |
-| `StickerImage` / `UIImage` | `@sketchy-js/stickers/image`, caller-decoded source | web |
+| `StickerBacking`, edges, paper, groups | `@sketchy-js/sketchy/stickers`, `@sketchy-js/sketchy/scene/stickers` | same |
+| `StickerImage` / `UIImage` | `@sketchy-js/sketchy/stickers/image`, caller-decoded source | web |
 | `SketchGroup` / `SketchPart` | same names | web |
 | SwiftUI `.frame`, `.offset`, `.scaleEffect` | renderer size; part transforms are explicit | n/a |
 | `UIColor` / SwiftUI `Color` | `Color` | web |

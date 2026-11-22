@@ -44,7 +44,6 @@ describe("determinism lint rules for pure geometry packages", () => {
 
   it("forbids importing packages that are not allowed dependencies", async () => {
     expect((await lint('import "@sketchy-js/sketchy/fills";', pure())).length).toBe(1);
-    expect((await lint('import "@sketchy-js/svg-renderer/x";', pure())).length).toBeGreaterThan(0);
     expect(
       await lint(
         'import "@sketchy-js/sketchy/types"; import "@sketchy-js/sketchy/plugin/schema";',

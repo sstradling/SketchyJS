@@ -2,18 +2,18 @@
 
 ## From the thirteen-package layout
 
-Every former `@sketchy-js/<name>` import, except React, is `@sketchy-js/sketchy/<name>`.
+Use the table. It is the import map. `svg-renderer` becomes `/svg` and `canvas-renderer` becomes `/canvas`, so a blanket `@sketchy-js/<name>` rewrite is wrong for those two. React keeps its name.
 
 | Before | After |
 | --- | --- |
-| `@sketchy-js/core` | `@sketchy-js/sketchy/core` |
-| `@sketchy-js/core/options` | `@sketchy-js/sketchy/core/options` |
-| `@sketchy-js/fills/hachure` | `@sketchy-js/sketchy/fills/hachure` |
-| `@sketchy-js/scene/basic` | `@sketchy-js/sketchy/scene/basic` |
-| `@sketchy-js/svg-renderer` | `@sketchy-js/sketchy/svg` |
-| `@sketchy-js/canvas-renderer` | `@sketchy-js/sketchy/canvas` |
-| `@sketchy-js/stickers/clipper` | `@sketchy-js/sketchy/stickers/clipper` |
-| `@sketchy-js/web-components` | `@sketchy-js/sketchy/web-components` |
+| `@sketchy-js/sketchy/core` | `@sketchy-js/sketchy/core` |
+| `@sketchy-js/sketchy/core/options` | `@sketchy-js/sketchy/core/options` |
+| `@sketchy-js/sketchy/fills/hachure` | `@sketchy-js/sketchy/fills/hachure` |
+| `@sketchy-js/sketchy/scene/basic` | `@sketchy-js/sketchy/scene/basic` |
+| `@sketchy-js/sketchy/svg` | `@sketchy-js/sketchy/svg` |
+| `@sketchy-js/sketchy/canvas` | `@sketchy-js/sketchy/canvas` |
+| `@sketchy-js/sketchy/stickers/clipper` | `@sketchy-js/sketchy/stickers/clipper` |
+| `@sketchy-js/sketchy/web-components` | `@sketchy-js/sketchy/web-components` |
 | `@sketchy-js/react` | `@sketchy-js/react` |
 | `@sketchy-js/react/canvas` | `@sketchy-js/react/canvas` |
 
@@ -68,7 +68,7 @@ Contour options live on the view, not on a separate plugin schema, because a gui
 
 `contourIntensity` `0` is the straight chord. `1` keeps the guide's bow. A lower value flattens that bow. It does not move the stroke onto a tighter circle. `contourDrift.phase` is the distance already traveled. `useContourPhase(speed)` in `@sketchy-js/react` advances it. The slot seed does not change, so the wobble does not boil.
 
-`.wash` with no `washPasses` uses `skyWash` from `@sketchy-js/fills`. Pass the same list as `washPasses` on a contour view to stroke those centerlines with the wash recipe.
+`.wash` with no `washPasses` uses `skyWash` from `@sketchy-js/sketchy/fills/wash` (also exported by `@sketchy-js/sketchy/fills`). Pass the same list as `washPasses` on a contour view to stroke those centerlines with the wash recipe.
 
 ## From rough.js
 

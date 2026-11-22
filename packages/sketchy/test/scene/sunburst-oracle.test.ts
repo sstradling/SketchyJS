@@ -20,7 +20,7 @@ import {
  * `sinf`/`cosf` with glibc, which differs from the correctly rounded value by one `Float` ulp for
  * some angles; a ray that grazes a polygon vertex then crosses the 1e-5 margin of
  * `LineHelper.inRange` on one platform only. Only the concave polygon is affected, by exactly one
- * ray (four operations). The ray-level mechanism is pinned in `packages/fills/test/line-helper.test.ts`.
+ * ray (four operations). The ray-level mechanism is pinned in `packages/sketchy/test/fills/line-helper.test.ts`.
  */
 interface FillCase {
   id: string;
