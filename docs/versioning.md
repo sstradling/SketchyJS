@@ -14,6 +14,10 @@ The first release could not start from `0.0.0`. A minor bump from `0.0.0` writes
 
 The publish workflow takes the resulting version as a required input, including when the dispatch is a dry run. It does not run `changeset version` again, and it refuses to publish while a changeset is still pending. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+The publish job is bound to the GitHub environment `npm-publish`. Before the first real publish, create that environment on this repository and add a required reviewer. A dispatch with dry run off then waits for that approval. `NPM_TOKEN` stays the registry credential; the environment is the approval gate, not a replacement for the token.
+
+`pnpm changeset status` exits 1 on this branch after `changeset version`. The command diffs the packages against master, the version bump is in that diff, and the changeset file has already been consumed, so it reports a package change with no changeset. That is expected. The release gate does not call it. It refuses a pending changeset file instead, and this branch has none. Do not add an empty changeset to silence the command: the gate would then refuse to publish.
+
 `.changeset/config.json` puts the two publishable packages in one `fixed` group so they always share a version: `@sketchy-js/sketchy` and `@sketchy-js/react`. This release set both to `1.5.0`, added one minor changeset, and ran `changeset version`, which wrote `1.6.0`.
 
 `v1.4.2` appears in [plan.md](plan.md) only as the old Sketchy pin this plan was first written against. It is not a SketchyJS version. `v1.5.0` in the fixture tree is the Sketchy pin those files were exported from. It is not the SketchyJS release tag.

@@ -27,12 +27,15 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy-js/sketchy": "workspace:*"
+    "@sketchy-js/sketchy": "workspace:^"
   },
   "peerDependencies": {
     "react": ">=18"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=22"
   },

@@ -30,7 +30,7 @@ Canvas is `@sketchy-js/sketchy/canvas`. Clipper is `@sketchy-js/sketchy/stickers
 
 | Import | What it is |
 | --- | --- |
-| `@sketchy-js/sketchy` | shapes and `sketch` only, so an unbundled import does not load a renderer |
+| `@sketchy-js/sketchy` | shapes, `sketch`, `basicSketchy`, `RoughView`, and `ViewOptions`. An unbundled import does not load a renderer |
 | `@sketchy-js/sketchy/core` | shapes, RNG, outlines |
 | `@sketchy-js/sketchy/core/options` | option defaults and rules |
 | `@sketchy-js/sketchy/fills` and `/fills/<name>` | fill plugins. Contour and wash are subpaths |

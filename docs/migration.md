@@ -19,7 +19,7 @@ Use the table. It is the import map. `svg-renderer` becomes `/svg` and `canvas-r
 
 `@sketchy-js/contrib` is gone. `@sketchy-js/react` depends on `@sketchy-js/sketchy`. Canvas is not a peer.
 
-The package root exports shapes and `sketch` only. It used to re-export `renderToSvgString` and `renderToSvgElement`; those stay on `@sketchy-js/sketchy/svg`, so loading the root does not load the SVG renderer.
+The package root exports shapes, `sketch`, `basicSketchy`, `RoughView`, and `ViewOptions`. It used to re-export `renderToSvgString` and `renderToSvgElement`; those stay on `@sketchy-js/sketchy/svg`, so loading the root does not load the SVG renderer.
 
 ```ts
 import { rectangle, sketch } from "@sketchy-js/sketchy";
