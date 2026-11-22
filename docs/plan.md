@@ -1,5 +1,7 @@
 # SketchyJS implementation plan
 
+> **Package layout.** The names in this plan are the original per-area packages. [ADR 0002](adr/0002-two-packages.md) publishes two packages. Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>`.
+
 > Companion docs: [plugin architecture](plugins.md) and [contributing plugins](contributing-plugins.md).
 
 ## Scope and baseline
@@ -74,12 +76,12 @@ flowchart TD
   brushes["@sketchy-js/brushes\nribbons, outlines, crayon, watercolor,\nopacity masks"]
   stickers["@sketchy-js/stickers\nsilhouettes, boolean union, offsets,\nsheet/texture command descriptions"]
   scene["@sketchy-js/scene\nretained scene, SketchGroup, transforms,\nlayer assembly"]
-  svg["@sketchy-js/svg-renderer"]
-  canvas["@sketchy-js/canvas-renderer"]
+  svg["@sketchy-js/sketchy/svg"]
+  canvas["@sketchy-js/sketchy/canvas"]
   worker["@sketchy-js/worker-renderer\noptional OffscreenCanvas protocol"]
   webgl["@sketchy-js/webgl-renderer\noptional future accelerator"]
   react["@sketchy-js/react"]
-  wc["@sketchy-js/web-components"]
+  wc["@sketchy-js/sketchy/web-components"]
 
   types --> core
   types --> fills
@@ -102,7 +104,7 @@ flowchart TD
   canvas --> wc
 ```
 
-`@sketchy-js/types` must contain only values/contracts and no side effects. `@sketchy-js/core` must not import a renderer, browser global, image decoder, React, or a polygon clipping implementation. Expensive geometry (polygon booleans) belongs in `@sketchy-js/stickers`; a scene without stickers does not pay for it.
+The published layout is two packages, recorded in [ADR 0002](adr/0002-two-packages.md). `@sketchy-js/sketchy` holds the areas below as folders. `types` has no side effects. `core` must not import a renderer, a browser global, React, or Clipper. Polygon booleans stay in `src/stickers/clipper`. A core or SVG import does not pay for them. `@sketchy-js/react` is the other package.
 
 ### Core IR and determinism
 
@@ -154,6 +156,8 @@ Use a scoped `RngContext` passed through nested generation instead of a global m
 - **WebGL/WebGPU path (future and optional):** only accelerate tessellated fills/ribbons/large animated scenes. It must consume the same IR and pass the same geometry tests. Blurs, clipping, and image texture capabilities must be feature-gated; it must never be the only correct renderer.
 
 ## 3. Package split, APIs, and import behavior
+
+The names below are the public subpaths of `@sketchy-js/sketchy`. [ADR 0002](adr/0002-two-packages.md) records why they are one package.
 
 Use a pnpm workspace monorepo:
 
@@ -334,7 +338,7 @@ Example `@sketchy-js/stickers/package.json`:
 
 ```json
 {
-  "name": "@sketchy-js/stickers",
+  "name": "@sketchy-js/sketchy/stickers",
   "type": "module",
   "sideEffects": false,
   "exports": {
@@ -348,8 +352,8 @@ Example `@sketchy-js/stickers/package.json`:
 `@sketchy-js/scene` should expose subpaths such as `@sketchy-js/scene/basic` and `@sketchy-js/scene/stickers`; the latter imports `@sketchy-js/stickers`, while basic scenes do not. Users can therefore write:
 
 ```ts
-import { SketchGroup, StickerBacking } from "@sketchy-js/scene/stickers";
-import { renderToSvgString } from "@sketchy-js/svg-renderer";
+import { SketchGroup, StickerBacking } from "@sketchy-js/sketchy/scene/stickers";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
 ```
 
 and receive core + fills/brushes only if used + stickers + SVG renderer, not Canvas, React, Web Components, worker code, or WebGL. Document that all renderer packages are peers chosen by the application, not automatic fallbacks.

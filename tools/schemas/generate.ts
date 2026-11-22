@@ -11,12 +11,12 @@ import {
   STICKER_TEXTURE,
   WATERCOLOR_STYLE,
   type OptionRule,
-} from "../../packages/core/src/options/index.ts";
+} from "../../packages/sketchy/src/core/options/index.ts";
 
 type Json = { [key: string]: unknown };
 
 const root = fileURLToPath(new URL("../../", import.meta.url));
-const typesDir = join(root, "packages", "types");
+const typesDir = join(root, "packages", "sketchy");
 const outDir = join(typesDir, "schemas");
 
 /** Schema files to produce: file stem, TypeScript type name, title. */
@@ -96,7 +96,7 @@ function enrich(schema: Json): void {
 function generateAll(): [string, string][] {
   return TARGETS.map(({ file, type, title }) => {
     const generator = createGenerator({
-      path: join(typesDir, "src", "index.ts"),
+      path: join(typesDir, "src", "types", "index.ts"),
       tsconfig: join(typesDir, "tsconfig.json"),
       type,
       expose: "export",

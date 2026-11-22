@@ -1,4 +1,4 @@
-import { SplitMix64 } from "../../../packages/core/src/index.ts";
+import { SplitMix64 } from "../../../packages/sketchy/src/core/index.ts";
 import { circle, type MultiPolygon, type Polygon, type Pt, type Ring } from "./geometry.ts";
 
 /** One benchmark input, shaped after the sticker backing pipeline. */

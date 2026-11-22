@@ -1,54 +1,24 @@
 {
-  "$comment": "Allowed workspace dependencies per package. Single source of truth for scripts/check-boundaries.mjs and the ESLint no-restricted-imports overrides.",
+  "$comment": "Folder rules inside @sketchy-js/sketchy, plus the two publishable packages. Every area gets the DOM-global ban unless it is listed in domAreas.",
   "packages": {
-    "types": {
-      "dependencies": []
-    },
-    "plugin": {
-      "dependencies": ["types"]
-    },
-    "core": {
-      "dependencies": ["types", "plugin"]
-    },
-    "fills": {
-      "dependencies": ["plugin"],
-      "peerOnly": []
-    },
-    "brushes": {
-      "dependencies": ["plugin", "core"],
-      "peerOnly": []
-    },
-    "stickers": {
-      "dependencies": ["plugin", "core", "types"],
-      "peerOnly": []
-    },
-    "scene": {
-      "dependencies": ["types", "plugin", "core", "fills"],
-      "optionalPeers": ["stickers"]
-    },
-    "svg-renderer": {
-      "dependencies": ["types"]
-    },
-    "canvas-renderer": {
-      "dependencies": ["types"]
-    },
-    "animate": {
-      "dependencies": ["types", "core"]
-    },
-    "react": {
-      "dependencies": ["types", "scene", "svg-renderer", "animate"],
-      "optionalPeers": ["canvas-renderer"],
-      "externalPeers": ["react"]
-    },
-    "web-components": {
-      "dependencies": ["types", "scene", "svg-renderer", "core"]
-    },
-    "contrib": {
-      "dependencies": [],
-      "peers": ["plugin"]
-    }
+    "sketchy": { "dependencies": [] },
+    "react": { "dependencies": ["sketchy"], "externalPeers": ["react"] }
   },
-  "pureGeometryPackages": ["types", "plugin", "core", "fills", "brushes", "stickers", "contrib"],
+  "areas": {
+    "types": [],
+    "plugin": ["types"],
+    "core": ["types", "plugin"],
+    "fills": ["plugin"],
+    "brushes": ["plugin", "core"],
+    "stickers": ["plugin", "core", "types"],
+    "scene": ["types", "plugin", "core", "fills", "stickers"],
+    "svg": ["types"],
+    "canvas": ["types"],
+    "animate": ["types", "core"],
+    "web-components": ["types", "scene", "svg", "core"],
+    "root": ["core", "scene"]
+  },
+  "domAreas": ["svg", "canvas", "web-components"],
   "bannedInPureGeometry": {
     "globals": [
       "window",

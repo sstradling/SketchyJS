@@ -1,6 +1,6 @@
 import { createElement, useEffect, useRef, type ReactElement } from "react";
-import { renderToCanvas, type Canvas2D } from "@sketchy-js/canvas-renderer";
-import type { Scene } from "@sketchy-js/types";
+import { renderToCanvas, type Canvas2D } from "@sketchy-js/sketchy/canvas";
+import type { Scene } from "@sketchy-js/sketchy/types";
 
 /**
  * Canvas binding. Import this from `@sketchy-js/react/canvas`.

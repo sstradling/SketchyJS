@@ -14,22 +14,9 @@
 
 ## Package graph
 
-```
-types  plugin
-  |      |
-  core --+
-  |   \
-fills  brushes
-  |
-scene/basic     scene/stickers     scene/silhouette
-  |                  |                    |
-svg-renderer    stickers            (no basic import)
-canvas-renderer
-react           (svg + scene/basic, no canvas)
-web-components  (svg + scene/basic, no canvas)
-```
+`@sketchy-js/sketchy` publishes the areas as subpaths: `/types`, `/plugin`, `/core`, `/fills`, `/brushes`, `/stickers`, `/scene`, `/svg`, `/canvas`, `/animate`, `/web-components`. `@sketchy-js/react` depends on that package. Its only peer is `react`. The Canvas binding is `@sketchy-js/react/canvas`.
 
-`clipper2-ts` is imported only from `@sketchy-js/stickers/clipper`.
+`clipper2-ts` is a regular dependency of `@sketchy-js/sketchy`, imported only from `@sketchy-js/sketchy/stickers/clipper`.
 
 ## Seeds and numbers
 

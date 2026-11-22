@@ -119,8 +119,9 @@ if (!install.ok) {
 
 /** Public entry points and one symbol each must expose. Skeleton packages export nothing yet. */
 const expectations = {
-  "@sketchy-js/types": { symbols: [], skeleton: false, note: "types only" },
-  "@sketchy-js/plugin": {
+  "@sketchy-js/sketchy": { symbols: ["rectangle", "sketch"] },
+  "@sketchy-js/sketchy/types": { symbols: [], skeleton: false, note: "types only" },
+  "@sketchy-js/sketchy/plugin": {
     symbols: [
       "defineBrush",
       "defineFill",
@@ -130,10 +131,10 @@ const expectations = {
       "PLUGIN_API_VERSION",
     ],
   },
-  "@sketchy-js/plugin/schema": {
+  "@sketchy-js/sketchy/plugin/schema": {
     symbols: ["resolveOptions", "validateSchema", "toJsonSchema", "hashOptions", "checkPluginApi"],
   },
-  "@sketchy-js/core": {
+  "@sketchy-js/sketchy/core": {
     symbols: [
       "SplitMix64",
       "Rng",
@@ -145,46 +146,54 @@ const expectations = {
       "svgPathToOps",
     ],
   },
-  "@sketchy-js/core/options": {
+  "@sketchy-js/sketchy/core/options": {
     symbols: ["defaultSketchOptions", "applyRule", "SKETCH_OPTIONS", "resolveSketchOptions"],
   },
-  "@sketchy-js/fills": { symbols: ["builtinFills"] },
-  "@sketchy-js/fills/solid": { symbols: ["solid"] },
-  "@sketchy-js/fills/hachure": { symbols: ["hachure"] },
-  "@sketchy-js/fills/zigzag": { symbols: ["zigzag"] },
-  "@sketchy-js/fills/crossHatch": { symbols: ["crossHatch"] },
-  "@sketchy-js/fills/dots": { symbols: ["dots"] },
-  "@sketchy-js/fills/dashed": { symbols: ["dashed"] },
-  "@sketchy-js/fills/zigzagLine": { symbols: ["zigzagLine"] },
-  "@sketchy-js/fills/sunBurst": { symbols: ["sunBurst"] },
-  "@sketchy-js/fills/starBurst": { symbols: ["starBurst"] },
-  "@sketchy-js/fills/scribble": { symbols: ["scribble"] },
-  "@sketchy-js/scene": { symbols: ["createSketchy", "RoughView", "buildScene", "sketchScene"] },
-  "@sketchy-js/scene/basic": { symbols: ["sketch", "RoughView", "basicSketchy"] },
-  "@sketchy-js/svg-renderer": { symbols: ["renderToSvgString", "renderToSvgElement"] },
-  "@sketchy-js/canvas-renderer": { symbols: ["renderToCanvas"] },
-  "@sketchy-js/brushes": {
+  "@sketchy-js/sketchy/fills": { symbols: ["builtinFills"] },
+  "@sketchy-js/sketchy/fills/solid": { symbols: ["solid"] },
+  "@sketchy-js/sketchy/fills/hachure": { symbols: ["hachure"] },
+  "@sketchy-js/sketchy/fills/zigzag": { symbols: ["zigzag"] },
+  "@sketchy-js/sketchy/fills/crossHatch": { symbols: ["crossHatch"] },
+  "@sketchy-js/sketchy/fills/dots": { symbols: ["dots"] },
+  "@sketchy-js/sketchy/fills/dashed": { symbols: ["dashed"] },
+  "@sketchy-js/sketchy/fills/zigzagLine": { symbols: ["zigzagLine"] },
+  "@sketchy-js/sketchy/fills/sunBurst": { symbols: ["sunBurst"] },
+  "@sketchy-js/sketchy/fills/starBurst": { symbols: ["starBurst"] },
+  "@sketchy-js/sketchy/fills/scribble": { symbols: ["scribble"] },
+  "@sketchy-js/sketchy/scene": {
+    symbols: ["createSketchy", "RoughView", "buildScene", "sketchScene"],
+  },
+  "@sketchy-js/sketchy/scene/basic": { symbols: ["sketch", "RoughView", "basicSketchy"] },
+  "@sketchy-js/sketchy/svg": { symbols: ["renderToSvgString", "renderToSvgElement"] },
+  "@sketchy-js/sketchy/canvas": { symbols: ["renderToCanvas"] },
+  "@sketchy-js/sketchy/brushes": {
     symbols: ["crayon", "crayonPasses", "watercolor", "watercolorFill", "watercolorStrokeCommands"],
   },
-  "@sketchy-js/brushes/crayon": { symbols: ["crayon"] },
-  "@sketchy-js/brushes/watercolor": { symbols: ["watercolor", "watercolorFill"] },
-  "@sketchy-js/animate": { symbols: ["generateFrame", "precomputeFrames", "createAnimation"] },
-  "@sketchy-js/stickers": {
+  "@sketchy-js/sketchy/brushes/crayon": { symbols: ["crayon"] },
+  "@sketchy-js/sketchy/brushes/watercolor": { symbols: ["watercolor", "watercolorFill"] },
+  "@sketchy-js/sketchy/animate": {
+    symbols: ["generateFrame", "precomputeFrames", "createAnimation"],
+  },
+  "@sketchy-js/sketchy/stickers": {
     symbols: ["stickerCommands", "stickerLayers", "paper", "smoothEdge", "builtinEdges"],
   },
-  "@sketchy-js/stickers/image": {
+  "@sketchy-js/sketchy/stickers/image": {
     symbols: ["resolveImagePlacement", "assertDataImage", "StickerImageError"],
   },
-  "@sketchy-js/stickers/clipper": { symbols: ["clipperBackend", "CLIPPER_SCALE"] },
-  "@sketchy-js/scene/stickers": { symbols: ["SketchGroup", "SketchPart", "buildStickerScene"] },
-  "@sketchy-js/scene/silhouette": { symbols: ["treeShadow", "footAnchor", "silhouetteScene"] },
-  "@sketchy-js/fills/contour": { symbols: ["contour"] },
-  "@sketchy-js/fills/wash": { symbols: ["wash", "skyWash"] },
+  "@sketchy-js/sketchy/stickers/clipper": { symbols: ["clipperBackend", "CLIPPER_SCALE"] },
+  "@sketchy-js/sketchy/scene/stickers": {
+    symbols: ["SketchGroup", "SketchPart", "buildStickerScene"],
+  },
+  "@sketchy-js/sketchy/scene/silhouette": {
+    symbols: ["treeShadow", "footAnchor", "silhouetteScene"],
+  },
+  "@sketchy-js/sketchy/fills/contour": { symbols: ["contour"] },
+  "@sketchy-js/sketchy/fills/wash": { symbols: ["wash", "skyWash"] },
   "@sketchy-js/react": {
     symbols: ["Sketchy", "SketchySvg", "useSketch", "useContourPhase", "useSketchAnimation"],
   },
   "@sketchy-js/react/canvas": { symbols: ["SketchyCanvas"] },
-  "@sketchy-js/web-components": {
+  "@sketchy-js/sketchy/web-components": {
     symbols: [
       "registerSketchyElements",
       "defineSketchyElement",
@@ -193,48 +202,63 @@ const expectations = {
     ],
   },
 };
-const skeletons = ["contrib"];
+
+/** JS entry points. `package.json` and wildcard keys are not symbol imports. */
+function jsSpecifiers(pkgName, exportsMap) {
+  return Object.keys(exportsMap)
+    .filter((key) => key !== "./package.json" && !key.includes("*"))
+    .map((key) => (key === "." ? pkgName : `${pkgName}${key.slice(1)}`))
+    .sort();
+}
+
+for (const dir of ["sketchy", "react"]) {
+  const manifest = JSON.parse(readFileSync(join(root, "packages", dir, "package.json"), "utf8"));
+  const declared = jsSpecifiers(manifest.name, manifest.exports);
+  const covered = Object.keys(expectations)
+    .filter((key) => key === manifest.name || key.startsWith(`${manifest.name}/`))
+    .sort();
+  if (declared.join("\n") !== covered.join("\n")) {
+    fail(
+      `${manifest.name}: smoke expectations do not match package exports\nexpected ${declared.join(", ")}\nactual ${covered.join(", ")}`,
+    );
+  }
+}
 
 writeFileSync(
   join(consumer, "check.mjs"),
   `const expectations = ${JSON.stringify(expectations)};
-const skeletons = ${JSON.stringify(skeletons.map((s) => `@sketchy-js/${s}`))};
 let bad = 0;
 for (const [specifier, { symbols }] of Object.entries(expectations)) {
   const mod = await import(specifier);
   for (const symbol of symbols) if (!(symbol in mod)) { console.error("missing export", specifier, symbol); bad++; }
 }
-for (const specifier of skeletons) {
-  const mod = await import(specifier);
-  if (Object.keys(mod).length !== 0) { console.error("skeleton package now has exports; update the smoke test:", specifier); bad++; }
-}
-const { sketch } = await import("@sketchy-js/scene/basic");
-const { renderToSvgString } = await import("@sketchy-js/svg-renderer");
-const { rectangle } = await import("@sketchy-js/core");
+const { sketch } = await import("@sketchy-js/sketchy/scene/basic");
+const { renderToSvgString } = await import("@sketchy-js/sketchy/svg");
+const { rectangle } = await import("@sketchy-js/sketchy/core");
 const svg = renderToSvgString(sketch(rectangle(10, 10, 80, 60), { width: 100, height: 80 }, { seed: 42n, fillStyle: "hachure" }));
 if (!svg.startsWith("<svg ") || !svg.includes("<path")) { console.error("end-to-end SVG render failed", svg.slice(0, 80)); bad++; }
 const { readFileSync: readManifest } = await import("node:fs");
 const reactManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/react/package.json", import.meta.url), "utf8"));
-const stickerManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/stickers/package.json", import.meta.url), "utf8"));
-if (reactManifest.dependencies?.["@sketchy-js/canvas-renderer"]) {
-  console.error("react's main dependency list includes canvas; keep it an optional peer of the canvas subpath");
+const sketchyManifest = JSON.parse(readManifest(new URL("./node_modules/@sketchy-js/sketchy/package.json", import.meta.url), "utf8"));
+if (!reactManifest.dependencies?.["@sketchy-js/sketchy"]) {
+  console.error("react must depend on @sketchy-js/sketchy");
   bad++;
 }
-if (stickerManifest.dependencies?.["@sketchy-js/react"] || stickerManifest.peerDependencies?.["@sketchy-js/react"]) {
-  console.error("stickers depend on react"); bad++;
+if (sketchyManifest.dependencies?.["@sketchy-js/react"] || sketchyManifest.peerDependencies?.react) {
+  console.error("sketchy must not depend on react"); bad++;
 }
-const { renderToCanvas } = await import("@sketchy-js/canvas-renderer");
+const { renderToCanvas } = await import("@sketchy-js/sketchy/canvas");
 if (typeof renderToCanvas !== "function") { console.error("canvas renderer missing"); bad++; }
-const { stickerCommands } = await import("@sketchy-js/stickers");
+const { stickerCommands } = await import("@sketchy-js/sketchy/stickers");
 if (typeof stickerCommands !== "function") { console.error("stickers missing"); bad++; }
-const { sceneFromAttributes } = await import("@sketchy-js/web-components");
+const { sceneFromAttributes } = await import("@sketchy-js/sketchy/web-components");
 const seeded = sceneFromAttributes({ shape: "rectangle", seed: "42", fill: "hachure" }, { width: 100, height: 80 });
 if (!seeded.nodes?.length) { console.error("seeded consumer scene empty"); bad++; }
-const { SplitMix64 } = await import("@sketchy-js/core");
+const { SplitMix64 } = await import("@sketchy-js/sketchy/core");
 const rng = new SplitMix64(42n);
 const first = rng.nextU64();
 if (first !== 13679457532755275413n) { console.error("SplitMix64(42) first value", first); bad++; }
-const schemaUrl = import.meta.resolve("@sketchy-js/types/schemas/options.schema.json");
+const schemaUrl = import.meta.resolve("@sketchy-js/sketchy/schemas/options.schema.json");
 const { readFileSync } = await import("node:fs");
 const schema = JSON.parse(readFileSync(new URL(schemaUrl), "utf8"));
 if (!schema.definitions?.SketchOptions) { console.error("options schema not published"); bad++; }
@@ -248,19 +272,19 @@ else console.log(node.stdout.trim());
 
 writeFileSync(
   join(consumer, "types-check.ts"),
-  `import type { SketchOptions, Scene, PathOp } from "@sketchy-js/types";
-import { defineBrush, s, type Resolved } from "@sketchy-js/plugin";
-import { resolveOptions } from "@sketchy-js/plugin/schema";
-import { Rng, SplitMix64 } from "@sketchy-js/core";
-import { defaultSketchOptions } from "@sketchy-js/core/options";
-import { sketch, RoughView } from "@sketchy-js/scene/basic";
-import { hachure } from "@sketchy-js/fills/hachure";
-import { scribble } from "@sketchy-js/fills/scribble";
-import { rectangle } from "@sketchy-js/core";
-import { renderToSvgString } from "@sketchy-js/svg-renderer";
-import { renderToCanvas } from "@sketchy-js/canvas-renderer";
-import { generateFrame } from "@sketchy-js/animate";
-import { crayon } from "@sketchy-js/brushes/crayon";
+  `import type { SketchOptions, Scene, PathOp } from "@sketchy-js/sketchy/types";
+import { defineBrush, s, type Resolved } from "@sketchy-js/sketchy/plugin";
+import { resolveOptions } from "@sketchy-js/sketchy/plugin/schema";
+import { Rng, SplitMix64 } from "@sketchy-js/sketchy/core";
+import { defaultSketchOptions } from "@sketchy-js/sketchy/core/options";
+import { sketch, RoughView } from "@sketchy-js/sketchy/scene/basic";
+import { hachure } from "@sketchy-js/sketchy/fills/hachure";
+import { scribble } from "@sketchy-js/sketchy/fills/scribble";
+import { rectangle } from "@sketchy-js/sketchy/core";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
+import { renderToCanvas } from "@sketchy-js/sketchy/canvas";
+import { generateFrame } from "@sketchy-js/sketchy/animate";
+import { crayon } from "@sketchy-js/sketchy/brushes/crayon";
 
 const options: SketchOptions = defaultSketchOptions();
 const op: PathOp = { op: "M", x: options.roughness, y: 0 };
@@ -345,8 +369,9 @@ for (const dir of packageDirs) {
     (p) =>
       !(
         p === "package.json" ||
+        p === "THIRD_PARTY_NOTICES" ||
         p.startsWith("dist/") ||
-        (dir === "types" && p.startsWith("schemas/")) ||
+        (dir === "sketchy" && p.startsWith("schemas/")) ||
         /^(README|LICENSE)/i.test(p)
       ),
   );
@@ -378,37 +403,37 @@ async function bundle(label, code, mustNotContain) {
 }
 await bundle(
   "core: SplitMix64 only",
-  `import { SplitMix64 } from "@sketchy-js/core"; console.log(new SplitMix64(1n).nextU64());`,
+  `import { SplitMix64 } from "@sketchy-js/sketchy/core"; console.log(new SplitMix64(1n).nextU64());`,
   ["Box-Muller", "Math.cos", "FNV"],
 );
 await bundle(
   "plugin: s only",
-  `import { s } from "@sketchy-js/plugin"; console.log(s.number({ default: 1, min: 0, max: 2, description: "x" }));`,
+  `import { s } from "@sketchy-js/sketchy/plugin"; console.log(s.number({ default: 1, min: 0, max: 2, description: "x" }));`,
   ["deepFreeze", "~sketchy"],
 );
 await bundle(
   "plugin: defineBrush",
-  `import { defineBrush } from "@sketchy-js/plugin"; console.log(defineBrush({ id: "a", version: "1.0.0", api: "1.0", title: "t", description: "d", options: {}, generate: () => [] }));`,
+  `import { defineBrush } from "@sketchy-js/sketchy/plugin"; console.log(defineBrush({ id: "a", version: "1.0.0", api: "1.0", title: "t", description: "d", options: {}, generate: () => [] }));`,
   ["PluginOptionError"],
 );
 await bundle(
   "plugin/schema: resolveOptions",
-  `import { resolveOptions } from "@sketchy-js/plugin/schema"; console.log(resolveOptions({}, {}));`,
+  `import { resolveOptions } from "@sketchy-js/sketchy/plugin/schema"; console.log(resolveOptions({}, {}));`,
   ["PluginApiError"],
 );
 await bundle(
   "core/options: applyRule",
-  `import { applyRule } from "@sketchy-js/core/options"; console.log(applyRule(1, { type: "float", default: 0, enforcedBy: "none", swift: "x" }));`,
+  `import { applyRule } from "@sketchy-js/sketchy/core/options"; console.log(applyRule(1, { type: "float", default: 0, enforcedBy: "none", swift: "x" }));`,
   ["Options.roughness"],
 );
 await bundle(
   "scene/basic + svg-renderer (plan 28-42 KB)",
-  `import { sketch } from "@sketchy-js/scene/basic"; import { renderToSvgString } from "@sketchy-js/svg-renderer"; import { rectangle } from "@sketchy-js/core"; console.log(renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 })));`,
+  `import { sketch } from "@sketchy-js/sketchy/scene/basic"; import { renderToSvgString } from "@sketchy-js/sketchy/svg"; import { rectangle } from "@sketchy-js/sketchy/core"; console.log(renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 })));`,
   [],
 );
 await bundle(
   "fills/hachure only",
-  `import { hachure } from "@sketchy-js/fills/hachure"; console.log(hachure);`,
+  `import { hachure } from "@sketchy-js/sketchy/fills/hachure"; console.log(hachure);`,
   ["sunBurst", "starBurst", "zigzagLine"],
 );
 const basicRow = report.find((r) => r.label.startsWith("scene/basic + svg-renderer"));

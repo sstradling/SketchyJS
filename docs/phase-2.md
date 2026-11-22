@@ -1,5 +1,7 @@
 # Phase 2 status: canvas, advanced strokes, and animation
 
+> **Package layout.** This note was written when each area was its own npm package. The published layout is two packages, [ADR 0002](adr/0002-two-packages.md). Read `@sketchy-js/<area>` here as `@sketchy-js/sketchy/<area>`, `@sketchy-js/svg-renderer` as `@sketchy-js/sketchy/svg`, and `@sketchy-js/canvas-renderer` as `@sketchy-js/sketchy/canvas`. A `packages/<area>` path is now `packages/sketchy/src/<area>` (schemas are `packages/sketchy/schemas`).
+
 Scope: the Phase 2 section of [`plan.md`](plan.md), plus scribble fill. Reference: Sketchy v1.5.0 (`fb17a6e`). Darwin fixtures are the oracle. Reference images under `fixtures/swift-reference/v1.5.0/images/` are the accepted upstream copies and were not regenerated.
 
 ## Deliverables

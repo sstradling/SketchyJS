@@ -10,7 +10,7 @@ export default tseslint.config(
       "fixtures/**",
       "docs/api/**",
       "tools/swift-fixture-exporter/**",
-      "packages/types/schemas/**",
+      "packages/sketchy/schemas/**",
       ".turbo/**",
       "tools/clipper-bench/results/**",
     ],

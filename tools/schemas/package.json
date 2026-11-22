@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Generates the JSON Schemas shipped in @sketchy-js/types from its TypeScript declarations and the option spec tables.",
+  "description": "Generates the JSON Schemas shipped in @sketchy-js/sketchy from its TypeScript declarations and the option spec tables.",
   "scripts": {
     "generate": "tsx generate.ts",
     "check": "tsx generate.ts --check"

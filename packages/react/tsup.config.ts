@@ -10,4 +10,5 @@ export default defineConfig({
   target: "es2022",
   treeshake: true,
   splitting: false,
+  external: ["react", /^@sketchy-js\/sketchy(\/.*)?$/],
 });

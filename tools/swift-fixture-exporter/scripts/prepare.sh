@@ -9,9 +9,26 @@ COMMIT="fb17a6e7344f46da994ece07da1505be7d431b16"
 CACHE=".cache/Sketchy"
 DEST="Sources/exporter/Upstream"
 
+# A transient 403 or 5xx from GitHub should not fail the fixture check.
+clone_sketchy() {
+  local attempt
+  for attempt in 1 2 3; do
+    rm -rf "$CACHE"
+    if git clone --quiet --depth 1 --branch "$TAG" https://github.com/sstradling/Sketchy.git "$CACHE"; then
+      return 0
+    fi
+    echo "Sketchy clone failed (attempt ${attempt}/3)" >&2
+    if [ "$attempt" -lt 3 ]; then
+      sleep $((attempt * 2))
+    fi
+  done
+  echo "Sketchy clone failed after 3 attempts" >&2
+  return 1
+}
+
 if [ ! -d "$CACHE/.git" ]; then
   mkdir -p .cache
-  git clone --quiet --depth 1 --branch "$TAG" https://github.com/sstradling/Sketchy.git "$CACHE"
+  clone_sketchy
 fi
 ACTUAL="$(git -C "$CACHE" rev-parse HEAD)"
 if [ "$ACTUAL" != "$COMMIT" ]; then

@@ -1,7 +1,7 @@
 {
   "name": "@sketchy-js/react",
   "version": "0.0.0",
-  "description": "SketchyJS react package.",
+  "description": "React bindings for SketchyJS. SVG by default; Canvas is a subpath.",
   "type": "module",
   "sideEffects": false,
   "main": "./dist/index.js",
@@ -27,19 +27,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
-    "@sketchy-js/animate": "workspace:*",
-    "@sketchy-js/scene": "workspace:*",
-    "@sketchy-js/svg-renderer": "workspace:*",
-    "@sketchy-js/types": "workspace:*"
+    "@sketchy-js/sketchy": "workspace:*"
   },
   "peerDependencies": {
-    "@sketchy-js/canvas-renderer": "workspace:*",
     "react": ">=18"
-  },
-  "peerDependenciesMeta": {
-    "@sketchy-js/canvas-renderer": {
-      "optional": true
-    }
   },
   "license": "MIT",
   "engines": {

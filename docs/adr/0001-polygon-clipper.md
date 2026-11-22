@@ -2,7 +2,7 @@
 
 - Status: Accepted (provisional)
 - Date: 2026-11-09
-- Scope: `@sketchy-js/stickers` (and `SketchGroup` silhouette union). Nothing else may depend on the chosen library.
+- Scope: the sticker clipper adapter, now `@sketchy-js/sketchy/stickers/clipper` ([ADR 0002](0002-two-packages.md)). Nothing else may import the chosen library.
 
 ## Context
 
@@ -73,13 +73,13 @@ Bundle cost (gzip, only the operations we need, tree-shaken):
 1. **Default backend: `clipper2-ts`.** It is correct on every fixture, handles round and miter offsets natively, is deterministic, has no WASM or async initialisation, and works unchanged in Node, browsers, workers, and SSR. Its worst case here (200 overlapping shapes, 8,800 input vertices) is about 42 ms, which is acceptable for a result that is cached by option hash.
 2. **`clipper2-wasm` is a supported optional backend, not the default.** It is about 2x faster on large round offsets and up to 3.6x on miter offsets, with roughly parity on small unions, but adds 82 KB gzip of WASM, async init, and manual memory management that leaks if mishandled. Implement it behind the same adapter only if Phase 3 profiling shows group union or offset dominating frame time.
 3. **`polygon-clipping` is rejected.** No offset, and the dilation workaround failed on 5 of 6 round-offset fixtures.
-4. **Adapter boundary.** `@sketchy-js/stickers` defines a small `PolygonBackend` interface (`union(rings[]) -> rings[]`, `offset(rings[], delta, join) -> rings[]`) over plain `Float64`-compatible point arrays with even-odd/non-zero fill declared explicitly. The library is imported in exactly one module; a boundary rule for that is added in Phase 3 together with the adapter. Public APIs never expose library types.
+4. **Adapter boundary.** `@sketchy-js/sketchy/stickers` defines a small `PolygonBackend` interface (`union(rings[]) -> rings[]`, `offset(rings[], delta, join) -> rings[]`) over plain `Float64`-compatible point arrays with even-odd/non-zero fill declared explicitly. The library is imported in exactly one module, `stickers/clipper`; a boundary rule enforces that. Public APIs never expose library types. Packaging of this adapter is superseded by [ADR 0002](0002-two-packages.md): it is the subpath `@sketchy-js/sketchy/stickers/clipper`, not a separate package. The library choice in this ADR is unchanged.
 5. **Coordinate precision.** Clipper's core works on integer coordinates. The adapter owns the scale factor and rounding so that both Clipper builds see identical integer input; the factor is chosen in Phase 3 and changing it afterwards is a geometry (seeded-output) change.
 
 ## Consequences
 
 - Positive: no handwritten boolean code, one dependency, no async surface in the sticker API, and a clear escape hatch.
-- Negative: roughly 17 KB gzip lands in any bundle that imports `@sketchy-js/stickers`, which is why stickers stay a separate package and `StickerImage` stays on a subpath. Both Clipper builds are BSL-1.0; it is permissive and requires no attribution in binaries, but the license notice must ship in the repository's third-party notices.
+- Negative: roughly 17 KB gzip lands in any bundle that imports `@sketchy-js/sketchy/stickers/clipper`. [ADR 0002](0002-two-packages.md) supersedes the original packaging (a separate stickers package) and keeps Clipper on that subpath. `StickerImage` stays on `@sketchy-js/sketchy/stickers/image`. Both Clipper builds are BSL-1.0; it is permissive and requires no attribution in binaries, but the license notice ships in `packages/sketchy/THIRD_PARTY_NOTICES`.
 - Negative: `clipper2-ts` is a younger port than Clipper2 itself. Mitigation (to build in Phase 3): run the adapter contract tests (concave, holes, dense group) against both Clipper builds so a regression in the port is visible against the reference implementation.
 
 ## Open items

@@ -1,13 +1,13 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createCanvas } from "@napi-rs/canvas";
 import { Resvg } from "@resvg/resvg-js";
-import { curve, linearPath, rectangle } from "../packages/core/dist/index.js";
-import { basicSketchy, sketch } from "../packages/scene/dist/basic.js";
-import { renderToSvgString } from "../packages/svg-renderer/dist/index.js";
-import { renderToCanvas } from "../packages/canvas-renderer/dist/index.js";
-import { crayon } from "../packages/brushes/dist/crayon.js";
-import { watercolor, watercolorFill } from "../packages/brushes/dist/watercolor.js";
-import { generateFrame } from "../packages/animate/dist/index.js";
+import { curve, linearPath, rectangle } from "../packages/sketchy/dist/core.js";
+import { basicSketchy, sketch } from "../packages/sketchy/dist/scene/basic.js";
+import { renderToSvgString } from "../packages/sketchy/dist/svg.js";
+import { renderToCanvas } from "../packages/sketchy/dist/canvas.js";
+import { crayon } from "../packages/sketchy/dist/brushes/crayon.js";
+import { watercolor, watercolorFill } from "../packages/sketchy/dist/brushes/watercolor.js";
+import { generateFrame } from "../packages/sketchy/dist/animate.js";
 
 const out = new URL("../docs/examples/phase-2/", import.meta.url);
 

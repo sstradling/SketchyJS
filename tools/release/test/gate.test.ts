@@ -6,21 +6,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const script = fileURLToPath(new URL("../../../scripts/release-dry-run.mjs", import.meta.url));
-const names = [
-  "types",
-  "plugin",
-  "core",
-  "fills",
-  "brushes",
-  "stickers",
-  "scene",
-  "svg-renderer",
-  "canvas-renderer",
-  "animate",
-  "react",
-  "web-components",
-  "contrib",
-];
+const names = ["sketchy", "react"];
 
 function tree(versions: string | readonly string[], pending = false): string {
   const root = mkdtempSync(join(tmpdir(), "sketchy-release-"));
@@ -76,7 +62,7 @@ describe("release dry run", () => {
 
   it("refuses a version mismatch, the wrong expected version, and a pending changeset", () => {
     const versions = names.map(() => "1.6.0");
-    versions[2] = "1.6.1";
+    versions[1] = "1.6.1";
     const mismatch = run(tree(versions), ["--gate", "--expect", "1.6.0"]);
     expect(mismatch.status).not.toBe(0);
     expect(mismatch.stderr).toMatch(/differ/);

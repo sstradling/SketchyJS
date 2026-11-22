@@ -1,8 +1,8 @@
 import { createCanvas } from "@napi-rs/canvas";
 import { Worker } from "node:worker_threads";
-import { rectangle } from "@sketchy-js/core";
-import { sketch } from "@sketchy-js/scene/basic";
-import { renderToCanvas } from "@sketchy-js/canvas-renderer";
+import { rectangle } from "@sketchy-js/sketchy/core";
+import { sketch } from "@sketchy-js/sketchy/scene/basic";
+import { renderToCanvas } from "@sketchy-js/sketchy/canvas";
 
 /**
  * Compares a dense scene drawn on the main thread with the same draw inside a

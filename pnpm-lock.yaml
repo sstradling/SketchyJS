@@ -41,6 +41,9 @@ importers:
       happy-dom:
         specifier: ^21.0.4
         version: 21.0.4
+      opentype.js:
+        specifier: ^2.0.0
+        version: 2.0.0
       prettier:
         specifier: ^3.9.10
         version: 3.9.10
@@ -75,74 +78,11 @@ importers:
         specifier: ^5.1.0
         version: 5.1.0(@types/node@26.6.6)(happy-dom@21.0.4)(vite@8.3.7(@types/node@26.6.6)(esbuild@0.28.2)(tsx@4.23.15)(yaml@2.9.1))
 
-  packages/animate:
-    dependencies:
-      '@sketchy-js/core':
-        specifier: workspace:*
-        version: link:../core
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
-
-  packages/brushes:
-    dependencies:
-      '@sketchy-js/core':
-        specifier: workspace:*
-        version: link:../core
-      '@sketchy-js/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-
-  packages/canvas-renderer:
-    dependencies:
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
-
-  packages/contrib:
-    dependencies:
-      '@sketchy-js/plugin':
-        specifier: workspace:^
-        version: link:../plugin
-
-  packages/core:
-    dependencies:
-      '@sketchy-js/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
-
-  packages/fills:
-    dependencies:
-      '@sketchy-js/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-
-  packages/plugin:
-    dependencies:
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
-
   packages/react:
     dependencies:
-      '@sketchy-js/animate':
+      '@sketchy-js/sketchy':
         specifier: workspace:*
-        version: link:../animate
-      '@sketchy-js/canvas-renderer':
-        specifier: workspace:*
-        version: link:../canvas-renderer
-      '@sketchy-js/scene':
-        specifier: workspace:*
-        version: link:../scene
-      '@sketchy-js/svg-renderer':
-        specifier: workspace:*
-        version: link:../svg-renderer
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
+        version: link:../sketchy
     devDependencies:
       '@types/react':
         specifier: 18.3.18
@@ -154,62 +94,11 @@ importers:
         specifier: 18.3.1
         version: 18.3.1
 
-  packages/scene:
+  packages/sketchy:
     dependencies:
-      '@sketchy-js/core':
-        specifier: workspace:*
-        version: link:../core
-      '@sketchy-js/fills':
-        specifier: workspace:*
-        version: link:../fills
-      '@sketchy-js/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
-    devDependencies:
-      '@sketchy-js/stickers':
-        specifier: workspace:*
-        version: link:../stickers
-
-  packages/stickers:
-    dependencies:
-      '@sketchy-js/core':
-        specifier: workspace:*
-        version: link:../core
-      '@sketchy-js/plugin':
-        specifier: workspace:*
-        version: link:../plugin
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
       clipper2-ts:
         specifier: 2.0.1-19
         version: 2.0.1-19
-
-  packages/svg-renderer:
-    dependencies:
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
-
-  packages/types: {}
-
-  packages/web-components:
-    dependencies:
-      '@sketchy-js/core':
-        specifier: workspace:*
-        version: link:../core
-      '@sketchy-js/scene':
-        specifier: workspace:*
-        version: link:../scene
-      '@sketchy-js/svg-renderer':
-        specifier: workspace:*
-        version: link:../svg-renderer
-      '@sketchy-js/types':
-        specifier: workspace:*
-        version: link:../types
 
   tools/clipper-bench:
     dependencies:
@@ -232,15 +121,9 @@ importers:
       '@napi-rs/canvas':
         specifier: ^1.1.1
         version: 1.1.1
-      '@sketchy-js/canvas-renderer':
+      '@sketchy-js/sketchy':
         specifier: workspace:*
-        version: link:../../packages/canvas-renderer
-      '@sketchy-js/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@sketchy-js/scene':
-        specifier: workspace:*
-        version: link:../../packages/scene
+        version: link:../../packages/sketchy
 
 packages:
 
@@ -1743,6 +1626,10 @@ packages:
   obug@3.0.0:
     resolution: {integrity: sha512-5vvB5+W7ePv+p3uqxi+RcW1XAzLW0/hxt3/4X4Lc4qHudzOhmBiBwOY6DRob4WnanAEGvNcLjF+KNOufrUoEQw==}
     engines: {node: '>=12.20.0'}
+
+  opentype.js@2.0.0:
+    resolution: {integrity: sha512-kCyjv6xdDY1W/jLWZ/L3QhhTlKUqDZMQ5+Jdlw12b3dXkKNpYBqqlMMj0YDQPShWFTMwgZI1hG14kN3XUDSg/A==}
+    hasBin: true
 
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
@@ -3497,6 +3384,8 @@ snapshots:
   object-assign@4.1.1: {}
 
   obug@3.0.0: {}
+
+  opentype.js@2.0.0: {}
 
   optionator@0.9.4:
     dependencies:

@@ -2,7 +2,7 @@
   "$schema": "https://typedoc.org/schema.json",
   "name": "SketchyJS API",
   "entryPointStrategy": "packages",
-  "entryPoints": ["packages/types", "packages/plugin", "packages/core"],
+  "entryPoints": ["packages/sketchy", "packages/react"],
   "out": "docs/api",
   "readme": "none",
   "skipErrorChecking": false,

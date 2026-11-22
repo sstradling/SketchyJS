@@ -1,6 +1,6 @@
 # Contributing a plugin
 
-> **Status: design.** The generator (`pnpm new`), the `@sketchy-js/testkit` suite (`describePlugin`), and `packages/contrib` described here do not exist yet; they are the target interface for contributors. What does exist is the plugin contract (API 1.0) and a set of conformance helpers in `@sketchy-js/plugin`; [section 3](#3-the-conformance-suite) says exactly which checks those cover. Read [plugins.md](plugins.md) first; this guide assumes you know the four plugin kinds and the purity contract.
+> **Status: the contrib package was removed.** [ADR 0002](adr/0002-two-packages.md) publishes `@sketchy-js/sketchy` and `@sketchy-js/react`. A community plugin is its own package and may import only `@sketchy-js/sketchy/plugin`. The generator (`pnpm new`), `@sketchy-js/testkit`, and the contrib layout below were the target design and were not built. The conformance helpers that exist are in `@sketchy-js/sketchy/plugin`. Read [plugins.md](plugins.md) first.
 
 This is a walkthrough from idea to merged pull request. For general repository rules (setup, commits, code style) see [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -30,13 +30,15 @@ This is a walkthrough from idea to merged pull request. For general repository r
 2. **Search the [gallery](plugins.md#52-what-the-schema-drives) and open issues** for an existing plugin that an option could extend. A new `style` choice on an existing plugin is often better than a near-duplicate.
 
 3. **Choose a home.**
-   - `packages/contrib` in this repo: the default for anything new. Reviewed to the same technical bar as core, with lighter process and an `experimental` status.
+   - A separate package (the in-repo contrib package was removed, [ADR 0002](adr/0002-two-packages.md)): the place for anything new. Reviewed to the same technical bar as core, with lighter process and an `experimental` status.
    - Your own npm package (`sketchy-plugin-<name>`, keyword `sketchy-plugin`): fully supported. Use `@sketchy-js/testkit` as a dev dependency to run the same conformance suite on your own CI. Open a PR adding it to the gallery's community list if you want it listed.
    - Built-in packages (`brushes`, `fills`, `stickers`): only by [graduation](#5-graduation-from-contrib-to-core) or by maintainers, because built-ins carry Swift-parity and size commitments.
 
 4. **Read the contract** ([purity rules](plugins.md#3-the-purity-contract-and-how-it-is-enforced)). If your idea needs pixels, blur, blend modes, or other plugins, it does not fit the contract yet; discuss it in an issue.
 
 ## 2. The `pnpm new` generator
+
+> **Not built.** The paths below pointed at the contrib package, which [ADR 0002](adr/0002-two-packages.md) removed. A new plugin is a separate package that imports `@sketchy-js/sketchy/plugin`.
 
 ```bash
 pnpm new <brush|fill|texture|edge> <name> [flags]
@@ -81,7 +83,7 @@ packages/contrib/src/brushes/charcoal/
 | `charcoal.demo.ts` | `defineDemo(plugin, { geometry, strokeWidth })`; samples default to the plugin's `examples` | Uses the standard fixtures |
 | `charcoal.doc.md` | Front matter (`plugin`, `kind`, `status: experimental`, `author`) and two prose headings. The option table is generated from the schema | Placeholder text that fails the docs check until replaced |
 | `index.ts` | `export { charcoal } from "./charcoal"; export { charcoal as default } from "./charcoal";` | Generated |
-| changeset | `@sketchy-js/contrib: minor` with "Add contrib/charcoal brush" | Generated |
+| changeset | note for the community package (the in-repo contrib package was removed) | Generated |
 
 ### 2.2 What it changes
 
@@ -125,7 +127,7 @@ flowchart LR
 
 ### 3.0 What is implemented today
 
-The suite below is the **target**. Today the repository has individual helper functions exported from `@sketchy-js/plugin` (`packages/plugin/src/conformance.ts`, tests in `packages/plugin/test/conformance.test.ts`). Each throws on failure, so it works in any test runner, and a plugin's own test file calls them directly. There is no `describePlugin`, no auto-discovery, no `expectedFailures`, and no gallery or snapshot machinery yet.
+The suite below is the **target**. Today the repository has individual helper functions exported from `@sketchy-js/sketchy/plugin` (`packages/sketchy/src/plugin/conformance.ts`, tests in `packages/sketchy/test/plugin/conformance.test.ts`). Each throws on failure, so it works in any test runner, and a plugin's own test file calls them directly. There is no `describePlugin`, no auto-discovery, no `expectedFailures`, and no gallery or snapshot machinery yet.
 
 | Guarantee | Status | Helper or note |
 | --- | --- | --- |
@@ -135,12 +137,12 @@ The suite below is the **target**. Today the repository has individual helper fu
 | Frozen inputs and no output aliasing | Implemented | `assertInputImmutable(generate, input)` runs `generate` on a deep-frozen structural copy and fails on a write or on output that reuses an input object or array |
 | Interleaving: A, B, A gives the same A | Implemented for a pair of calls | `assertInterleavingStable(a, b)`. Planned: checking two instances with different overrides automatically |
 | Output budget | Implemented | `assertWithinBudget(output, maxOps)` counts path operations and requires finite numbers. Planned: the `overflow` bound check |
-| Import graph limited to relative files and `@sketchy-js/plugin` | Planned | Needs the esbuild metafile; also the empty-bundle tree-shaking check |
+| Import graph limited to relative files and `@sketchy-js/sketchy/plugin` | Planned | Needs the esbuild metafile; also the empty-bundle tree-shaking check |
 | Fresh module (`vi.resetModules()` and re-import) | Planned | |
 | Seed sensitivity and `stochastic: false` verification | Planned | Needs a call-counting RNG |
 | Option-order independence, dead-option detection | Planned | |
-| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/plugin/schema`, and `defineX` runs them outside production. The registry calls `assertPluginApi` at `use()`. Examples, id pattern, and length limits are not checked |
-| Edge-case corpus per kind, all-min and all-max options, pairwise sampling | Planned | The nine built-in fills have a hand-written subset in `packages/scene/test/fills-conformance.test.ts` (degenerate and far-off regions, angles, huge and tiny gaps, determinism, metadata) |
+| Contract and metadata checks (id pattern, semver, `api` support, examples, length limits) | Partly | Schema and definition validation exist as `validateSchema` and `validateDefinition` in `@sketchy-js/sketchy/plugin/schema`, and `defineX` runs them outside production. The registry calls `assertPluginApi` at `use()`. Examples, id pattern, and length limits are not checked |
+| Edge-case corpus per kind, all-min and all-max options, pairwise sampling | Planned | The nine built-in fills have a hand-written subset in `packages/sketchy/test/scene/fills-conformance.test.ts` (degenerate and far-off regions, angles, huge and tiny gaps, determinism, metadata) |
 | Cross-platform snapshots, SVG vs Canvas visual parity | Planned | Built-in fills are compared with the Swift reference fixtures instead |
 
 ### The target suite
@@ -175,7 +177,7 @@ pnpm check charcoal         # lint, types, tests, size budget
 
 1. Lint rejects `Math.random`, `Date`, `performance`, `crypto`, and platform globals in plugin modules.
 2. At runtime the suite replaces `Math.random`, `Date.now`, `new Date()` with no arguments, `performance.now`, `crypto.getRandomValues`, `crypto.randomUUID`, `document`, `window`, `Path2D`, and `OffscreenCanvas` with throwing getters while `generate` runs. Aliased or computed access (`Math["random"]`, `const r = Math.random`) is caught here.
-3. The import graph of the plugin module (via the esbuild metafile) may contain only relative files and `@sketchy-js/plugin`.
+3. The import graph of the plugin module (via the esbuild metafile) may contain only relative files and `@sketchy-js/sketchy/plugin`.
 
 **Determinism per seed.**
 
@@ -209,16 +211,16 @@ Additional kind rules:
 
 ### 3.4 Snapshot render
 
-For every `(fixture, example)` pair the suite runs the plugin through the testkit host, builds a `Scene`, renders it with `@sketchy-js/svg-renderer` at a fixed size and device scale, normalizes the SVG (numbers to 3 decimals, attribute order, ids), and compares against `__snapshots__/<name>/<fixture>-<example>.svg` using a tolerant numeric comparator.
+For every `(fixture, example)` pair the suite runs the plugin through the testkit host, builds a `Scene`, renders it with `@sketchy-js/sketchy/svg` at a fixed size and device scale, normalizes the SVG (numbers to 3 decimals, attribute order, ids), and compares against `__snapshots__/<name>/<fixture>-<example>.svg` using a tolerant numeric comparator.
 
 - First run writes snapshots and fails with "snapshots written, review and commit".
 - `pnpm test -u charcoal` updates them. **Every snapshot diff in a PR must be explained in the PR description**; CI attaches an HTML report with before and after thumbnails.
-- `pnpm test:visual` (Playwright, pinned Chromium) rasterizes the SVG and the same scene through `@sketchy-js/canvas-renderer` and compares them with pixelmatch: at most 0.5% differing pixels at per-pixel threshold 0.1. A plugin may declare a looser `visualTolerance` in its test, up to 1.5%, with a stated reason. This is what proves "works in SVG and Canvas automatically" for your plugin.
+- `pnpm test:visual` (Playwright, pinned Chromium) rasterizes the SVG and the same scene through `@sketchy-js/sketchy/canvas` and compares them with pixelmatch: at most 0.5% differing pixels at per-pixel threshold 0.1. A plugin may declare a looser `visualTolerance` in its test, up to 1.5%, with a stated reason. This is what proves "works in SVG and Canvas automatically" for your plugin.
 - Snapshots test geometry and layer structure, not anti-aliasing, so they are stable across machines.
 
 ### 3.5 Size budget
 
-Each plugin has a per-plugin gzip budget in its package's `budgets.json`. The suite bundles the plugin entry with esbuild (`--bundle --minify --format=esm --tree-shaking`, `@sketchy-js/plugin` marked external), gzips at level 9, and compares.
+Each plugin has a per-plugin gzip budget in its package's `budgets.json`. The suite bundles the plugin entry with esbuild (`--bundle --minify --format=esm --tree-shaking`, `@sketchy-js/sketchy/plugin` marked external), gzips at level 9, and compares.
 
 | Kind | Default budget (gzip) |
 | --- | ---: |
@@ -246,11 +248,13 @@ FAIL contrib/charcoal  determinism/repeat
 
 ## 4. `packages/contrib`
 
-`packages/contrib` (published as `@sketchy-js/contrib`) is the home for community plugins in this repository.
+> **Removed.** [ADR 0002](adr/0002-two-packages.md) dropped this package. There is no `@sketchy-js/contrib`. Publish a community plugin on its own and depend on `@sketchy-js/sketchy/plugin`. The tree below is the design that was not built.
+
+`packages/contrib` was the planned home for community plugins in this repository.
 
 ```text
 packages/contrib/
-  package.json          "sideEffects": false; per-plugin subpath exports; peer dep on @sketchy-js/plugin
+  package.json          "sideEffects": false; per-plugin subpath exports; peer dep on @sketchy-js/sketchy; import @sketchy-js/sketchy/plugin
   budgets.json          per-plugin size budgets
   src/
     brushes/<name>/     <name>.ts, .test.ts, .demo.ts, .doc.md, index.ts
@@ -263,20 +267,20 @@ packages/contrib/
 Rules:
 
 - **Same technical bar, lighter process.** Conformance, lint, types, snapshots, and size budgets are identical to core. Review needs one maintainer approval instead of the design discussion core features get.
-- **Status.** Every contrib plugin starts as `experimental` (docs badge). `@sketchy-js/contrib` versions with changesets; the package stays `0.x` so output or option changes are minor bumps, announced in the changelog. A plugin can be marked `stable` in its docs front matter after meeting the first two [graduation](#5-graduation-from-contrib-to-core) criteria, at which point the output-stability rules in [plugins.md](plugins.md#7-api-versioning-and-compatibility) apply.
+- **Status.** Every community plugin starts as `experimental` (docs badge). Its own package versions with changesets and stays `0.x` so output or option changes are minor bumps, announced in the changelog. A plugin can be marked `stable` in its docs front matter after meeting the first two [graduation](#5-graduation-from-contrib-to-core) criteria, at which point the output-stability rules in [plugins.md](plugins.md#7-api-versioning-and-compatibility) apply. The in-repo package this section was written for was removed.
 - **Ownership.** The author is the default owner in `CODEOWNERS` and is expected to respond to issues. An owner who is unresponsive for two releases triggers a call for a new owner; if none appears, the plugin is deprecated and later removed with notice in the changelog.
 - **Namespace.** Ids are `contrib/<name>`. Names are first come, first served, and maintainers may ask you to rename to avoid near-duplicates.
-- **Dependencies.** None. Plugins use only `@sketchy-js/plugin` (enforced).
+- **Dependencies.** None. Plugins use only `@sketchy-js/sketchy/plugin` (enforced).
 - **Licensing.** Contributions are made under the repository license. By opening the PR you confirm the code is yours or you have the right to submit it, and that it was not copied from a source whose license is incompatible. Reference implementations in other libraries may inspire the look, but do not port code without checking its license first.
 
 ## 5. Graduation from contrib to core
 
-Core built-ins (`@sketchy-js/brushes`, `fills`, `stickers`) carry long-term commitments: size targets, visual parity tests, documentation in the API reference. A contrib plugin can graduate when it meets **all** of the following.
+Core built-ins (`@sketchy-js/sketchy/brushes`, `fills`, `stickers`) carry long-term commitments: size targets, visual parity tests, documentation in the API reference. A contrib plugin can graduate when it meets **all** of the following.
 
 **Quality and stability**
 
 1. Passes conformance with no `expectedFailures`.
-2. Has been `stable` in at least two released minor versions of `@sketchy-js/contrib` with no unresolved determinism, crash, or visual-parity bug.
+2. Has been `stable` in at least two released minor versions of its own package with no unresolved determinism, crash, or visual-parity bug. The in-repo contrib package this criterion named was removed ([ADR 0002](adr/0002-two-packages.md)).
 3. Option schema unchanged (no removals, renames, or default changes) for those two releases.
 4. SVG and Canvas parity within the default tolerance, with no `visualTolerance` override.
 5. Works under animation: the per-frame cost on the animation benchmark fixture stays inside the animation budget, and output is stable under the per-frame seed policy.
@@ -301,7 +305,7 @@ Core built-ins (`@sketchy-js/brushes`, `fills`, `stickers`) carry long-term comm
 **Process**
 
 - Open an issue (a "Plugin graduation" issue template is planned for Phase 0) listing evidence for each criterion. Maintainers decide by consensus; a single unresolved objection blocks until answered.
-- On approval the plugin moves package, its id changes from `contrib/<name>` to `<name>`, and the old id stays registered as an alias for one major version (`use(plugin, { alias: "contrib/<name>" })`). `@sketchy-js/contrib` re-exports the plugin from its new home with a deprecation notice so imports keep working. Saved scenes using the old id continue to resolve.
+- On approval the plugin moves into `@sketchy-js/sketchy`, its id changes from `acme/<name>` to `<name>`, and the old id stays registered as an alias for one major version. The removed contrib package does not re-export it. Saved scenes using the old id continue to resolve through the alias.
 - Built-in output is then covered by the built-in stability policy: changes that alter seeded output are major.
 
 Demotion mirrors this: a built-in that no longer meets 2, 5, or 13 can be moved back to contrib or deprecated.
@@ -313,7 +317,7 @@ The template lives at [`.github/PULL_REQUEST_TEMPLATE.md`](../.github/PULL_REQUE
 **Plugin PR checklist**
 
 - [ ] Generated with `pnpm new` (or equivalent structure) and placed in the right package.
-- [ ] Plugin is pure: only `@sketchy-js/plugin` imports, no `Math.random`, no DOM/Canvas, no module-level mutable state.
+- [ ] Plugin is pure: only `@sketchy-js/sketchy/plugin` imports, no `Math.random`, no DOM/Canvas, no module-level mutable state.
 - [ ] `defineX(...)` call has `/*#__PURE__*/`, and the module exports only the plugin (plus types).
 - [ ] Every option has `min`, `max`, `default`, `unit`, and an artist-readable `description`; defaults look good with no tuning.
 - [ ] At least two `examples`, with fixed seeds.

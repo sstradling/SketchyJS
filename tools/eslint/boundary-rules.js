@@ -5,36 +5,33 @@ export const boundaries = JSON.parse(
 );
 
 const { globals, members, newExpressions } = boundaries.bannedInPureGeometry;
-const allPackages = Object.keys(boundaries.packages);
+const areas = Object.keys(boundaries.areas);
 
 /**
- * `no-restricted-imports` rule forbidding every workspace package that `name` may not import.
- * @param {string} name package directory name, e.g. "core"
+ * Forbids subpaths outside the area's allowed folders.
+ * @param {string} area folder under packages/sketchy/src
  */
-export function importRestrictions(name) {
-  const entry = boundaries.packages[name];
-  const allowed = new Set([
-    name,
-    ...entry.dependencies,
-    ...(entry.peers ?? []),
-    ...(entry.optionalPeers ?? []),
+export function importRestrictions(area) {
+  const allowed = new Set([area, ...(boundaries.areas[area] ?? [])]);
+  const banned = areas.filter((name) => !allowed.has(name));
+  const patterns = banned.flatMap((name) => [
+    `@sketchy-js/sketchy/${name}`,
+    `@sketchy-js/sketchy/${name}/*`,
   ]);
-  const groups = allPackages.filter((p) => !allowed.has(p)).map((p) => `@sketchy-js/${p}`);
-  if (groups.length === 0) return {};
   return {
     "no-restricted-imports": [
       "error",
       {
-        patterns: groups.map((group) => ({
+        patterns: patterns.map((group) => ({
           group: [group],
-          message: "Not an allowed dependency; see tools/boundaries.json.",
+          message: "Not an allowed folder dependency; see tools/boundaries.json.",
         })),
       },
     ],
   };
 }
 
-/** Determinism rules for packages that must not touch time, randomness, or the environment. */
+/** Determinism rules for folders that must not touch time, randomness, or the DOM. */
 export function determinismRules() {
   const memberSelectors = members.map((path) => {
     const [object, property] = path.split(".");
@@ -52,23 +49,20 @@ export function determinismRules() {
       "error",
       ...globals.map((name) => ({
         name,
-        message: `${name} is not available to pure geometry packages.`,
+        message: `${name} is not available to pure geometry code.`,
       })),
     ],
     "no-restricted-syntax": ["error", ...memberSelectors, ...newSelectors],
   };
 }
 
-/**
- * Per-package ESLint override blocks derived from `tools/boundaries.json`.
- * @returns {import("eslint").Linter.Config[]}
- */
+/** Folder-level ESLint overrides derived from tools/boundaries.json. */
 export function packageOverrides() {
-  return allPackages.map((name) => {
-    const pure = boundaries.pureGeometryPackages.includes(name);
+  return areas.map((area) => {
+    const dom = (boundaries.domAreas ?? []).includes(area);
     return {
-      files: [`packages/${name}/src/**/*.ts`],
-      rules: { ...importRestrictions(name), ...(pure ? determinismRules() : {}) },
+      files: [`packages/sketchy/src/${area}/**/*.ts`],
+      rules: { ...importRestrictions(area), ...(dom ? {} : determinismRules()) },
     };
   });
 }
