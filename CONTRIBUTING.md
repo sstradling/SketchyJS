@@ -49,13 +49,12 @@ There is no `pnpm new`, `pnpm dev`, `pnpm check`, `pnpm test:visual`, or `pnpm d
 ## Repository layout
 
 ```text
-packages/        types, plugin, core, fills, brushes, stickers, scene,
-                 svg-renderer, canvas-renderer, animate, react, web-components,
-                 testkit, eslint-plugin, contrib
-apps/            playground, docs
-fixtures/        swift-reference (generated from Sketchy), generated
-docs/            plan, plugin architecture, contributor guides
-tools/           plugin generator and templates
+packages/sketchy   geometry, fills, brushes, stickers, scene, SVG, Canvas,
+                   animation, and the custom element. Subpaths keep the old entries.
+packages/react     React bindings. Depends on @sketchy-js/sketchy. Peer: react.
+fixtures/          swift-reference (generated from Sketchy)
+docs/              plan, plugin architecture, ADRs, contributor guides
+tools/             boundaries, schemas, benches
 ```
 
 Package boundaries are part of the design: `core` has no browser, renderer, or polygon-clipping dependency, and `types` and `plugin` have no side effects. See [docs/plan.md](docs/plan.md#2-architecture). Do not add an import that crosses these boundaries without a design issue.
@@ -64,7 +63,7 @@ Package boundaries are part of the design: `core` has no browser, renderer, or p
 
 1. **Branch** from the default branch: `feat/<topic>`, `fix/<topic>`, `docs/<topic>`, or `plugin/<name>`. Do not push tags; releases are created by the release workflow only, with `v`-prefixed tags. The first stable tag is `v1.6.0` (see [docs/versioning.md](docs/versioning.md)).
 2. **Commit** with [Conventional Commits](https://www.conventionalcommits.org/) (`feat(brushes): ...`, `fix(core): ...`, `docs: ...`). Keep commits logical; do not mix refactors with behavior changes.
-3. **Add a changeset** (`pnpm changeset`) for any change that affects a published package. Say whether seeded output changes; that is a breaking change for stable plugins and built-ins. Do not edit `package.json` versions in that PR. The release PR sets all 13 packages to `1.5.0`, adds one minor changeset, and runs `pnpm changeset version`. That writes `1.6.0` and a `## 1.6.0` heading in each changelog. A minor bump from `0.0.0` would have written `## 0.1.0` instead. See [docs/versioning.md](docs/versioning.md). The publish job refuses to run while a changeset is still pending.
+3. **Add a changeset** (`pnpm changeset`) for any change that affects a published package. Say whether seeded output changes; that is a breaking change for stable plugins and built-ins. Do not edit `package.json` versions in that PR. The release PR sets `@sketchy-js/sketchy` and `@sketchy-js/react` to `1.5.0`, adds one minor changeset, and runs `pnpm changeset version`. That writes `1.6.0` and a `## 1.6.0` heading in each changelog. A minor bump from `0.0.0` would have written `## 0.1.0` instead. See [docs/versioning.md](docs/versioning.md). The publish job refuses to run while a changeset is still pending.
 4. **Run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm size`** before pushing. CI runs those plus the schema check, fixture verify, and export smoke.
 5. **Open a pull request** using the template. Draft PRs are welcome for early feedback.
 6. **Review.** One maintainer approval is required; changes to `core`, `types`, `plugin`, or the RNG need two. Address feedback with new commits; maintainers squash on merge.

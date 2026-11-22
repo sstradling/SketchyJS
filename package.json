@@ -23,7 +23,7 @@
     "fixtures:import-assets": "node tools/fixtures/import-assets.mjs",
     "smoke:exports": "node tools/consumer-smoke/run.mjs",
     "size": "node scripts/measure-size.mjs",
-    "examples:svg": "UPDATE_EXAMPLES=1 vitest run packages/svg-renderer/test/examples.test.ts",
+    "examples:svg": "UPDATE_EXAMPLES=1 vitest run packages/sketchy/test/svg/examples.test.ts",
     "bench:clipper": "pnpm --filter @sketchy-js/clipper-bench run bench",
     "docs:api": "typedoc",
     "changeset": "changeset"

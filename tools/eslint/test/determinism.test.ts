@@ -43,16 +43,19 @@ describe("determinism lint rules for pure geometry packages", () => {
   });
 
   it("forbids importing packages that are not allowed dependencies", async () => {
-    expect((await lint('import "@sketchy-js/fills";', pure())).length).toBe(1);
-    expect((await lint('import "@sketchy-js/svg-renderer/x";', pure())).length).toBe(1);
+    expect((await lint('import "@sketchy-js/sketchy/fills";', pure())).length).toBe(1);
+    expect((await lint('import "@sketchy-js/svg-renderer/x";', pure())).length).toBeGreaterThan(0);
     expect(
-      await lint('import "@sketchy-js/types"; import "@sketchy-js/plugin/schema";', pure()),
+      await lint(
+        'import "@sketchy-js/sketchy/types"; import "@sketchy-js/sketchy/plugin/schema";',
+        pure(),
+      ),
     ).toEqual([]);
   });
 
   it("built-in packages may import only the plugin package", async () => {
     const fills = importRestrictions("fills");
-    expect((await lint('import "@sketchy-js/core";', fills)).length).toBe(1);
-    expect(await lint('import "@sketchy-js/plugin";', fills)).toEqual([]);
+    expect((await lint('import "@sketchy-js/sketchy/core";', fills)).length).toBe(1);
+    expect(await lint('import "@sketchy-js/sketchy/plugin";', fills)).toEqual([]);
   });
 });

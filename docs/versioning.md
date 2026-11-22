@@ -10,10 +10,10 @@ SketchyJS package versions match the Swift Sketchy library.
 
 Nothing in this repository has been published. `package.json` versions are still `0.0.0` until the release PR. Feature PRs add changesets and do not edit those versions. The release PR runs `pnpm changeset version`. That command consumes the pending changesets, writes each `CHANGELOG.md`, and sets every package in the fixed group to the same version.
 
-The first release cannot start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. The release PR sets all 13 packages to `1.5.0`, adds one minor changeset that names them, and then runs `pnpm changeset version`. That bumps every package to `1.6.0` and heads each changelog with `## 1.6.0`. A scratch copy of that sequence produced `1.6.0` for all 13 packages and a `## 1.6.0` heading in each `CHANGELOG.md`. Later releases take the version the command produces from the version already on the branch.
+The first release cannot start from `0.0.0`. A minor bump from `0.0.0` writes `## 0.1.0` in the changelogs. The release PR sets `@sketchy-js/sketchy` and `@sketchy-js/react` to `1.5.0`, adds one minor changeset that names them, and then runs `pnpm changeset version`. That bumps both packages to `1.6.0` and heads each changelog with `## 1.6.0`. Later releases take the version the command produces from the version already on the branch.
 
 The publish workflow takes the resulting version as a required input, including when the dispatch is a dry run. It does not run `changeset version` again, and it refuses to publish while a changeset is still pending. See [CONTRIBUTING.md](../CONTRIBUTING.md).
 
-`.changeset/config.json` puts the publishable packages in one `fixed` group so they always share a version: `types`, `plugin`, `core`, `fills`, `brushes`, `stickers`, `scene`, `svg-renderer`, `canvas-renderer`, `animate`, `react`, `web-components`, and `contrib`.
+`.changeset/config.json` puts the two publishable packages in one `fixed` group so they always share a version: `@sketchy-js/sketchy` and `@sketchy-js/react`. The first release sets both to `1.5.0`, adds one minor changeset, and runs `changeset version`, which writes `1.6.0`.
 
 `v1.4.2` appears in [plan.md](plan.md) only as the old Sketchy pin this plan was first written against. It is not a SketchyJS version. `v1.5.0` in the fixture tree is the Sketchy pin those files were exported from. It is not the SketchyJS release tag.

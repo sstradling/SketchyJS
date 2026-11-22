@@ -1,9 +1,10 @@
 import { build } from "esbuild";
+import { TextDecoder } from "node:util";
 import { gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const dist = (pkg, file = "index.js") => `${root}packages/${pkg}/dist/${file}`;
+const dist = (file) => `${root}packages/sketchy/dist/${file}`;
 
 /**
  * Entry points measured. `budget` is a gzip ceiling in KB: the check fails only when an entry
@@ -12,84 +13,86 @@ const dist = (pkg, file = "index.js") => `${root}packages/${pkg}/dist/${file}`;
 const entries = [
   {
     name: "basic SVG scene (scene/basic + svg-renderer)",
-    code: `import { sketch } from "@sketchy-js/scene/basic";
-import { renderToSvgString } from "@sketchy-js/svg-renderer";
-import { rectangle } from "@sketchy-js/core";
+    code: `import { sketch } from "@sketchy-js/sketchy/scene/basic";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
+import { rectangle } from "@sketchy-js/sketchy/core";
 export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10, height: 10 }));`,
     ceiling: 42,
+    forbid: ["clipper2", "renderToCanvas"],
   },
   {
     name: "core: all shapes, outlines, SVG parser (plan 12-18 KB)",
-    code: `export * from "@sketchy-js/core";`,
+    code: `export * from "@sketchy-js/sketchy/core";`,
     ceiling: 18,
+    forbid: ["clipper2", "renderToCanvas", "renderToSvg"],
   },
   {
     name: "fills: basic built-ins, contour and wash excluded",
-    code: `export { builtinFills } from "@sketchy-js/fills";`,
+    code: `export { builtinFills } from "@sketchy-js/sketchy/fills";`,
     ceiling: 16,
   },
   {
     name: "scene/basic only",
-    code: `export { sketch } from "@sketchy-js/scene/basic";`,
+    code: `export { sketch } from "@sketchy-js/sketchy/scene/basic";`,
   },
   {
     name: "svg-renderer only (plan 5-9 KB)",
-    code: `export { renderToSvgString, renderToSvgElement } from "@sketchy-js/svg-renderer";`,
+    code: `export { renderToSvgString, renderToSvgElement } from "@sketchy-js/sketchy/svg";`,
     ceiling: 9,
   },
   {
     name: "one fill plugin (hachure)",
-    code: `export { hachure } from "@sketchy-js/fills/hachure";`,
+    code: `export { hachure } from "@sketchy-js/sketchy/fills/hachure";`,
   },
   {
     name: "canvas-renderer (plan ceiling 12 KB)",
-    code: `export { renderToCanvas } from "@sketchy-js/canvas-renderer";`,
+    code: `export { renderToCanvas } from "@sketchy-js/sketchy/canvas";`,
     ceiling: 12,
   },
   {
     name: "brushes entry (plan ceiling 20 KB)",
-    code: `export { crayon, watercolor, watercolorFill } from "@sketchy-js/brushes";`,
+    code: `export { crayon, watercolor, watercolorFill } from "@sketchy-js/sketchy/brushes";`,
     ceiling: 20,
   },
   {
     name: "animate (frame generator)",
-    code: `export { generateFrame, precomputeFrames } from "@sketchy-js/animate";`,
+    code: `export { generateFrame, precomputeFrames } from "@sketchy-js/sketchy/animate";`,
   },
   {
     name: "animate controller (createAnimation)",
-    code: `export { createAnimation } from "@sketchy-js/animate";`,
+    code: `export { createAnimation } from "@sketchy-js/sketchy/animate";`,
   },
   {
     name: "brushes/crayon subpath",
-    code: `export { crayon } from "@sketchy-js/brushes/crayon";`,
+    code: `export { crayon } from "@sketchy-js/sketchy/brushes/crayon";`,
   },
   {
     name: "stickers entry (sheet, edges, paper, group union)",
-    code: `export { stickerCommands, stickerLayers, paper, smoothEdge, groupCommands } from "@sketchy-js/stickers";`,
+    code: `export { stickerCommands, stickerLayers, paper, smoothEdge, groupCommands } from "@sketchy-js/sketchy/stickers";`,
     ceiling: 18,
   },
   {
     name: "stickers/image (experimental placement)",
-    code: `export { resolveImagePlacement } from "@sketchy-js/stickers/image";`,
+    code: `export { resolveImagePlacement } from "@sketchy-js/sketchy/stickers/image";`,
   },
   {
     name: "sticker scene (scene/stickers + sheets + image)",
-    code: `export { SketchGroup, buildStickerScene } from "@sketchy-js/scene/stickers";`,
+    code: `export { SketchGroup, buildStickerScene } from "@sketchy-js/sketchy/scene/stickers";`,
     ceiling: 65,
   },
   {
     name: "stickers/clipper adapter",
-    code: `export { clipperBackend } from "@sketchy-js/stickers/clipper";`,
+    code: `export { clipperBackend } from "@sketchy-js/sketchy/stickers/clipper";`,
     ceiling: 22,
   },
   {
     name: "fills/contour",
-    code: `export { contour } from "@sketchy-js/fills/contour";`,
+    code: `export { contour } from "@sketchy-js/sketchy/fills/contour";`,
     ceiling: 8,
   },
   {
     name: "fills/wash",
-    code: `export { wash } from "@sketchy-js/fills/wash";`,
+    code: `export { wash } from "@sketchy-js/sketchy/fills/wash";`,
     ceiling: 8,
   },
   {
@@ -99,39 +102,40 @@ export const out = renderToSvgString(sketch(rectangle(0, 0, 10, 10), { width: 10
   },
   {
     name: "web-components",
-    code: `export { registerSketchyElements, sceneFromAttributes } from "@sketchy-js/web-components";`,
+    code: `export { registerSketchyElements, sceneFromAttributes } from "@sketchy-js/sketchy/web-components";`,
     ceiling: 42,
   },
   {
     name: "scene/silhouette",
-    code: `export { treeShadow, footAnchor, silhouetteScene } from "@sketchy-js/scene/silhouette";`,
+    code: `export { treeShadow, footAnchor, silhouetteScene } from "@sketchy-js/sketchy/scene/silhouette";`,
     ceiling: 2,
   },
 ];
 
 const alias = {
-  "@sketchy-js/scene/basic": dist("scene", "basic.js"),
-  "@sketchy-js/core/options": dist("core", "options.js"),
-  "@sketchy-js/svg-renderer": dist("svg-renderer"),
-  "@sketchy-js/core": dist("core"),
-  "@sketchy-js/fills/hachure": dist("fills", "hachure.js"),
-  "@sketchy-js/fills/contour": dist("fills", "contour.js"),
-  "@sketchy-js/fills/wash": dist("fills", "wash.js"),
-  "@sketchy-js/fills": dist("fills"),
-  "@sketchy-js/plugin/schema": dist("plugin", "schema.js"),
-  "@sketchy-js/plugin": dist("plugin"),
-  "@sketchy-js/types": dist("types"),
-  "@sketchy-js/canvas-renderer": dist("canvas-renderer"),
-  "@sketchy-js/brushes": dist("brushes"),
-  "@sketchy-js/brushes/crayon": dist("brushes", "crayon.js"),
-  "@sketchy-js/animate": dist("animate"),
-  "@sketchy-js/scene/stickers": dist("scene", "stickers.js"),
-  "@sketchy-js/scene/silhouette": dist("scene", "silhouette.js"),
-  "@sketchy-js/react": dist("react"),
-  "@sketchy-js/web-components": dist("web-components"),
-  "@sketchy-js/stickers": dist("stickers"),
-  "@sketchy-js/stickers/image": dist("stickers", "image.js"),
-  "@sketchy-js/stickers/clipper": dist("stickers", "clipper.js"),
+  "@sketchy-js/sketchy/scene/basic": dist("scene/basic.js"),
+  "@sketchy-js/sketchy/core/options": dist("core/options.js"),
+  "@sketchy-js/sketchy/svg": dist("svg.js"),
+  "@sketchy-js/sketchy/core": dist("core.js"),
+  "@sketchy-js/sketchy/fills/hachure": dist("fills/hachure.js"),
+  "@sketchy-js/sketchy/fills/contour": dist("fills/contour.js"),
+  "@sketchy-js/sketchy/fills/wash": dist("fills/wash.js"),
+  "@sketchy-js/sketchy/fills": dist("fills.js"),
+  "@sketchy-js/sketchy/plugin/schema": dist("plugin/schema.js"),
+  "@sketchy-js/sketchy/plugin": dist("plugin.js"),
+  "@sketchy-js/sketchy/types": dist("types.js"),
+  "@sketchy-js/sketchy/canvas": dist("canvas.js"),
+  "@sketchy-js/sketchy/brushes": dist("brushes.js"),
+  "@sketchy-js/sketchy/brushes/crayon": dist("brushes/crayon.js"),
+  "@sketchy-js/sketchy/animate": dist("animate.js"),
+  "@sketchy-js/sketchy/scene/stickers": dist("scene/stickers.js"),
+  "@sketchy-js/sketchy/scene/silhouette": dist("scene/silhouette.js"),
+  "@sketchy-js/react": `${root}packages/react/dist/index.js`,
+  "@sketchy-js/react/canvas": `${root}packages/react/dist/canvas.js`,
+  "@sketchy-js/sketchy/web-components": dist("web-components.js"),
+  "@sketchy-js/sketchy/stickers": dist("stickers.js"),
+  "@sketchy-js/sketchy/stickers/image": dist("stickers/image.js"),
+  "@sketchy-js/sketchy/stickers/clipper": dist("stickers/clipper.js"),
 };
 
 let failed = false;
@@ -150,6 +154,13 @@ for (const entry of entries) {
     external: ["react", "react/jsx-runtime", "react-dom"],
   });
   const bytes = result.outputFiles[0].contents;
+  const text = new TextDecoder().decode(bytes);
+  for (const token of entry.forbid ?? []) {
+    if (text.includes(token)) {
+      console.error(`${entry.name} contains ${token}`);
+      failed = true;
+    }
+  }
   const gz = gzipSync(bytes, { level: 9 }).length;
   const kb = (gz / 1024).toFixed(1);
   let verdict = "";

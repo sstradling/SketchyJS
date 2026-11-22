@@ -503,8 +503,8 @@ Lenient clamping mirrors Sketchy, which clamps most options silently (for exampl
 **Pass the plugin object directly.** No registry, nothing to configure. Good for apps that use two or three plugins.
 
 ```ts
-import { RoughView } from "@sketchy-js/scene/basic";
-import { crayon } from "@sketchy-js/brushes/crayon";
+import { RoughView } from "@sketchy-js/sketchy/scene/basic";
+import { crayon } from "@sketchy-js/sketchy/brushes/crayon";
 import { charcoal } from "@sketchy-js/contrib/brushes/charcoal";
 
 const view = new RoughView()
@@ -515,8 +515,8 @@ const view = new RoughView()
 **Register on a `Sketchy` instance.** Needed when scenes are described as JSON (saved documents, React or web-component attributes, the playground), because strings must resolve to code the app deliberately imported.
 
 ```ts
-import { createSketchy } from "@sketchy-js/scene";
-import { crayon } from "@sketchy-js/brushes/crayon";
+import { createSketchy } from "@sketchy-js/sketchy/scene";
+import { crayon } from "@sketchy-js/sketchy/brushes/crayon";
 import { charcoal } from "@sketchy-js/contrib/brushes/charcoal";
 
 const sketchy = createSketchy().use(crayon).use(charcoal);   // returns a NEW instance
@@ -568,7 +568,7 @@ Two independent version numbers:
 **Declaring and checking (target behavior).** A plugin declares `api: "1.0"`, the lowest API it needs. At `use()` or direct-use time the host checks:
 
 - Plugin major must equal the host major (or be a major the host still supports through its compatibility layer).
-- Plugin minor must be `<=` the host minor. A plugin that uses a feature added in `1.2` declares `api: "1.2"` and a `1.1` host rejects it with `PluginApiError: acme/chalk needs plugin API 1.2, host provides 1.1. Upgrade @sketchy-js/scene.`
+- Plugin minor must be `<=` the host minor. A plugin that uses a feature added in `1.2` declares `api: "1.2"` and a `1.1` host rejects it with `PluginApiError: acme/chalk needs plugin API 1.2, host provides 1.1. Upgrade @sketchy-js/sketchy.`
 
 **What may change in a minor release (additive only):**
 
@@ -616,7 +616,7 @@ Option names and defaults come from Sketchy `CrayonStyle`. The pass structure (h
 
 ```ts
 // packages/brushes/src/crayon/options.ts
-import { s, type Resolved } from "@sketchy-js/plugin";
+import { s, type Resolved } from "@sketchy-js/sketchy/plugin";
 
 export const crayonOptions = {
   baseOpacity: s.number({ default: 0.8, min: 0.2, max: 1, unit: "ratio", description: "Opacity of the greasy base." }),
@@ -634,7 +634,7 @@ export type CrayonOptions = Resolved<typeof crayonOptions>;
 
 ```ts
 // packages/brushes/src/crayon/crayon.ts
-import { defineBrush } from "@sketchy-js/plugin";
+import { defineBrush } from "@sketchy-js/sketchy/plugin";
 import { crayonOptions } from "./options";
 import { baseLayers, gritLayers } from "./passes"; // internal helpers, not part of the API
 
@@ -659,7 +659,7 @@ The schema lives in its own module because the internal helpers need the resolve
 ### 8.2 Hachure as a plugin
 
 ```ts
-import { defineFill, type Path, type Segment } from "@sketchy-js/plugin";
+import { defineFill, type Path, type Segment } from "@sketchy-js/sketchy/plugin";
 
 export const hachure = /*#__PURE__*/ defineFill({
   id: "hachure",
@@ -753,7 +753,7 @@ and adds `"./brushes/charcoal"` to `packages/contrib/package.json` `exports`. Us
 ### 9.2 Implementation
 
 ```ts
-import { defineBrush, s, type BrushLayer, type Path, type Point, type PluginContext, type Rng } from "@sketchy-js/plugin";
+import { defineBrush, s, type BrushLayer, type Path, type Point, type PluginContext, type Rng } from "@sketchy-js/sketchy/plugin";
 
 const TAU = Math.PI * 2;
 
@@ -904,7 +904,7 @@ The repo-wide conformance suite runs on `charcoal` automatically ([details](cont
 
 ```ts
 import { describe, expect, it } from "vitest";
-import type { BrushLayer } from "@sketchy-js/plugin";
+import type { BrushLayer } from "@sketchy-js/sketchy/plugin";
 import { fixtures, runBrush } from "@sketchy-js/testkit";
 import { charcoal } from "./charcoal";
 

@@ -21,6 +21,11 @@ for (const dir of readdirSync(join(root, "packages")).sort()) {
   else if (readFileSync(copy, "utf8") !== license)
     problems.push(`${dir}: LICENSE differs from the repo root`);
 }
+const notices = readFileSync(join(root, "THIRD_PARTY_NOTICES"), "utf8");
+const shipped = join(root, "packages", "sketchy", "THIRD_PARTY_NOTICES");
+if (!existsSync(shipped)) problems.push("sketchy: missing THIRD_PARTY_NOTICES");
+else if (readFileSync(shipped, "utf8") !== notices)
+  problems.push("sketchy: THIRD_PARTY_NOTICES differs from the repo root");
 if (problems.length > 0) {
   console.error(problems.join("\n"));
   process.exit(1);

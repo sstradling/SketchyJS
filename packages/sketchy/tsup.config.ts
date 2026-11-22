@@ -1,0 +1,53 @@
+import { defineConfig } from "tsup";
+
+const fills = [
+  "solid",
+  "hachure",
+  "zigzag",
+  "crossHatch",
+  "dots",
+  "dashed",
+  "zigzagLine",
+  "sunBurst",
+  "starBurst",
+  "scribble",
+  "contour",
+  "wash",
+];
+
+/** One build for every public subpath. Clipper stays external and only the clipper entry imports it. */
+export default defineConfig({
+  entry: {
+    index: "src/index.ts",
+    types: "src/types/index.ts",
+    plugin: "src/plugin/index.ts",
+    "plugin/schema": "src/plugin/schema/index.ts",
+    core: "src/core/index.ts",
+    "core/options": "src/core/options/index.ts",
+    fills: "src/fills/index.ts",
+    ...Object.fromEntries(fills.map((name) => [`fills/${name}`, `src/fills/${name}.ts`])),
+    brushes: "src/brushes/index.ts",
+    "brushes/crayon": "src/brushes/crayon.ts",
+    "brushes/watercolor": "src/brushes/watercolor.ts",
+    stickers: "src/stickers/index.ts",
+    "stickers/image": "src/stickers/image/index.ts",
+    "stickers/clipper": "src/stickers/clipper/adapter.ts",
+    scene: "src/scene/index.ts",
+    "scene/basic": "src/scene/basic.ts",
+    "scene/stickers": "src/scene/stickers.ts",
+    "scene/silhouette": "src/scene/silhouette.ts",
+    svg: "src/svg/index.ts",
+    canvas: "src/canvas/index.ts",
+    animate: "src/animate/index.ts",
+    "web-components": "src/web-components/index.ts",
+  },
+  format: ["esm"],
+  dts: { compilerOptions: { composite: false } },
+  tsconfig: "tsconfig.build.json",
+  clean: true,
+  sourcemap: true,
+  target: "es2022",
+  treeshake: true,
+  splitting: true,
+  external: ["clipper2-ts"],
+});

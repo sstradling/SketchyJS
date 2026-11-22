@@ -1,6 +1,6 @@
 import { createCanvas } from "@napi-rs/canvas";
 import { parentPort, workerData } from "node:worker_threads";
-import { renderToCanvas } from "@sketchy-js/canvas-renderer";
+import { renderToCanvas } from "@sketchy-js/sketchy/canvas";
 
 const { scene, width, height } = workerData;
 

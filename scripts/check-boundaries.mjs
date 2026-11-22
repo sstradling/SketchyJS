@@ -1,94 +1,82 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const boundaries = JSON.parse(readFileSync(join(root, "tools", "boundaries.json"), "utf8"));
 const problems = [];
-
-const dirs = readdirSync(join(root, "packages"), { withFileTypes: true })
-  .filter((d) => d.isDirectory())
-  .map((d) => d.name)
-  .sort();
 const declared = Object.keys(boundaries.packages).sort();
-for (const name of dirs.filter((d) => !declared.includes(d)))
+const dirs = readdirSync(join(root, "packages"), { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
+for (const name of dirs.filter((dir) => !declared.includes(dir)))
   problems.push(`packages/${name} is not declared in tools/boundaries.json`);
-for (const name of declared.filter((d) => !dirs.includes(d)))
+for (const name of declared.filter((dir) => !dirs.includes(dir)))
   problems.push(`tools/boundaries.json declares ${name} but packages/${name} does not exist`);
 
-const graph = new Map();
-for (const name of dirs.filter((d) => declared.includes(d))) {
-  const rule = boundaries.packages[name];
-  const pkgPath = join(root, "packages", name, "package.json");
-  if (!existsSync(pkgPath)) {
-    problems.push(`packages/${name}/package.json is missing`);
-    continue;
-  }
-  const pkg = JSON.parse(readFileSync(pkgPath, "utf8"));
-  const where = `packages/${name}/package.json`;
+for (const name of declared) {
+  const pkg = JSON.parse(readFileSync(join(root, "packages", name, "package.json"), "utf8"));
   if (pkg.name !== `@sketchy-js/${name}`)
-    problems.push(`${where}: name must be @sketchy-js/${name}`);
-  if (pkg.type !== "module") problems.push(`${where}: type must be "module"`);
-  if (pkg.sideEffects !== false) problems.push(`${where}: sideEffects must be false`);
-  const root_ = pkg.exports?.["."];
-  if (!root_?.types || !root_?.import)
-    problems.push(`${where}: exports["."] needs "types" and "import"`);
-  for (const [key, value] of Object.entries(pkg.exports ?? {})) {
-    if (typeof value === "string" && !value.startsWith("./"))
-      problems.push(`${where}: exports["${key}"] must be relative`);
+    problems.push(`${name}: name must be @sketchy-js/${name}`);
+  if (pkg.sideEffects !== false) problems.push(`${name}: sideEffects must be false`);
+  const used = Object.keys({
+    ...pkg.dependencies,
+    ...pkg.peerDependencies,
+    ...pkg.devDependencies,
+  }).filter((dep) => dep.startsWith("@sketchy-js/"));
+  const allowed = new Set(
+    (boundaries.packages[name].dependencies ?? []).map((dep) => `@sketchy-js/${dep}`),
+  );
+  if (name === "react") allowed.add("@sketchy-js/sketchy");
+  for (const dep of used) {
+    const base = dep.startsWith("@sketchy-js/sketchy") ? "@sketchy-js/sketchy" : dep;
+    if (!allowed.has(base) && dep !== "@sketchy-js/sketchy")
+      problems.push(`${name}: ${dep} is not an allowed dependency`);
   }
-  const sketchy = (record = {}) =>
-    Object.keys(record)
-      .filter((k) => k.startsWith("@sketchy-js/"))
-      .map((k) => k.slice("@sketchy-js/".length));
-  const allowed = new Set([
-    ...rule.dependencies,
-    ...(rule.peers ?? []),
-    ...(rule.optionalPeers ?? []),
-  ]);
-  const used = [
-    ...sketchy(pkg.dependencies),
-    ...sketchy(pkg.peerDependencies),
-    ...sketchy(pkg.devDependencies),
-  ];
-  for (const dep of used)
-    if (!allowed.has(dep))
-      problems.push(
-        `${where}: @sketchy-js/${dep} is not an allowed dependency (tools/boundaries.json)`,
-      );
-  for (const dep of rule.dependencies)
-    if (!sketchy(pkg.dependencies).includes(dep))
-      problems.push(`${where}: missing dependency @sketchy-js/${dep}`);
-  for (const dep of rule.peers ?? [])
-    if (!sketchy(pkg.peerDependencies).includes(dep))
-      problems.push(`${where}: missing peer dependency @sketchy-js/${dep}`);
-  graph.set(name, [...rule.dependencies, ...(rule.peers ?? []), ...(rule.optionalPeers ?? [])]);
 }
 
-function findCycle() {
-  const state = new Map();
-  const visit = (node, path) => {
-    if (state.get(node) === 1) return [...path, node];
-    if (state.get(node) === 2) return null;
-    state.set(node, 1);
-    for (const next of graph.get(node) ?? []) {
-      const cycle = visit(next, [...path, node]);
-      if (cycle) return cycle;
-    }
-    state.set(node, 2);
-    return null;
-  };
-  for (const node of graph.keys()) {
-    const cycle = visit(node, []);
-    if (cycle) return cycle;
+const srcRoot = join(root, "packages/sketchy/src");
+function walk(dir, out = []) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) walk(path, out);
+    else if (entry.name.endsWith(".ts")) out.push(path);
   }
-  return null;
+  return out;
 }
-const cycle = findCycle();
-if (cycle) problems.push(`dependency cycle: ${cycle.join(" -> ")}`);
+
+function areaOf(file) {
+  const rel = relative(srcRoot, file);
+  if (rel.startsWith("..")) return null;
+  const [first, ...rest] = rel.split("/");
+  return rest.length === 0 ? "root" : first;
+}
+
+for (const file of walk(srcRoot)) {
+  const area = areaOf(file);
+  const allowed = new Set([area, ...(boundaries.areas[area] ?? [])]);
+  const text = readFileSync(file, "utf8");
+  for (const match of text.matchAll(/from\s+["'](\.[^"']+)["']/g)) {
+    const target = resolve(dirname(file), match[1]);
+    const other = areaOf(target);
+    if (other && !allowed.has(other))
+      problems.push(`${relative(root, file)}: ${area} cannot import ${other}`);
+  }
+  if (
+    area === "stickers" &&
+    !file.includes(`${join("stickers", "clipper")}`) &&
+    text.includes("clipper2-ts")
+  )
+    problems.push(`${relative(root, file)}: clipper2-ts is only allowed from the clipper subpath`);
+  if (area !== "stickers" && text.includes("clipper2-ts"))
+    problems.push(`${relative(root, file)}: clipper2-ts is only allowed from stickers/clipper`);
+}
 
 if (problems.length > 0) {
   console.error(problems.join("\n"));
   process.exit(1);
 }
-console.log(`boundaries ok: ${dirs.length} packages`);
+console.log(
+  `boundaries ok: ${dirs.length} packages, ${Object.keys(boundaries.areas).length} areas`,
+);

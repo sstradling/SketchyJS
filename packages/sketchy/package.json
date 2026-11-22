@@ -1,0 +1,172 @@
+{
+  "name": "@sketchy-js/sketchy",
+  "version": "0.0.0",
+  "description": "Seeded hand-drawn graphics: geometry, fills, brushes, stickers, and SVG and Canvas renderers.",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js"
+    },
+    "./plugin/schema": {
+      "types": "./dist/plugin/schema.d.ts",
+      "import": "./dist/plugin/schema.js"
+    },
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
+    "./core/options": {
+      "types": "./dist/core/options.d.ts",
+      "import": "./dist/core/options.js"
+    },
+    "./fills": {
+      "types": "./dist/fills.d.ts",
+      "import": "./dist/fills.js"
+    },
+    "./brushes": {
+      "types": "./dist/brushes.d.ts",
+      "import": "./dist/brushes.js"
+    },
+    "./brushes/crayon": {
+      "types": "./dist/brushes/crayon.d.ts",
+      "import": "./dist/brushes/crayon.js"
+    },
+    "./brushes/watercolor": {
+      "types": "./dist/brushes/watercolor.d.ts",
+      "import": "./dist/brushes/watercolor.js"
+    },
+    "./stickers": {
+      "types": "./dist/stickers.d.ts",
+      "import": "./dist/stickers.js"
+    },
+    "./stickers/image": {
+      "types": "./dist/stickers/image.d.ts",
+      "import": "./dist/stickers/image.js"
+    },
+    "./stickers/clipper": {
+      "types": "./dist/stickers/clipper.d.ts",
+      "import": "./dist/stickers/clipper.js"
+    },
+    "./scene": {
+      "types": "./dist/scene.d.ts",
+      "import": "./dist/scene.js"
+    },
+    "./scene/basic": {
+      "types": "./dist/scene/basic.d.ts",
+      "import": "./dist/scene/basic.js"
+    },
+    "./scene/stickers": {
+      "types": "./dist/scene/stickers.d.ts",
+      "import": "./dist/scene/stickers.js"
+    },
+    "./scene/silhouette": {
+      "types": "./dist/scene/silhouette.d.ts",
+      "import": "./dist/scene/silhouette.js"
+    },
+    "./svg": {
+      "types": "./dist/svg.d.ts",
+      "import": "./dist/svg.js"
+    },
+    "./canvas": {
+      "types": "./dist/canvas.d.ts",
+      "import": "./dist/canvas.js"
+    },
+    "./animate": {
+      "types": "./dist/animate.d.ts",
+      "import": "./dist/animate.js"
+    },
+    "./web-components": {
+      "types": "./dist/web-components.d.ts",
+      "import": "./dist/web-components.js"
+    },
+    "./schemas/*": "./schemas/*",
+    "./package.json": "./package.json",
+    "./fills/solid": {
+      "types": "./dist/fills/solid.d.ts",
+      "import": "./dist/fills/solid.js"
+    },
+    "./fills/hachure": {
+      "types": "./dist/fills/hachure.d.ts",
+      "import": "./dist/fills/hachure.js"
+    },
+    "./fills/zigzag": {
+      "types": "./dist/fills/zigzag.d.ts",
+      "import": "./dist/fills/zigzag.js"
+    },
+    "./fills/crossHatch": {
+      "types": "./dist/fills/crossHatch.d.ts",
+      "import": "./dist/fills/crossHatch.js"
+    },
+    "./fills/dots": {
+      "types": "./dist/fills/dots.d.ts",
+      "import": "./dist/fills/dots.js"
+    },
+    "./fills/dashed": {
+      "types": "./dist/fills/dashed.d.ts",
+      "import": "./dist/fills/dashed.js"
+    },
+    "./fills/zigzagLine": {
+      "types": "./dist/fills/zigzagLine.d.ts",
+      "import": "./dist/fills/zigzagLine.js"
+    },
+    "./fills/sunBurst": {
+      "types": "./dist/fills/sunBurst.d.ts",
+      "import": "./dist/fills/sunBurst.js"
+    },
+    "./fills/starBurst": {
+      "types": "./dist/fills/starBurst.d.ts",
+      "import": "./dist/fills/starBurst.js"
+    },
+    "./fills/scribble": {
+      "types": "./dist/fills/scribble.d.ts",
+      "import": "./dist/fills/scribble.js"
+    },
+    "./fills/contour": {
+      "types": "./dist/fills/contour.d.ts",
+      "import": "./dist/fills/contour.js"
+    },
+    "./fills/wash": {
+      "types": "./dist/fills/wash.d.ts",
+      "import": "./dist/fills/wash.js"
+    }
+  },
+  "files": [
+    "dist",
+    "schemas",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "clipper2-ts": "2.0.1-19"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sstradling/SketchyJS.git",
+    "directory": "packages/sketchy"
+  },
+  "homepage": "https://github.com/sstradling/SketchyJS#readme",
+  "bugs": {
+    "url": "https://github.com/sstradling/SketchyJS/issues"
+  }
+}

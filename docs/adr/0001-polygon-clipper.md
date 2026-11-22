@@ -2,7 +2,7 @@
 
 - Status: Accepted (provisional)
 - Date: 2026-11-09
-- Scope: `@sketchy-js/stickers` (and `SketchGroup` silhouette union). Nothing else may depend on the chosen library.
+- Scope: the sticker clipper adapter, now `@sketchy-js/sketchy/stickers/clipper` ([ADR 0002](0002-two-packages.md)). Nothing else may import the chosen library.
 
 ## Context
 

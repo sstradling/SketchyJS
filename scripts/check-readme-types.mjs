@@ -52,9 +52,6 @@ const options = {
   baseUrl: root,
   paths: {
     ...base.compilerOptions.paths,
-    "@sketchy-js/brushes/crayon": ["packages/brushes/src/crayon.ts"],
-    "@sketchy-js/brushes/watercolor": ["packages/brushes/src/watercolor.ts"],
-    "@sketchy-js/react/canvas": ["packages/react/src/canvas.ts"],
     react: [fromRoot(join(reactTypes, "index.d.ts"))],
     "react/jsx-runtime": [fromRoot(join(reactTypes, "jsx-runtime.d.ts"))],
   },

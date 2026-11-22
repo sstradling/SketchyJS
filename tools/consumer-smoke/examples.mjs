@@ -3,14 +3,14 @@ import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Window } from "happy-dom";
-import { rectangle } from "@sketchy-js/core";
-import { basicSketchy, sketch } from "@sketchy-js/scene/basic";
-import { buildStickerScene } from "@sketchy-js/scene/stickers";
-import { renderToSvgString } from "@sketchy-js/svg-renderer";
-import { renderToCanvas } from "@sketchy-js/canvas-renderer";
+import { rectangle } from "@sketchy-js/sketchy/core";
+import { basicSketchy, sketch } from "@sketchy-js/sketchy/scene/basic";
+import { buildStickerScene } from "@sketchy-js/sketchy/scene/stickers";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
+import { renderToCanvas } from "@sketchy-js/sketchy/canvas";
 import { Sketchy, useSketch, useSketchAnimation } from "@sketchy-js/react";
 import { SketchyCanvas } from "@sketchy-js/react/canvas";
-import { defineSketchyElement } from "@sketchy-js/web-components";
+import { defineSketchyElement } from "@sketchy-js/sketchy/web-components";
 
 /**
  * Seeded examples rendered from the packed tarballs. The smoke runner hashes

@@ -125,7 +125,7 @@ jobs:
             fi
             echo "changeset publish exited $publish_status; every package version is already published"
           fi
-          version=$(node -p "require('./packages/core/package.json').version")
+          version=$(node -p "require('./packages/sketchy/package.json').version")
           test "$version" = "$RELEASE_VERSION"
           tag="v${version}"
           peeled=$(git ls-remote origin "refs/tags/${tag}^{}")

@@ -10,12 +10,12 @@ pnpm add @sketchy-js/react react
 
 `pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
 
-`react` is a peer dependency. `@sketchy-js/canvas-renderer` is an optional peer, used only by the canvas subpath.
+`react` is the only peer dependency. The package depends on `@sketchy-js/sketchy`, which includes Canvas. `@sketchy-js/react/canvas` is the Canvas binding.
 
 ## Usage
 
 ```tsx
-import { rectangle } from "@sketchy-js/core";
+import { rectangle } from "@sketchy-js/sketchy/core";
 import { Sketchy } from "@sketchy-js/react";
 
 export function Card() {

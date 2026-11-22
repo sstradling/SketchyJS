@@ -7,10 +7,10 @@ import {
   useState,
   type ReactElement,
 } from "react";
-import { generateFrame, type VarianceConfig } from "@sketchy-js/animate";
-import { sketch, type ViewOptions } from "@sketchy-js/scene/basic";
-import { renderToSvgString } from "@sketchy-js/svg-renderer";
-import type { Scene, Size } from "@sketchy-js/types";
+import { generateFrame, type VarianceConfig } from "@sketchy-js/sketchy/animate";
+import { sketch, type ViewOptions } from "@sketchy-js/sketchy/scene/basic";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
+import type { Scene, Size } from "@sketchy-js/sketchy/types";
 
 type Shapes = Parameters<typeof sketch>[0];
 

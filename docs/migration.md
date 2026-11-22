@@ -1,30 +1,49 @@
 # Migrating to SketchyJS
 
-SketchyJS keeps Sketchy's drawing names where the behavior transfers, and changes the names where the web platform is different. The parity marks are in [api-parity.md](api-parity.md).
+## From the thirteen-package layout
+
+Every former `@sketchy-js/<name>` import, except React, is `@sketchy-js/sketchy/<name>`.
+
+| Before | After |
+| --- | --- |
+| `@sketchy-js/core` | `@sketchy-js/sketchy/core` |
+| `@sketchy-js/core/options` | `@sketchy-js/sketchy/core/options` |
+| `@sketchy-js/fills/hachure` | `@sketchy-js/sketchy/fills/hachure` |
+| `@sketchy-js/scene/basic` | `@sketchy-js/sketchy/scene/basic` |
+| `@sketchy-js/svg-renderer` | `@sketchy-js/sketchy/svg` |
+| `@sketchy-js/canvas-renderer` | `@sketchy-js/sketchy/canvas` |
+| `@sketchy-js/stickers/clipper` | `@sketchy-js/sketchy/stickers/clipper` |
+| `@sketchy-js/web-components` | `@sketchy-js/sketchy/web-components` |
+| `@sketchy-js/react` | `@sketchy-js/react` |
+| `@sketchy-js/react/canvas` | `@sketchy-js/react/canvas` |
+
+`@sketchy-js/contrib` is gone. `@sketchy-js/react` depends on `@sketchy-js/sketchy`. Canvas is not a peer.
 
 ## From Sketchy (Swift)
 
+SketchyJS keeps Sketchy's drawing names where the behavior transfers, and changes the names where the web platform is different. The parity marks are in [api-parity.md](api-parity.md).
+
 | Swift | SketchyJS |
 | --- | --- |
-| `import Sketchy` | `import { RoughView, sketch } from "@sketchy-js/scene/basic"` |
+| `import Sketchy` | `import { RoughView, sketch } from "@sketchy-js/sketchy/scene/basic"` |
 | `RoughView().fillStyle(.hachure)` | `new RoughView().with({ fillStyle: "hachure" })` |
 | `.frame` / SwiftUI layout | `build({ width, height })` or the renderer's canvas size |
 | `Color` / `UIColor` | `Color`: a CSS string or `[r, g, b, a]` in 0...1 |
-| `Path(d:)` | `path(d)` from `@sketchy-js/core` |
+| `Path(d:)` | `path(d)` from `@sketchy-js/sketchy/core` |
 | `Options.seed` | `seed` as a `bigint` or a safe integer. JSON stores it as a decimal string |
-| `.animated()` | `createAnimation` from `@sketchy-js/animate`, or `useContourPhase` for a contour scroll |
-| `.stickerBacking` | `@sketchy-js/scene/stickers`. The basic import does not load it |
-| `StickerImage` | `@sketchy-js/stickers/image`. The caller decodes the image |
-| `SilhouetteShadow.tree` | `@sketchy-js/scene/silhouette`. It is not a sticker shadow |
+| `.animated()` | `createAnimation` from `@sketchy-js/sketchy/animate`, or `useContourPhase` for a contour scroll |
+| `.stickerBacking` | `@sketchy-js/sketchy/scene/stickers`. The basic import does not load it |
+| `StickerImage` | `@sketchy-js/sketchy/stickers/image`. The caller decodes the image |
+| `SilhouetteShadow.tree` | `@sketchy-js/sketchy/scene/silhouette`. It is not a sticker shadow |
 | `.interiorShades` | `interiorShades` on the view. Presets: `pitShadow`, `pitRecess`, `edgeShade`, `halo` |
 | `.fillStyle(.contour)` / `.wash` | `fillStyle: "contour"` / `"wash"` |
 
 A seeded rectangle:
 
 ```ts
-import { rectangle } from "@sketchy-js/core";
-import { RoughView } from "@sketchy-js/scene/basic";
-import { renderToSvgString } from "@sketchy-js/svg-renderer";
+import { rectangle } from "@sketchy-js/sketchy/core";
+import { RoughView } from "@sketchy-js/sketchy/scene/basic";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
 
 const scene = new RoughView()
   .with({ seed: 42n, fillStyle: "hachure" })

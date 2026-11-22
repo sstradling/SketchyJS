@@ -4,9 +4,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { act } from "react-dom/test-utils";
 import { Window } from "happy-dom";
 import { describe, expect, it } from "vitest";
-import { circle, rectangle } from "@sketchy-js/core";
-import { pitShadow } from "@sketchy-js/scene";
-import { sketch } from "@sketchy-js/scene/basic";
+import { circle, rectangle } from "@sketchy-js/sketchy/core";
+import { pitShadow } from "@sketchy-js/sketchy/scene";
+import { sketch } from "@sketchy-js/sketchy/scene/basic";
 import { SketchyCanvas } from "../src/canvas.js";
 import { Sketchy, sketchValueKey, useSketch, useSketchAnimation } from "../src/index.js";
 
