@@ -133,7 +133,7 @@ const sticker = {
   smoothness: 1,
   edge: "smooth",
   color: "#ffffff",
-  shadow: { opacity: 0.7, x: 1, y: 5, radius: 16, color: "#000000" },
+  shadow: { opacity: 0.9, x: 7, y: 12, radius: 22, color: "#000000" },
 };
 const bangSeeds = [1414n, 1616n, 1818n, 2019n, 1818n, 1616n];
 
@@ -248,8 +248,21 @@ function keepOneStickerSheet(scene) {
     if (keep) {
       // Bungee's notch is narrower than the margin, so a geometric offset
       // fills the counter. A white round stroke keeps one shape and an 8pt
-      // margin. The sheet shadow is what separates that edge from the paper.
+      // margin. A slightly narrower black stroke under it casts the drop
+      // shadow of that outer edge; the white stroke covers the black paint.
       const margin = sticker.width * 2;
+      const shadow = sticker.shadow;
+      const at = kept.indexOf(keep);
+      kept.splice(at, 0, {
+        role: "stroke",
+        paths: keep.paths,
+        fillRule: "nonzero",
+        paint: { kind: "solid", color: shadow.color, alpha: shadow.opacity },
+        strokeWidth: margin - 4,
+        cap: "round",
+        join: "round",
+        shadow: { x: shadow.x, y: shadow.y, radius: shadow.radius },
+      });
       kept.push({
         role: "stroke",
         paths: keep.paths,
