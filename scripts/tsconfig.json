@@ -5,5 +5,5 @@
     "types": ["node"],
     "rootDir": ".."
   },
-  "include": ["check-boundaries.d.mts"]
+  "include": ["check-boundaries.d.mts", "check-typedoc-entries.d.mts"]
 }

@@ -1,4 +1,6 @@
-# SketchyJS
+<h1 align="center">
+  <img src="docs/images/header.gif" alt="Sketchy! The S is a white paper sticker and the exclamation mark boils." width="960">
+</h1>
 
 SketchyJS is a TypeScript port of [Sketchy](https://github.com/sstradling/Sketchy), a Swift library for hand-drawn, seeded, deterministic graphics. It draws roughened shapes, hatch and scribble fills, crayon and watercolor brushes, paper-sheet stickers (including image-masked stickers, new in Sketchy v1.5.0), grouped sketches, and animation, and renders them to **SVG** and **Canvas 2D**.
 

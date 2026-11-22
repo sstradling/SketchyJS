@@ -6,18 +6,31 @@ Use the table. It is the import map. `svg-renderer` becomes `/svg` and `canvas-r
 
 | Before | After |
 | --- | --- |
-| `@sketchy-js/sketchy/core` | `@sketchy-js/sketchy/core` |
-| `@sketchy-js/sketchy/core/options` | `@sketchy-js/sketchy/core/options` |
-| `@sketchy-js/sketchy/fills/hachure` | `@sketchy-js/sketchy/fills/hachure` |
-| `@sketchy-js/sketchy/scene/basic` | `@sketchy-js/sketchy/scene/basic` |
-| `@sketchy-js/sketchy/svg` | `@sketchy-js/sketchy/svg` |
-| `@sketchy-js/sketchy/canvas` | `@sketchy-js/sketchy/canvas` |
-| `@sketchy-js/sketchy/stickers/clipper` | `@sketchy-js/sketchy/stickers/clipper` |
-| `@sketchy-js/sketchy/web-components` | `@sketchy-js/sketchy/web-components` |
+| `@sketchy-js/core` | `@sketchy-js/sketchy/core` |
+| `@sketchy-js/core/options` | `@sketchy-js/sketchy/core/options` |
+| `@sketchy-js/fills/hachure` | `@sketchy-js/sketchy/fills/hachure` |
+| `@sketchy-js/scene/basic` | `@sketchy-js/sketchy/scene/basic` |
+| `@sketchy-js/svg-renderer` | `@sketchy-js/sketchy/svg` |
+| `@sketchy-js/canvas-renderer` | `@sketchy-js/sketchy/canvas` |
+| `@sketchy-js/stickers/clipper` | `@sketchy-js/sketchy/stickers/clipper` |
+| `@sketchy-js/web-components` | `@sketchy-js/sketchy/web-components` |
 | `@sketchy-js/react` | `@sketchy-js/react` |
 | `@sketchy-js/react/canvas` | `@sketchy-js/react/canvas` |
 
 `@sketchy-js/contrib` is gone. `@sketchy-js/react` depends on `@sketchy-js/sketchy`. Canvas is not a peer.
+
+The package root exports shapes and `sketch` only. It used to re-export `renderToSvgString` and `renderToSvgElement`; those stay on `@sketchy-js/sketchy/svg`, so loading the root does not load the SVG renderer.
+
+```ts
+import { rectangle, sketch } from "@sketchy-js/sketchy";
+import { renderToSvgString } from "@sketchy-js/sketchy/svg";
+
+const scene = sketch(rectangle(8, 8, 120, 80), { width: 160, height: 120 }, {
+  seed: 7n,
+  fillStyle: "hachure",
+});
+const svg = renderToSvgString(scene);
+```
 
 ## From Sketchy (Swift)
 

@@ -254,7 +254,7 @@ FAIL contrib/charcoal  determinism/repeat
 
 ```text
 packages/contrib/
-  package.json          "sideEffects": false; per-plugin subpath exports; peer dep on @sketchy-js/sketchy/plugin
+  package.json          "sideEffects": false; per-plugin subpath exports; peer dep on @sketchy-js/sketchy; import @sketchy-js/sketchy/plugin
   budgets.json          per-plugin size budgets
   src/
     brushes/<name>/     <name>.ts, .test.ts, .demo.ts, .doc.md, index.ts

@@ -587,7 +587,7 @@ Two independent version numbers:
 
 **Plugin output stability.** Users commit seeded art and snapshots, so for a plugin at `>= 1.0.0` any change to output for the same `(input, options, seed)` is a **major** version bump of the plugin, even if it is a visual improvement. To ship an improvement without breaking people, add a `variant`/`algorithm` choice option that defaults to the old behavior, or publish a new id (`crayon-2`). Plugins below `1.0.0` bump the minor for output changes. Built-in plugins are additionally pinned by Swift reference fixtures. Every conformance snapshot update must be explained in the PR.
 
-**Dependencies.** A plugin package declares `@sketchy-js/sketchy/plugin` as a **peer** dependency (`^1`), so one copy resolves per app. Because the brand is a plain property, a duplicated copy degrades to a version-skew warning instead of rejecting valid plugins.
+**Dependencies.** A plugin package peers on `@sketchy-js/sketchy` (`^1`) and imports the contract from `@sketchy-js/sketchy/plugin`, so one copy resolves per app. Because the brand is a plain property, a duplicated copy degrades to a version-skew warning instead of rejecting valid plugins.
 
 **Recording.** Every built `Scene` records `{ id, version, api }` per plugin used, so a bug report or a stored scene says exactly which plugin versions produced it.
 
@@ -602,7 +602,7 @@ Status: the fill rows through `scribble`, plus the crayon brush, the watercolor 
 | Crayon | `defineBrush` id `crayon` | `@sketchy-js/sketchy/brushes/crayon` |
 | Watercolor stroke | `defineBrush` id `watercolor` | `@sketchy-js/sketchy/brushes/watercolor` |
 | Watercolor fill | `defineFill` id `watercolor` | `@sketchy-js/sketchy/brushes/watercolor` (shares `wash.ts` with the brush) |
-| Marker (variable width) | `defineBrush` id `marker` | `@sketchy-js/sketchy/brushes/marker` |
+| Marker (variable width) | `defineBrush` id `marker` | Planned. There is no `@sketchy-js/sketchy/brushes/marker` subpath |
 | solid, hachure, zigzag, crossHatch, dots, sunBurst, starBurst, dashed, zigzagLine, scribble | one `defineFill` each | `@sketchy-js/sketchy/fills/<name>` |
 | `StickerTexture.paper` | `defineTexture` id `paper` | `@sketchy-js/sketchy/stickers` (`paper`) |
 | `.smooth`, `.fullySmooth`, `.torn` | `defineStickerEdge` ids `smooth`, `fullySmooth`, `torn` | `@sketchy-js/sketchy/stickers` (`smoothEdge`, `fullySmoothEdge`, `tornEdge`) |
@@ -743,7 +743,7 @@ charcoal/
   src/charcoal.test.ts plugin-specific unit tests
   src/charcoal.demo.ts demo samples for playground and gallery
   src/charcoal.doc.md  prose for the docs page (option table is generated)
-  package.json         depends on @sketchy-js/sketchy, peer of the plugin subpath
+  package.json         peerDependency @sketchy-js/sketchy; import @sketchy-js/sketchy/plugin
 ```
 
 The old `packages/contrib` tree was not shipped ([ADR 0002](adr/0002-two-packages.md)). The id `acme/charcoal` marks it as a third-party plugin.

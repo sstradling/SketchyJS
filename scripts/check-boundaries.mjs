@@ -13,7 +13,7 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 export function relativeSpecifiers(text) {
   const found = [];
   for (const match of text.matchAll(/from\s+["'](\.[^"']+)["']/g)) found.push(match[1]);
-  for (const match of text.matchAll(/import\s*\(\s*["'](\.[^"']+)["']\s*\)/g)) found.push(match[1]);
+  for (const match of text.matchAll(/import\s*\(\s*(["'`])(\.[^"'`${]*)\1/g)) found.push(match[2]);
   for (const match of text.matchAll(/(?:^|\n)\s*import\s+["'](\.[^"']+)["']/g))
     found.push(match[1]);
   return found;
@@ -90,25 +90,42 @@ export function bannedHits(text, banned) {
     true,
     ts.ScriptKind.TS,
   );
-  const declared = new Set();
-  const collect = (node) => {
-    if (ts.isIdentifier(node) && isBindingName(node)) declared.add(node.text);
-    ts.forEachChild(node, collect);
-  };
-  collect(source);
+  const scopes = [new Set()];
   const hits = [];
+  const shadowed = (name) => scopes.some((scope) => scope.has(name));
+  const bind = (name) => scopes[scopes.length - 1].add(name);
+  const opensScope = (node) =>
+    ts.isSourceFile(node) ||
+    ts.isFunctionLike(node) ||
+    ts.isBlock(node) ||
+    ts.isModuleBlock(node) ||
+    ts.isClassStaticBlockDeclaration(node) ||
+    ts.isCatchClause(node) ||
+    ts.isForStatement(node) ||
+    ts.isForInStatement(node) ||
+    ts.isForOfStatement(node);
   const visit = (node) => {
+    const scoped = opensScope(node);
+    if (scoped) scopes.push(new Set());
+    if (ts.isFunctionLike(node)) {
+      for (const param of node.parameters) bindNames(param.name, bind);
+    }
+    if (ts.isCatchClause(node) && node.variableDeclaration)
+      bindNames(node.variableDeclaration.name, bind);
+    if (ts.isVariableDeclaration(node)) bindNames(node.name, bind);
     if (
       ts.isIdentifier(node) &&
+      !isBindingName(node) &&
       !isPropertyName(node) &&
-      !declared.has(node.text) &&
-      banned.globals.includes(node.text)
+      banned.globals.includes(node.text) &&
+      !shadowed(node.text)
     ) {
       hits.push(node.text);
     }
     if (
       (ts.isPropertyAccessExpression(node) || ts.isPropertyAccessChain(node)) &&
-      ts.isIdentifier(node.expression)
+      ts.isIdentifier(node.expression) &&
+      !shadowed(node.expression.text)
     ) {
       const path = `${node.expression.text}.${node.name.text}`;
       if (banned.members.includes(path)) hits.push(path);
@@ -116,13 +133,21 @@ export function bannedHits(text, banned) {
     if (
       ts.isNewExpression(node) &&
       ts.isIdentifier(node.expression) &&
-      banned.newExpressions.includes(node.expression.text)
+      banned.newExpressions.includes(node.expression.text) &&
+      !shadowed(node.expression.text)
     )
       hits.push(`new ${node.expression.text}`);
     ts.forEachChild(node, visit);
+    if (scoped) scopes.pop();
   };
   visit(source);
   return hits;
+}
+
+/** @param {ts.BindingName} name @param {(text: string) => void} bind */
+function bindNames(name, bind) {
+  if (ts.isIdentifier(name)) bind(name.text);
+  else for (const element of name.elements) if (element.name) bindNames(element.name, bind);
 }
 
 /** @param {ts.Identifier} node */

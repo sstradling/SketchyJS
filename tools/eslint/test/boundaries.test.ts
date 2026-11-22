@@ -31,6 +31,14 @@ describe("folder boundaries", () => {
     expect(problems).toEqual(["core/leak.ts: core cannot import canvas"]);
   });
 
+  it("rejects a backtick-literal dynamic import", () => {
+    const problems = importProblems(
+      [{ rel: "core/tick.ts", text: "export const pending = import(`../canvas/index.js`);" }],
+      boundaries.areas,
+    );
+    expect(problems).toEqual(["core/tick.ts: core cannot import canvas"]);
+  });
+
   it("rejects a side-effect import and an export-from", () => {
     const problems = importProblems(
       [
@@ -77,6 +85,12 @@ describe("folder boundaries", () => {
     expect(
       bannedHits("const document = host.document;\n", boundaries.bannedInPureGeometry),
     ).toEqual([]);
+  });
+
+  it("does not let one binding hide the same global elsewhere in the file", () => {
+    const text =
+      "function hide() { const document = host.document; }\nexport const el = document.body;\n";
+    expect(bannedHits(text, boundaries.bannedInPureGeometry)).toContain("document");
   });
 
   it("requires sketchy to have no peers and clipper as a dependency, and react to depend only on sketchy", () => {
