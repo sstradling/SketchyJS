@@ -120,8 +120,9 @@ const styles = {
     fill: "#b7950b",
     fillStyle: "hachure",
     fillAngle: 0,
-    fillSpacing: 0.92,
-    fillWeight: 0.9,
+    // Gap is fillWeight * fillSpacing. 1.8 * 1.8 ≈ 3.2px, the reference stem's band pitch.
+    fillSpacing: 1.8,
+    fillWeight: 1.8,
     roughness: 1.8,
     strokeWidth: 2.2,
     bowing: 2,
@@ -175,10 +176,14 @@ function placedGlyphs() {
   const areaR = CARD.x + CARD.w - 14;
   let x = areaL + (areaR - areaL - total) / 2;
   return glyphs.map(({ ch, glyph }) => {
-    const commands = glyph.getPath(x, BASELINE, FONT_SIZE).commands;
+    const at = x;
+    // Horizontal hachure loses lines once the shape sits a few hundred points
+    // from the origin. The bang is drawn there and the part is moved into place.
+    const local = ch === "!";
+    const commands = glyph.getPath(local ? 0 : x, local ? 0 : BASELINE, FONT_SIZE).commands;
     const contours = commands.filter((command) => command.type === "M").length;
     x += glyph.advanceWidth * scale + TRACKING;
-    return { ch, d: glyphPath(commands), contours };
+    return { ch, d: glyphPath(commands), contours, at, local };
   });
 }
 
@@ -206,14 +211,15 @@ function viewOptions(style, seed, withSticker) {
 function letterScene(bangSeed) {
   const glyphs = placedGlyphs();
   let seed = 7;
-  const parts = glyphs.map(({ ch, d, contours }) => {
+  const parts = glyphs.map(({ ch, d, contours, at, local }) => {
     const style = styles[ch];
     const letterSeed = ch === "!" ? bangSeed : BigInt(seed * 101);
     seed += 1;
     if (ch === "S" && contours !== 1)
       throw new Error(`S has ${contours} contours; the sticker needs one closed outline`);
     const view = new RoughView().with(viewOptions(style, letterSeed, ch === "S")).draw(svgPath(d));
-    return new SketchPart(view);
+    const part = new SketchPart(view);
+    return local ? part.offset(at, BASELINE) : part;
   });
   const scene = new SketchGroup(parts).build({ width: W, height: H });
   keepOneStickerSheet(scene);
@@ -235,23 +241,38 @@ function keepOneStickerSheet(scene) {
     const keep = sized.find((item) => item.area === biggest)?.layer;
     const layers = node.drawing.layers;
     const keepAt = layers.indexOf(keep);
-    node.drawing.layers = layers.filter((layer, index) => {
+    const kept = layers.filter((layer, index) => {
       if (layer.role !== "sheet" && layer.role !== "sheet-shadow") return true;
       if (layer.strokeWidth) return false;
       if (layer === keep) return true;
       return layer.role === "sheet-shadow" && index === keepAt - 1;
     });
     if (keep) {
-      node.drawing.layers.push({
+      // Bungee's notch is narrower than the margin, so a geometric offset
+      // fills the counter. A round stroke keeps one shape and an 8pt margin.
+      const margin = sticker.width * 2;
+      const rim = 1.6;
+      const at = kept.indexOf(keep);
+      kept.splice(at, 0, {
         role: "stroke",
         paths: keep.paths,
         fillRule: "nonzero",
         paint: { kind: "solid", color: "#3f3a34" },
-        strokeWidth: 2.4,
+        strokeWidth: margin + rim * 2,
+        cap: "round",
+        join: "round",
+      });
+      kept.push({
+        role: "stroke",
+        paths: keep.paths,
+        fillRule: "nonzero",
+        paint: { kind: "solid", color: sticker.color },
+        strokeWidth: margin,
         cap: "round",
         join: "round",
       });
     }
+    node.drawing.layers = kept;
   }
 }
 
