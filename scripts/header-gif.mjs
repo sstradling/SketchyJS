@@ -1,7 +1,5 @@
-import { Buffer } from "node:buffer";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { get } from "node:https";
-import { createCanvas, ImageData, loadImage } from "@napi-rs/canvas";
+import { createCanvas } from "@napi-rs/canvas";
 import opentype from "opentype.js";
 import { path as svgPath } from "../packages/sketchy/dist/core.js";
 import { RoughView } from "../packages/sketchy/dist/scene/basic.js";
@@ -249,19 +247,9 @@ function keepOneStickerSheet(scene) {
     });
     if (keep) {
       // Bungee's notch is narrower than the margin, so a geometric offset
-      // fills the counter. A round stroke keeps one shape and an 8pt margin.
+      // fills the counter. A white round stroke keeps one shape and an 8pt
+      // margin. The sheet shadow is what separates that edge from the paper.
       const margin = sticker.width * 2;
-      const rim = 1.6;
-      const at = kept.indexOf(keep);
-      kept.splice(at, 0, {
-        role: "stroke",
-        paths: keep.paths,
-        fillRule: "nonzero",
-        paint: { kind: "solid", color: "#3f3a34" },
-        strokeWidth: margin + rim * 2,
-        cap: "round",
-        join: "round",
-      });
       kept.push({
         role: "stroke",
         paths: keep.paths,
@@ -603,15 +591,26 @@ function hashColumn(data, x0, x1) {
 
 const rendered = bangSeeds.map((seed) => raster(seed));
 if (rendered[0][3] !== 0) throw new Error("the GIF corner is not transparent");
-const sBox = [Math.round(OUT_W * 0.12), Math.round(OUT_W * 0.24)];
-const bangBox = [Math.round(OUT_W * 0.78), Math.round(OUT_W * 0.9)];
-if (hashColumn(rendered[0], sBox[0], sBox[1]) !== hashColumn(rendered[2], sBox[0], sBox[1]))
-  throw new Error("the sticker S changed between boil frames");
-if (
-  hashColumn(rendered[0], bangBox[0], bangBox[1]) ===
-  hashColumn(rendered[2], bangBox[0], bangBox[1])
-)
-  throw new Error("the exclamation mark did not boil");
+const span = (start, end) => [Math.round(OUT_W * start), Math.round(OUT_W * end)];
+const sBox = span(0.13, 0.23);
+const bangBox = span(0.89, 0.93);
+const stillBoxes = [
+  sBox,
+  span(0.24, 0.34),
+  span(0.35, 0.44),
+  span(0.45, 0.55),
+  span(0.56, 0.64),
+  span(0.66, 0.76),
+  span(0.77, 0.87),
+];
+for (const frame of rendered.slice(1)) {
+  for (const [x0, x1] of stillBoxes) {
+    if (hashColumn(rendered[0], x0, x1) !== hashColumn(frame, x0, x1))
+      throw new Error("a still letter changed between boil frames");
+  }
+  if (hashColumn(rendered[0], bangBox[0], bangBox[1]) === hashColumn(frame, bangBox[0], bangBox[1]))
+    throw new Error("the exclamation mark did not boil");
+}
 
 const samples = [];
 for (const data of rendered) {
@@ -620,7 +619,10 @@ for (const data of rendered) {
     samples.push([data[i], data[i + 1], data[i + 2]]);
   }
 }
-const palette = [[0, 0, 0], ...medianCut(samples, 127)];
+// Index 0 is transparent. White and the cream card are both reserved: the
+// sticker margin is only a few steps lighter than the paper, and a shared
+// palette entry would erase that edge.
+const palette = [[0, 0, 0], [255, 255, 255], [0xfd, 0xf9, 0xee], ...medianCut(samples, 125)];
 while (palette.length < 256) palette.push(palette[palette.length - 1] ?? [0, 0, 0]);
 const encoded = gif(
   rendered.map((frame) => dither(frame, palette)),
@@ -630,53 +632,6 @@ const encoded = gif(
 const gifUrl = new URL("../docs/images/header.gif", import.meta.url);
 mkdirSync(new URL("../docs/images/", import.meta.url), { recursive: true });
 writeFileSync(gifUrl, encoded);
-
-const still = createCanvas(OUT_W, OUT_H);
-still
-  .getContext("2d")
-  .putImageData(new ImageData(new Uint8ClampedArray(rendered[0]), OUT_W, OUT_H), 0, 0);
-const reference = await loadImage(
-  await download(
-    "https://raw.githubusercontent.com/sstradling/Sketchy/master/docs/images/header.png",
-  ),
-);
-function comparisonRow(background) {
-  const row = createCanvas(reference.width + OUT_W + 24, Math.max(reference.height, OUT_H));
-  const paint = row.getContext("2d");
-  paint.fillStyle = background;
-  paint.fillRect(0, 0, row.width, row.height);
-  paint.drawImage(reference, 0, 0);
-  paint.drawImage(still, reference.width + 24, 0);
-  return row;
-}
-const light = comparisonRow("#ffffff");
-const dark = comparisonRow("#0d1117");
-const side = createCanvas(light.width, light.height + dark.height + 16);
-const ctx = side.getContext("2d");
-ctx.fillStyle = "#808080";
-ctx.fillRect(0, 0, side.width, side.height);
-ctx.drawImage(light, 0, 0);
-ctx.drawImage(dark, 0, light.height + 16);
-const artifacts = "/opt/cursor/artifacts";
-mkdirSync(artifacts, { recursive: true });
-writeFileSync(`${artifacts}/header-side-by-side.png`, side.toBuffer("image/png"));
-writeFileSync(`${artifacts}/header.gif`, encoded);
 console.log(
   `wrote ${gifUrl.pathname} ${encoded.length} bytes, ${OUT_W}x${OUT_H}, ${bangSeeds.length} frames`,
 );
-
-function download(url) {
-  return new Promise((resolve, reject) => {
-    get(url, (res) => {
-      if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-        download(res.headers.location).then(resolve, reject);
-        res.resume();
-        return;
-      }
-      const chunks = [];
-      res.on("data", (chunk) => chunks.push(chunk));
-      res.on("end", () => resolve(Buffer.concat(chunks)));
-      res.on("error", reject);
-    }).on("error", reject);
-  });
-}
