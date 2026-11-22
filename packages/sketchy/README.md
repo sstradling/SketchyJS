@@ -8,8 +8,6 @@ Seeded hand-drawn graphics. One package holds the geometry, fills, brushes, stic
 pnpm add @sketchy-js/sketchy
 ```
 
-`pnpm add` resolves the package after the first publish. Until then, depend on it from this repo with `workspace:*`.
-
 ## Usage
 
 ```ts
