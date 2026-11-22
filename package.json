@@ -40,6 +40,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.14.0",
     "happy-dom": "^21.0.4",
+    "opentype.js": "^2.0.0",
     "prettier": "^3.9.10",
     "publint": "^0.3.25",
     "react-dom": "^18.3.1",
