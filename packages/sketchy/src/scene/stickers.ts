@@ -9,6 +9,7 @@ import {
   stickerLayers,
   type GroupPart,
 } from "../stickers/index.js";
+import { resolveGlyphContours } from "../stickers/glyph-contours.js";
 import { appendStickerImage, type StickerBackingWithImage } from "../stickers/image/index.js";
 import type {
   Drawing,
@@ -189,7 +190,11 @@ export function buildStickerScene(
 function generateOne(resolver: FillResolver, shape: Shape, options: SketchOptions, fill: unknown) {
   const spec = fill ?? { kind: options.fillStyle };
   const resolved = resolver.resolveSpec("fill", spec);
-  return generateDrawing(shape, options, createFillStage({ fill: resolved, options, report() {} }));
+  const drawn =
+    shape.kind === "path" && options.fillStyle === "solid"
+      ? { ...shape, d: resolveGlyphContours(shape.d) }
+      : shape;
+  return generateDrawing(drawn, options, createFillStage({ fill: resolved, options, report() {} }));
 }
 
 /**
