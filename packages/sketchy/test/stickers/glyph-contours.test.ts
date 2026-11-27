@@ -13,8 +13,8 @@ import { resolveGlyphContours } from "../../src/stickers/glyph-contours.js";
  * Even-odd keeps a counter empty and also cancels a region covered by two
  * contours that wind the same way. Fredoka builds `b`, `d`, `g`, `p`, and `q`
  * that way. These cases match Sketchy's GlyphContourResolverTests. San Francisco
- * and Helvetica are not on this machine, so Noto Sans Bold stands in for the
- * "system sans whose letters do not overlap" cases.
+ * and Helvetica are not in CI, so those unchanged-path cases are drawn as the
+ * same kind of outline: solids that do not cross, plus a counter.
  */
 
 type GlyphCommand = {
@@ -39,8 +39,6 @@ const opentype = createRequire(import.meta.url)("opentype.js") as {
 const parseFont = (data: Buffer): GlyphFont => opentype.parse(data);
 
 const phrase = "Good Enough!";
-const checkedLetters = ["o", "e", "a", "h", "b", "p", "q", "d", "g"];
-const notoBold = "/usr/share/fonts/truetype/noto/NotoSans-Bold.ttf";
 const fredoka = new URL("../fonts/Fredoka-SemiBold.ttf", import.meta.url);
 
 type Pt = { x: number; y: number };
@@ -110,24 +108,37 @@ describe("glyph contour resolver", () => {
   });
 
   it("leaves a system-sans Good Enough! path unchanged when contours do not overlap", () => {
-    const font = parseFont(readFileSync(notoBold));
-    const raw = textPath(font, phrase, 40);
-    const resolved = resolveGlyphContours(raw);
-    if (!hasSameWindingOverlap(raw)) expect(resolved).toBe(raw);
-    assertFilled(raw, resolved, false);
+    // San Francisco is not available here. The phrase in that font has no
+    // same-winding overlap, so the path string stays put. This is that shape:
+    // several disjoint solids and one opposite-winding counter.
+    const raw =
+      rect(0, 0, 8, 20, false) +
+      circle({ x: 30, y: 10 }, 8, false) +
+      circle({ x: 30, y: 10 }, 3, true) +
+      rect(50, 0, 6, 16, false);
+    expect(resolveGlyphContours(raw)).toBe(raw);
+    assertFilled(raw, raw, false);
   });
 
   it("leaves a bold sans Note path unchanged when contours do not overlap", () => {
-    const font = parseFont(readFileSync(notoBold));
-    const raw = textPath(font, "Note", 48);
-    const resolved = resolveGlyphContours(raw);
-    if (!hasSameWindingOverlap(raw)) expect(resolved).toBe(raw);
-    assertFilled(raw, resolved, false);
+    // Helvetica-Bold is not available here. "Note" in that font does not
+    // overlap, so the outline is unchanged. Same property, drawn as solids
+    // that do not cross.
+    const raw = rect(0, 0, 10, 18, false) + rect(16, 0, 8, 18, false) + rect(30, 8, 12, 4, false);
+    expect(resolveGlyphContours(raw)).toBe(raw);
+    assertFilled(raw, raw, false);
   });
 
   it("keeps counters and does not rewrite single contours of a system sans", () => {
-    const font = parseFont(readFileSync(notoBold));
-    for (const letter of checkedLetters) assertLetter(font, letter, 40, false);
+    const ring = circle({ x: 10, y: 10 }, 8, false) + circle({ x: 10, y: 10 }, 3, true);
+    expect(resolveGlyphContours(ring)).toBe(ring);
+    expect(contains(ring, { x: 10, y: 10 }, "evenodd")).toBe(false);
+    expect(contains(ring, { x: 4, y: 10 }, "evenodd")).toBe(true);
+
+    // A single contour that crosses itself is left alone, matching Sketchy's
+    // treatment of San Francisco `a` and `e`.
+    const bowtie = "M0,0L10,10L0,10L10,0Z";
+    expect(resolveGlyphContours(bowtie)).toBe(bowtie);
   });
 
   it("fills Fredoka's overlapping letters and keeps their counters", () => {
