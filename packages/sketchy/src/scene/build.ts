@@ -8,6 +8,7 @@ import type {
   Size,
   SketchOptions,
 } from "../types/index.js";
+import { resolveGlyphContours } from "../stickers/glyph-contours.js";
 import { assembleDrawing } from "./assemble.js";
 import { attachShades } from "./shades.js";
 import { applyCrayon, applyWatercolor, resolvedStyleSeed } from "./brush-host.js";
@@ -176,7 +177,13 @@ export function buildScene(resolver: FillResolver, items: readonly DrawItem[], s
       });
     for (const options of spacingPasses(base)) {
       const stage = createFillStage({ fill, options, report });
-      const generated = generateDrawing(item.shape, options, stage);
+      // Solid fills of an SVG path are even-odd. Union same-winding overlaps
+      // first so a bowl-and-stem glyph stays filled. Other paths are unchanged.
+      const shape =
+        item.shape.kind === "path" && fill?.plugin.id === "solid"
+          ? { ...item.shape, d: resolveGlyphContours(item.shape.d) }
+          : item.shape;
+      const generated = generateDrawing(shape, options, stage);
       if (!generated) {
         report({
           code: "shape-empty",
